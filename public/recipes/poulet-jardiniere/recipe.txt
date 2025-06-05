@@ -1,6 +1,6 @@
 name: Poulet jardinière
 description: Un plat mijoté réconfortant à base de cuisses de poulet, légumes et sauce tomate.
-servings: 4
+servings: 4 à 6 portions 
 prep_time: 15 minutes
 cook_time: 50 minutes
 total_time: 1 h 5

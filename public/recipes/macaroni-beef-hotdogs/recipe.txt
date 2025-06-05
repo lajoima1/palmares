@@ -1,6 +1,6 @@
 name: Macaroni à la viande  
 description: Un gratin de macaronis savoureux avec bœuf haché, sauce tomate et fromage fondant, parfait pour les repas familiaux.  
-servings: 4 à 6 portions  
+servings: 6 à 8 portions  
 prep_time: 20 minutes  
 cook_time: 40 minutes  
 total_time: 1 heure  
