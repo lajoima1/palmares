@@ -159,6 +159,7 @@ function App() {
         elevation={isScrolled ? 4 : 0}
         sx={{
           backgroundColor: "primary.main",
+          backgroundImage: "none",
           borderBottom: `1px solid ${
             isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
           }`,

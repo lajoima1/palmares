@@ -50,7 +50,11 @@ export function parseRecipeText(
           .map((tag) => tag.trim())
           .filter((tag) => tag);
         currentSection = "";
-      } else if (fieldName === "ingredients" || fieldName === "instructions" || fieldName === "notes") {
+      } else if (
+        fieldName === "ingredients" ||
+        fieldName === "instructions" ||
+        fieldName === "notes"
+      ) {
         currentSection = fieldName;
         // If there's a value after the colon for notes, use it as a single-line note
         if (fieldName === "notes" && value) {

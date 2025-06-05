@@ -305,10 +305,10 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
             <Typography variant="h6" gutterBottom>
               Notes
             </Typography>
-            <Typography 
-              variant="body2" 
+            <Typography
+              variant="body2"
               color="text.secondary"
-              sx={{ whiteSpace: 'pre-line' }}
+              sx={{ whiteSpace: "pre-line" }}
             >
               {recipe.notes}
             </Typography>
