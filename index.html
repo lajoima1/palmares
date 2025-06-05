@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Palmarès Lajoie</title>
+  <style>
+    body {
+      background-color: transparent;
+    }
+
+    /* Initial loading screen styles */
+    #initial-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      z-index: 9999;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #initial-loader {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+      }
+    }
+
+    .spinner {
+      width: 80px;
+      height: 80px;
+      border: 4px solid rgba(0, 0, 0, 0.08);
+      border-left: 4px solid #1976d2;
+      border-radius: 50%;
+      animation: spin 1.5s linear infinite;
+      position: relative;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.08);
+        border-left: 4px solid #1976d2;
+      }
+    }
+
+    .spinner::after {
+      content: "🍽️";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+
+    .loading-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: #1976d2;
+    }
+
+    .loading-subtitle {
+      font-size: 16px;
+      margin: 0;
+      color: #757575;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .loading-subtitle {
+        color: #bdbdbd;
+      }
+    }
+
+    /* Hide the loader once React loads */
+    .react-loaded #initial-loader {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="initial-loader">
+    <div class="spinner"></div>
+    <div class="loading-text">
+      <h1 class="loading-title">Palmarès Lajoie</h1>
+      <p class="loading-subtitle">Loading application...</p>
+    </div>
+  </div>
+
+  <div id="root" style="width: 100vw"></div>
+
+  <script type="module" src="/src/main.tsx"></script>
+
+  <script>
+    // Set dynamic spinner color based on user's theme preference
+    function setSpinnerColor() {
+      try {
+        const colorThemes = [
+          { name: "Classic Red", primary: "#d32f2f", secondary: "#ff9800" },
+          { name: "Ocean Blue", primary: "#1976d2", secondary: "#ff9800" },
+          { name: "Forest Green", primary: "#388e3c", secondary: "#ff7043" },
+          { name: "Royal Purple", primary: "#7b1fa2", secondary: "#ffc107" },
+          { name: "Sunset Orange", primary: "#f57c00", secondary: "#e91e63" }
+        ];
+
+        const savedTheme = localStorage.getItem('color-theme');
+        const currentTheme = savedTheme ? JSON.parse(savedTheme) : colorThemes[0]; // Default to Ocean Blue
+
+        // Get user's dark mode preference
+        const savedDarkMode = localStorage.getItem('theme-mode');
+        const isDarkMode = savedDarkMode ? JSON.parse(savedDarkMode) : window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Set theme-based colors
+        const backgroundColor = isDarkMode ? '#121212' : '#fafafa';
+        const textColor = isDarkMode ? '#ffffff' : '#000000';
+        const subtitleColor = isDarkMode ? '#bdbdbd' : '#757575';
+        const spinnerBorder = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+
+        // Create a style element to override the colors
+        const style = document.createElement('style');
+        style.textContent = `
+          #initial-loader {
+            background-color: ${backgroundColor} !important;
+            color: ${textColor} !important;
+          }
+          .spinner {
+            border: 4px solid ${spinnerBorder} !important;
+            border-left-color: ${currentTheme.primary} !important;
+          }
+          .loading-title {
+            color: ${currentTheme.primary} !important;
+          }
+          .loading-subtitle {
+            color: ${subtitleColor} !important;
+          }
+        `;
+        document.head.appendChild(style);
+      } catch (error) {
+        console.log('Could not load theme preference, using default');
+      }
+    }
+
+    // Set spinner color immediately
+    setSpinnerColor();
+
+    // Hide the initial loader once React starts rendering
+    window.addEventListener('DOMContentLoaded', function () {
+      // Add a small delay to ensure smooth transition
+      setTimeout(() => {
+        const root = document.getElementById('root');
+        if (root && root.children.length > 0) {
+          document.body.classList.add('react-loaded');
+        } else {
+          // Check again after a short delay if React hasn't loaded yet
+          const checkReactLoaded = () => {
+            if (root && root.children.length > 0) {
+              document.body.classList.add('react-loaded');
+            } else {
+              setTimeout(checkReactLoaded, 100);
+            }
+          };
+          checkReactLoaded();
+        }
+      }, 300);
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+name: Biscuits préférées des lutins  
+description: Délicieux biscuits moelleux aux pépites de chocolat, faciles à préparer et adorés des enfants comme des lutins!  
+servings: 12-14 cookies  
+prep_time: 10 minutes
+cook_time: 10 à 15 minutes  
+total_time: 30 minutes 
+difficulty: Easy  
+tags: cookies, dessert, chocolate chip, christmas  
+
+ingredients:  
+- ½ c. à thé de bicarbonate de soude  
+- 1 c. à soupe de lait  
+- 1 tasse de cassonade  
+- 1 œuf  
+- ¼ tasse de beurre  
+- 1 tasse de pépites de chocolat  
+- 1 ¾ tasse de farine tout usage  
+
+instructions:  
+1. Préchauffer le four à 350 °F (180 °C).  
+2. Beurrer une plaque à biscuits.  
+3. Dissoudre le bicarbonate de soude dans le lait.  
+4. Dans un bol, mélanger la cassonade, l’œuf et le beurre.  
+5. Ajouter les pépites de chocolat et le mélange de lait et de bicarbonate de soude. Bien mélanger.  
+6. Incorporer la farine pour obtenir une pâte ferme.  
+7. Déposer à la cuillère sur la plaque à biscuits.  
+8. Faire cuire environ 10 à 15 minutes.  
+
+notes: Idéal pour une activité de pâtisserie amusante avec les enfants pendant le temps des Fêtes.

@@ -1,0 +1,33 @@
+name: Enchiladas au poulet
+description: Délicieuses enchiladas crémeuses au poulet, parfaites pour un souper réconfortant à la mexicaine.
+servings: 4 portions
+prep_time: 20 minutes
+cook_time: 25 minutes
+total_time: 45 minutes
+difficulty: Easy
+tags: chicken, mexican, main, weeknight, campbell, large portion, made by mom
+
+ingredients:
+- 1 boîte (10 oz) crème de poulet condensée
+- 125 ml (½ tasse) crème sure
+- 30 ml (2 c. à soupe) margarine ou beurre
+- 1 oignon moyen haché
+- 5 ml (1 c. a thé) poudre de chili
+- 1-2 poivron vert en dés
+- 500 ml (2 tasses) poulet cuit en dés
+- 8 tortillas à la farine (15 à 17,5 cm de diamètre)
+- 250 ml (1 tasse) fromage Monterey Jack ou cheddar râpé (120 g)
+- Persil frais pour la garniture (facultatif)
+
+instructions:
+1. Préchauffer le four à 190 °C (375 °F).
+2. Mélanger la soupe et la crème sure (option salsa).
+3. Dans une casserole de 2 L (8 tasses), faire fondre la margarine à feu moyen. Ajouter l’oignon et la poudre de chili. Cuire 5 minutes en remuant souvent.
+4. Incorporer le poulet et les piments. Retirer du feu. Ajouter 250 mL (1 tasse) du mélange crème sure. Mélanger. Réserver le reste de la soupe.
+5. Étaler 50 ml (¼ tasse) du mélange de poulet sur chaque tortilla au centre et en longueur.
+6. Replier les côtés sur la garniture et déposer dans un plat allant au four, le pli en dessous.
+7. Verser le reste de la soupe sur les enchiladas. Couvrir de papier d’aluminium. Cuire au four 15 minutes.
+8. Retirer le papier, parsemer de fromage et remettre au four 5 minutes ou jusqu’à ce que le fromage soit fondu.
+9. Garnir de persil, si désiré.
+
+notes: Vous pouvez remplacer la crème sure par un mélange de crème sure et salsa pour une touche piquante. Servir avec riz mexicain ou une salade verte pour un repas complet.
