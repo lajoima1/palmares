@@ -80,6 +80,35 @@ function App() {
     loadRecipes();
   }, []);
 
+  // Handle URL-based recipe routing
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      const recipeMatch = hash.match(/^#\/(.+)$/);
+
+      if (recipeMatch && recipes.length > 0) {
+        const recipeId = recipeMatch[1];
+        const recipe = recipes.find((r) => r.id === recipeId);
+        if (recipe) {
+          setSelectedRecipe(recipe);
+        } else {
+          // Recipe not found, clear the hash
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      }
+    };
+
+    // Handle initial load
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, [recipes]);
+
   // Handle scroll to top button and AppBar shadow
   useEffect(() => {
     const handleScroll = () => {
@@ -126,10 +155,14 @@ function App() {
 
   const handleViewRecipe = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
+    // Update URL to reflect the selected recipe
+    window.history.pushState(null, "", `#/${recipe.id}`);
   };
 
   const handleCloseRecipe = () => {
     setSelectedRecipe(null);
+    // Clear the recipe from URL
+    window.history.pushState(null, "", window.location.pathname);
   };
 
   const handleTagClick = (tag: string) => {

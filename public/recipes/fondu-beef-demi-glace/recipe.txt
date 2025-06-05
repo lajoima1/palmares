@@ -1,0 +1,27 @@
+name: Sauté de bœuf à fondue à la soupe à l’oignon
+description: Un sauté savoureux et rapide à base de tranches de bœuf à fondue, de légumes, et d'une sauce onctueuse à la soupe à l’oignon. Parfait pour un souper de semaine.
+servings: 4 portions
+prep_time: 15 minutes
+cook_time: 15 minutes
+total_time: 30 minutes
+difficulty: Easy
+tags: beef, rice, weeknight, main
+
+ingredients:
+- 450 g (1 lb) de tranches de bœuf à fondue
+- 1 sac de mélange de légumes de type oriental
+- 250 ml (1 tasse) de sauce demi-glace
+- 80 ml (1/3 tasse) de ketchup
+- 1 sachet de soupe à l’oignon (28 g)
+- 1 petit oignon rouge coupé en dés
+- Huile d’olive
+
+instructions:
+1. Dans une poêle, chauffer un peu d’huile d’olive à feu moyen. Cuire quelques tranches de bœuf à fondue à la fois de 1 à 2 minutes. Réserver dans une assiette.
+2. Dans la même poêle, cuire le mélange de légumes de 3 à 4 minutes.
+3. Ajouter la sauce demi-glace, le ketchup, le sachet de soupe à l’oignon et l’eau. Remuer. Porter à ébullition, puis laisser mijoter de 8 à 10 minutes à feu doux-moyen en remuant de temps en temps.
+4. Ajouter les tranches de bœuf et remuer.
+
+notes:
+- Servir avec du riz blanc ou des nouilles aux œufs pour un repas complet.
+- On peut remplacer le mélange de légumes congelés par des légumes frais coupés en julienne pour une version plus croquante.
