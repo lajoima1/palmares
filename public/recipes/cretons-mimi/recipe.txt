@@ -3,7 +3,7 @@ description: Une tartinade traditionnelle québécoise à base de veau haché, a
 servings: 12 portions  
 prep_time: 15 minutes  
 cook_time: 1 heure  
-total_time: 1 h 15  
+total_time: 1 heure 15 minutes
 difficulty: Easy  
 tags: veal, snack, breakfast
 

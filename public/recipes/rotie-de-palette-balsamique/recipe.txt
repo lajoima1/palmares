@@ -3,7 +3,7 @@ description: Un rôti de bœuf tendre et savoureux mijoté lentement dans une sa
 servings: 6 portions
 prep_time: 20 minutes
 cook_time: 2 h 30
-total_time: 2 h 50
+total_time: 3 heures
 difficulty: Medium
 tags: beef, slowcooker, main, hosting, potato, made by mom
 

@@ -260,7 +260,7 @@ function App() {
               sx={{ maxWidth: 600, mx: "auto" }}
             >
               Une collection de recettes accumulées au fil des générations et
-              testées dans notre cuisine familiale.
+              testées dans notre cuisine familiale
             </Typography>
           </Paper>
         </Box>

@@ -39,7 +39,7 @@ interface LoadingSpinnerProps {
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-  title = "Palmarès Lajoie",
+  title = "Palmarès",
   subtitle = "Loading recipes...",
 }) => {
   return (

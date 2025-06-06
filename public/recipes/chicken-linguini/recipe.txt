@@ -3,7 +3,7 @@ description: Un plat crémeux et réconfortant composé de poulet, pain à l’a
 servings: 6 à 8 portions  
 prep_time: 30 minutes  
 cook_time: 45 minutes  
-total_time: 1 h 15
+total_time: 1 heure 15 minutes
 difficulty: Easy  
 tags: chicken, pasta, weeknight, large portion, campbell, main, made by mom
 
