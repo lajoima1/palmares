@@ -217,7 +217,7 @@ function App() {
             component="div"
             sx={{ flexGrow: 1, fontWeight: 600 }}
           >
-            Palmarès Lajoie
+            Palmarès
           </Typography>
           <Typography variant="body2" sx={{ opacity: 0.9, mr: 2 }}>
             {filteredRecipes.length} recipe

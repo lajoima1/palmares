@@ -42,6 +42,9 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
+  // Font size for instructions, ingredients, notes
+  const contentFontSize = isMobile ? "body1" : "body2";
+
   // Wake Lock functionality
   React.useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
@@ -67,6 +70,8 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
 
     if (open && isMobile) {
       requestWakeLock();
+    } else if (!open && isMobile) {
+      releaseWakeLock();
     }
 
     // Clean up wake lock when dialog closes or component unmounts
@@ -238,9 +243,7 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
             })}
           </Stack>
         </Box>
-
         <Divider sx={{ my: 3 }} />
-
         <Box
           sx={{
             display: "grid",
@@ -257,13 +260,12 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
                 <ListItem key={index} sx={{ pl: 0 }}>
                   <ListItemText
                     primary={ingredient}
-                    primaryTypographyProps={{ variant: "body2" }}
+                    primaryTypographyProps={{ variant: contentFontSize }}
                   />
                 </ListItem>
               ))}
             </List>
           </Box>
-
           <Box>
             <Typography variant="h6" gutterBottom>
               Instructions
@@ -291,14 +293,13 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
                   </Box>
                   <ListItemText
                     primary={instruction}
-                    primaryTypographyProps={{ variant: "body2" }}
+                    primaryTypographyProps={{ variant: contentFontSize }}
                   />
                 </ListItem>
               ))}
             </List>
           </Box>
         </Box>
-
         {recipe.notes && (
           <>
             <Divider sx={{ my: 3 }} />
@@ -306,7 +307,7 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
               Notes
             </Typography>
             <Typography
-              variant="body2"
+              variant={contentFontSize}
               color="text.secondary"
               sx={{ whiteSpace: "pre-line" }}
             >
