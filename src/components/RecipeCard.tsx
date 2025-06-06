@@ -37,8 +37,19 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    // Open recipe on Enter or Space key press
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault(); // Prevent default behavior (like scrolling for space)
+      onViewRecipe(recipe);
+    }
+  };
+
   return (
     <Card
+      tabIndex={0}
+      role="button"
+      aria-label={`View recipe for ${recipe.name}`}
       sx={{
         height: "100%",
         display: "flex",
@@ -64,6 +75,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         },
       }}
       onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
     >
       <CardMedia
         component="img"
