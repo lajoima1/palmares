@@ -15,7 +15,6 @@ import {
 import Search from "@mui/icons-material/Search";
 import FilterList from "@mui/icons-material/FilterList";
 
-
 interface SearchFilterProps {
   searchTerm: string;
   onSearchChange: (term: string) => void;
@@ -47,7 +46,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
     <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
       <Box display="flex" alignItems="center" gap={1} mb={2}>
         <FilterList color="primary" />
-        <Typography variant="h6">Search & Filter Recipes</Typography>
+        <Typography variant="h6">Search & filter recipes</Typography>
       </Box>
 
       <Stack spacing={3}>

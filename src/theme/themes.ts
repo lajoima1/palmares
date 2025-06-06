@@ -1,6 +1,14 @@
 import { createTheme } from "@mui/material";
 import type { PaletteMode } from "@mui/material";
 
+// Helper function to convert hex color to rgba
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export interface ColorTheme {
   name: string;
   primary: string;
@@ -83,6 +91,19 @@ export function createAppTheme(mode: PaletteMode, colorTheme: ColorTheme) {
                 backgroundColor: isLight ? "#555" : "#888",
               },
             },
+          },
+          // Fix text selection colors for better contrast
+          "::selection": {
+            backgroundColor: isLight 
+              ? hexToRgba(colorTheme.primary, 0.2) // Light theme: primary color with 20% opacity
+              : hexToRgba(colorTheme.primary, 0.6), // Dark theme: primary color with 60% opacity
+            color: isLight ? "#000000" : "#ffffff",
+          },
+          "::-moz-selection": {
+            backgroundColor: isLight 
+              ? hexToRgba(colorTheme.primary, 0.2) 
+              : hexToRgba(colorTheme.primary, 0.6),
+            color: isLight ? "#000000" : "#ffffff",
           },
         },
       },

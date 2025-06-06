@@ -20,6 +20,10 @@ import { ThemeToggle } from "./components/ThemeToggle";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { createAppTheme, colorThemes, type ColorTheme } from "./theme/themes";
 
+// Our Family's Favorite Recipes
+// A curated collection of beloved family recipes, passed
+// down through generations and tested in our kitchen with love.
+
 function App() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -247,7 +251,7 @@ function App() {
               textAlign="center"
               color="primary.main"
             >
-              Our Family's Favorite Recipes
+              Palmarès
             </Typography>
             <Typography
               variant="h6"
@@ -255,8 +259,8 @@ function App() {
               color="text.secondary"
               sx={{ maxWidth: 600, mx: "auto" }}
             >
-              A curated collection of beloved family recipes, passed down
-              through generations and tested in our kitchen with love.
+              Une collection de recettes accumulées au fil des générations et
+              testées dans notre cuisine familiale.
             </Typography>
           </Paper>
         </Box>
@@ -370,7 +374,7 @@ function App() {
         }}
       >
         <Typography variant="body2" color="text.secondary" textAlign="center">
-          Made with ❤️ for our family's culinary journey
+          Made with 🤖 for our family's culinary journey
         </Typography>
       </Box>
     </ThemeProvider>
