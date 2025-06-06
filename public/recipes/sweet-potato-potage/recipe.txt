@@ -1,4 +1,4 @@
-name: Potage à la patate douce, cheddar et bacon
+name: Potage à la patate douce et cheddar
 description: Un potage réconfortant et savoureux à base de patates douces, enrichi de cheddar fort et garni de bacon croustillant.
 servings: 4 portions
 prep_time: 15 minutes
