@@ -1,0 +1,23 @@
+name: Lanières de bœuf, sauce aux poivres
+description: Lanières de bœuf tendres dans une sauce crémeuse aux poivres, accompagnées de légumes colorés. Un plat savoureux et élégant.
+servings: 4 portions
+prep_time: 15 minutes
+cook_time: 10 minutes
+total_time: 25 minutes
+difficulty: Easy
+tags: beef, main, potato, weeknight, hosting
+
+ingredients:
+- 450 g (1 lb) de haut de surlonge de bœuf coupé en lanières
+- 3 demi-poivrons de couleurs variées coupés en lanières
+- 1 oignon coupé en lanières
+- 125 ml (1/2 tasse) de vin rouge
+- 1 conserve de sauce aux poivres de 284 ml
+
+instructions:
+1. Dans une grande poêle, chauffer un peu d'huile de canola à feu moyen. Cuire les lanières de bœuf de 3 à 4 minutes.
+2. Ajouter les poivrons et l'oignon. Poursuivre la cuisson de 3 à 4 minutes.
+3. Verser le vin rouge dans la poêle et laisser évaporer de moitié.
+4. Incorporer la sauce aux poivres et porter à ébullition en remuant. Retirer du feu.
+
+notes: Pour accompagner: purée de pommes de terre et panais + crème à cuisson, ou simplement patates pilés.

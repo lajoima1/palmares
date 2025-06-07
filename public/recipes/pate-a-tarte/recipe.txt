@@ -1,0 +1,25 @@
+name: Pâte à tarte express
+description: Une pâte à tarte express et facile à préparer avec seulement 4 ingrédients de base. Parfaite pour les tartes sucrées et salées.
+servings: 1 croûte de tarte
+prep_time: 10 minutes
+cook_time: 15-20 minutes
+total_time: 25-30 minutes
+difficulty: Easy
+tags: dessert, made by mom, christmas
+
+ingredients:
+- 1 1/2 t. farine
+- 1 c. thé poudre à pâte
+- 1/2 t. huile végétale
+- 1/2 t. eau chaude
+
+instructions:
+1. Mélanger tous les ingrédients ensemble jusqu'à obtenir une pâte homogène.
+2. Étaler la pâte et la placer dans un moule à tarte.
+3. Cuire 15 à 20 min. à 350°F en bas.
+
+notes:
+- Pois par-dessus la croûte avec aluminium (empêche de lever)
+- Cette pâte est particulièrement rapide et ne nécessite pas de repos
+- Peut être utilisée pour des tartes sucrées ou salées
+- L'huile végétale rend la pâte plus tendre que le beurre traditionnel
