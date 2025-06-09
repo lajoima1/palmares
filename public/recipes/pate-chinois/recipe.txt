@@ -1,5 +1,5 @@
 name: Pâté chinois
-description: Un plat québécois réconfortant composé de bœuf haché assaisonné, d’un mélange de maïs crémeux et en grains, le tout recouvert d’une généreuse purée de pommes de terre dorée au four.
+description: Un plat québécois réconfortant composé de bœuf haché, d’un mélange de maïs, le tout recouvert d’une généreuse purée de pommes de terre dorée au four.
 servings: 6-8 portions
 prep_time: 30 minutes
 cook_time: 35 minutes
