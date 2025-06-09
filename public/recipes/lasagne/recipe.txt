@@ -4,7 +4,7 @@ servings: 8 à 10 portions
 prep_time: 30 minutes
 cook_time: 1 heure
 total_time: 1 heure 35 minutes
-difficulty: Moyen
+difficulty: Medium
 
 tags: hosting, main, pasta, beef
 

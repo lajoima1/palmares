@@ -1,6 +1,6 @@
 name: Sauce à la viande de Matt
 description: Une sauce bolognaise riche et savoureuse à base de bœuf haché, de légumes, de tomates et de vin blanc, parfaite pour garnir une grande lasagne maison.
-servings: 10 à 12 portions (pour une grande marmite)
+servings: Une grande marmite
 prep_time: 30 minutes
 cook_time: 2 h 30
 total_time: 3 heures

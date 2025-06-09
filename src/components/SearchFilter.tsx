@@ -34,6 +34,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   onDifficultyChange,
   availableTags,
 }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDifficultyChange = (event: any) => {
     onDifficultyChange(event.target.value);
   };
