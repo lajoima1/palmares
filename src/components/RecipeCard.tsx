@@ -78,6 +78,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
       onKeyDown={handleKeyDown}
     >
       <CardMedia
+        loading="lazy"
         component="img"
         height="200"
         image={recipe.image_url}
