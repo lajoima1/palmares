@@ -1,4 +1,4 @@
-name: Slow Cooker Beef Stew
+name: Beef stew
 description: A hearty and comforting beef stew slow-cooked to perfection with tender chunks of beef, carrots, potatoes, and peas in a rich, flavorful broth.
 servings: 6-8 servings
 prep_time: 30 minutes
