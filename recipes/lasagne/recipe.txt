@@ -1,0 +1,33 @@
+name: Lasagne à Matt
+description: Une lasagne généreuse avec une sauce mijotée maison pleine de légumes, de bœuf et de tomates Mutti. Parfaite pour les grandes tablées ou les restes!
+servings: 8 à 10 portions
+prep_time: 30 minutes
+cook_time: 1 heure
+total_time: 1 heure 35 minutes
+difficulty: Medium
+
+tags: hosting, main, pasta, beef
+
+ingredients:
+- 20 à 24 pâtes à lasagne (suffisament pour 5-6 étages)
+- Fromage râpé (mozzarella ou au choix)
+- Sauce à la viande de Matt (déjà préparée)
+- Huile d’olive, pour le fond du plat
+
+instructions:
+1. Faire bouillir les pâtes à lasagne quelques minutes jusqu’à ce qu’elles soient juste assez souples pour être manipulées. Ne pas trop cuire.
+2. Égoutter les pâtes et les plonger immédiatement dans un bol d’eau glacée pour arrêter la cuisson. Égoutter à nouveau et réserver.
+3. Huiler légèrement le fond du plat de cuisson avec un peu d’huile d’olive.
+4. Commencer l’assemblage en étalant une couche de sauce au fond du plat.
+5. Ajouter une couche de pâtes, puis une couche de sauce, puis une couche de fromage.
+6. Répéter les couches (pâte, sauce, fromage) jusqu’à épuisement des ingrédients ou au rebord du plat.
+7. Terminer par une couche de sauce.
+8. Couvrir le plat de papier aluminium.
+9. Cuire au four préchauffé à 380–390°F (193–199°C) pendant environ 45 minutes.
+10. Retirer le papier aluminium, ajouter du fromage sur le dessus, puis cuire encore 15 minutes à découvert.
+11. Allumer le gril (broil) et faire dorer le dessus pendant 4 à 5 minutes, en surveillant attentivement. On recherche un fromage gratiné!
+12. Laisser reposer la lasagne 10 à 15 minutes avant de servir.
+
+notes:
+- Peut être préparée à l’avance et réchauffée doucement au four.
+- Se congèle très bien une fois cuite et refroidie.

@@ -1,0 +1,29 @@
+name: Bœuf braisé au sirop d’érable et vinaigre balsamique
+description: Un rôti de bœuf tendre et savoureux mijoté lentement dans une sauce riche à base de sirop d’érable et de vinaigre balsamique.
+servings: 6 portions
+prep_time: 20 minutes
+cook_time: 2 h 30
+total_time: 3 heures
+difficulty: Medium
+tags: beef, slowcooker, main, hosting, potato, made by mom
+
+ingredients:
+- 30 ml (2 c. soupe) d’huile d’olive
+- 1 rôti de côtes croisées de bœuf désossé de 755 g (1 2/3 lb) (ou roti de palette)
+- 250 ml (1 tasse) de bouillon de bœuf
+- 125 ml (½ tasse) de sirop d’érable
+- 80 ml (1/3 tasse) de vinaigre balsamique
+- 80 ml (1/3 tasse) de sauce soya
+- 10 ml (2 c. à thé) d’ail haché
+- 1 oignon haché
+- Sel et poivre au goût
+
+instructions:
+1. Préchauffer le four à 180 °C (350 °F).
+2. Dans un bol, mélanger ensemble les ingrédients de la sauce.
+3. Dans un poêlon allant au four ou dans une cocotte, chauffer l’huile à feu moyen. Saisir la viande 1 à 2 minutes de chaque côté.
+4. Verser la sauce dans le poêlon et porter à ébullition. Couvrir et cuire au four pendant 2 heures à 2 heures 30 minutes, jusqu’à ce que la viande se défasse facilement à la fourchette.
+
+notes: 
+- Cette recette se fait bien au crockpot. Suffit de cuire le boeuf longtemps (7-8 heures low, 4-6 high) et couvrir de sauce.
+- Servir avec des légumes-racines au four et patate pilés pour un repas complet.

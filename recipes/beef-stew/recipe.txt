@@ -1,0 +1,42 @@
+name: Beef stew
+description: A hearty and comforting beef stew slow-cooked to perfection with tender chunks of beef, carrots, potatoes, and peas in a rich, flavorful broth.
+servings: 6-8 servings
+prep_time: 30 minutes
+cook_time: 7 hours
+total_time: 7 heures 30 minutes
+difficulty: Easy
+tags: beef, soup, slowcooker, main, weeknight
+
+ingredients:
+- 1 tablespoon olive oil
+- 3 pounds beef chuck, trimmed and cut into 1-inch pieces (about 2 1/2 pounds after trimming)
+- Freshly ground salt and pepper
+- 1 ½ cups beef broth (or beef bone broth)
+- 1 cup dry red wine (or substitute with additional beef broth)
+- 2 tablespoons tomato paste
+- 1 tablespoon Worcestershire sauce
+- ½ tablespoon balsamic vinegar
+- 1 teaspoon dried thyme
+- 1 teaspoon salt
+- Freshly ground black pepper
+- 6 garlic cloves, minced
+- 1 large yellow onion, cut into chunks
+- 4 large carrots, peeled and cut into 1/2-inch diagonal slices
+- 1 pound Yukon Gold potatoes, diced into ½-inch cubes
+- ¼ cup all-purpose flour (or gluten-free all-purpose flour)
+- 1 cup frozen peas
+
+instructions:
+1. Heat olive oil in a large skillet over medium-high heat. Season beef with salt and pepper, then brown in batches until seared. Transfer browned beef to a 6 or 8-quart slow cooker.
+2. Add beef broth, red wine, tomato paste, Worcestershire sauce, balsamic vinegar, dried thyme, salt, and pepper to the slow cooker. Stir to combine.
+3. Stir in minced garlic, onion chunks, carrots, and diced potatoes.
+4. Cover and cook on low for 7-8 hours or on high for 4-5 hours, until beef is tender.
+5. In a medium bowl, whisk together 1 cup of the stew broth from the slow cooker with the flour until smooth. Stir the mixture back into the slow cooker.
+6. Add frozen peas, stir, and cook uncovered on high for an additional 10-15 minutes until the stew thickens.
+7. Serve hot with toasted French bread, cornbread, crackers, or biscuits.
+
+notes:
+- For a non-alcoholic version, substitute the red wine with additional beef broth.
+- Store leftovers in an airtight container in the refrigerator for up to 3-4 days.
+- To freeze, let the stew cool completely, transfer to a freezer-safe container, and freeze for up to 3 months. Thaw in the refrigerator overnight before reheating.
+- Original recipe: https://www.ambitiouskitchen.com/moms-slow-cooker-beef-stew/ 

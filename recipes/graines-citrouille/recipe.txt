@@ -1,0 +1,21 @@
+name: Graines de citrouille
+description: Délicieuses graines de citrouille cuites au beurre et au sel, comme maman les faisait.
+servings: 2-3 pumpkins
+prep_time: 20 minutes
+cook_time: 40 minutes
+total_time: 1 hour
+difficulty: Easy
+tags: snack, made by mom
+
+ingredients:
+- Graines de citrouille
+- Sel
+- 2 c. soupe de beurre
+
+instructions:
+1. Tu nettoies les graines sans les laver.
+2. Les laisses sècher toute une nuit.
+3. Ajouter le sel et le beurre fondu.
+4. Mettre au four 250 environ 30-40 minutes.
+
+notes: Miam!
