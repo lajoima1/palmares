@@ -15,13 +15,14 @@ export interface Recipe {
 }
 
 export function parseRecipeText(
-  recipeText: string
+  recipeText: string,
 ): Omit<Recipe, "id" | "image_url"> {
   const lines = recipeText
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recipe: any = {
     name: "",
     description: "",
@@ -87,10 +88,10 @@ export function parseRecipeText(
 
 async function loadRecipeImage(
   recipeId: string,
-  basePath: string
+  basePath: string,
 ): Promise<string> {
   // List of common image file extensions to check
-  const imageExtensions = ["jpg", "jpeg", "png", "webp", "gif"];
+  const imageExtensions = ["webp", "jpg", "jpeg", "png", "gif"];
 
   // Try to find an actual image file first
   for (const ext of imageExtensions) {
@@ -101,6 +102,7 @@ async function loadRecipeImage(
         return imageUrl;
       }
     } catch (error) {
+      console.error(error);
       // Continue to next extension if this one fails
     }
   }
@@ -118,7 +120,7 @@ export async function loadRecipe(recipeId: string): Promise<Recipe> {
 
     if (!recipeResponse.ok) {
       throw new Error(
-        `Failed to fetch recipe ${recipeId}: ${recipeResponse.status} ${recipeResponse.statusText}`
+        `Failed to fetch recipe ${recipeId}: ${recipeResponse.status} ${recipeResponse.statusText}`,
       );
     }
 
@@ -159,7 +161,7 @@ export async function loadAllRecipes(): Promise<Recipe[]> {
 
     if (!indexResponse.ok) {
       throw new Error(
-        `Failed to fetch recipe index: ${indexResponse.status} ${indexResponse.statusText}`
+        `Failed to fetch recipe index: ${indexResponse.status} ${indexResponse.statusText}`,
       );
     }
 
