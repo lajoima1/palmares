@@ -1,0 +1,33 @@
+name: Air fryer steak bites
+description: Bouchées de steak assaisonnées et cuites à l’air fryer, puis enrobées d’une riche sauce au beurre et à l’ail.
+servings: 4 portions
+prep_time: 10 minutes
+cook_time: 11 minutes
+total_time: 21 minutes
+difficulty: Easy
+tags: beef, air fryer, main, weeknight, gd-friendly
+
+ingredients:
+- 1 1/2 lb boneless ribeye steak (ou sirloin), coupé en bouchées
+- 1 c. à soupe d’huile d’olive
+- 1/2 c. à thé de sel
+- 1/2 c. à thé de poivre noir fraîchement moulu
+- 1/4 c. à thé de paprika fumé
+- 3 c. à soupe de beurre salé
+- 3 gousses d’ail, hachées
+- 1 c. à soupe de persil frais haché (facultatif)
+
+instructions:
+1. Préchauffer l’air fryer à 400°F (205°C) pendant 5 minutes.
+2. Dans un grand bol, mélanger les bouchées de steak avec l’huile d’olive, le sel, le poivre et le paprika fumé.
+3. Disposer les bouchées de steak en une seule couche dans le panier de l’air fryer.
+4. Cuire à l’air fryer pendant 4 à 6 minutes, ou jusqu’à la cuisson désirée.
+5. Pendant la cuisson, faire fondre le beurre dans une poêle à feu moyen.
+6. Ajouter l’ail et cuire environ 30 secondes, jusqu’à ce qu’il soit parfumé.
+7. Ajouter les bouchées de steak cuites dans la poêle et mélanger pour bien les enrober de beurre à l’ail.
+8. Garnir de persil si désiré et servir immédiatement.
+
+notes:
+- Ajuster le temps de cuisson selon la taille des morceaux et la cuisson désirée.
+- Excellent avec pommes de terre, riz ou légumes verts.
+- Original recipe URL: https://www.thecountrycook.net/air-fryer-garlic-butter-steak-bites/
