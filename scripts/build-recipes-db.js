@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import initSqlJs from "sql.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,8 +12,8 @@ const PUBLIC_RECIPES_DIR = path.join(PUBLIC_DIR, "recipes");
 const DB_PATH = path.join(PUBLIC_DIR, "recipes.db");
 const INDEX_PATH = path.join(RECIPES_DIR, "index.json");
 
-// Dynamically import better-sqlite3 (CommonJS module)
-const Database = (await import("better-sqlite3")).default;
+// Initialize sql.js
+const SQL = await initSqlJs();
 
 // Ensure public directory exists
 if (!fs.existsSync(PUBLIC_DIR)) {
@@ -31,10 +32,10 @@ if (fs.existsSync(DB_PATH)) {
 fs.mkdirSync(PUBLIC_RECIPES_DIR, { recursive: true });
 
 // Create database
-const db = new Database(DB_PATH);
+const db = new SQL.Database();
 
 // Create tables
-db.exec(`
+db.run(`
   CREATE TABLE recipes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     slug TEXT UNIQUE NOT NULL,
@@ -132,56 +133,37 @@ function parseRecipe(content) {
 // Read recipe slugs from index.json
 const recipeSlugs = JSON.parse(fs.readFileSync(INDEX_PATH, "utf-8"));
 
-// Prepare statements
-const insertRecipe = db.prepare(`
-  INSERT INTO recipes (slug, name, description, servings, prep_time, cook_time, total_time, difficulty, tags)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-`);
-
-const insertIngredient = db.prepare(`
-  INSERT INTO ingredients (recipe_id, ingredient)
-  VALUES (?, ?)
-`);
-
-const insertInstruction = db.prepare(`
-  INSERT INTO instructions (recipe_id, step_number, instruction)
-  VALUES (?, ?, ?)
-`);
-
-const insertNote = db.prepare(`
-  INSERT INTO notes (recipe_id, note)
-  VALUES (?, ?)
-`);
-
 // Process all recipes
-const processRecipes = db.transaction(() => {
-  for (const slug of recipeSlugs) {
-    const recipeDir = path.join(RECIPES_DIR, slug);
-    const recipePath = path.join(recipeDir, "recipe.txt");
-    const imagePath = path.join(recipeDir, "image.webp");
+for (const slug of recipeSlugs) {
+  const recipeDir = path.join(RECIPES_DIR, slug);
+  const recipePath = path.join(recipeDir, "recipe.txt");
+  const imagePath = path.join(recipeDir, "image.webp");
 
-    if (!fs.existsSync(recipePath)) {
-      console.warn(`Warning: recipe.txt not found for ${slug}`);
-      continue;
-    }
+  if (!fs.existsSync(recipePath)) {
+    console.warn(`Warning: recipe.txt not found for ${slug}`);
+    continue;
+  }
 
-    // Parse recipe
-    const content = fs.readFileSync(recipePath, "utf-8");
-    const recipe = parseRecipe(content);
+  // Parse recipe
+  const content = fs.readFileSync(recipePath, "utf-8");
+  const recipe = parseRecipe(content);
 
-    // Copy and rename image to public/recipes/ folder
-    const newImageName = `${slug}.webp`;
-    const newImagePath = path.join(PUBLIC_RECIPES_DIR, newImageName);
+  // Copy and rename image to public/recipes/ folder
+  const newImageName = `${slug}.webp`;
+  const newImagePath = path.join(PUBLIC_RECIPES_DIR, newImageName);
 
-    if (fs.existsSync(imagePath)) {
-      fs.copyFileSync(imagePath, newImagePath);
-      console.log(`✓ Copied image: ${newImageName}`);
-    } else {
-      console.warn(`Warning: image.webp not found for ${slug}`);
-    }
+  if (fs.existsSync(imagePath)) {
+    fs.copyFileSync(imagePath, newImagePath);
+    console.log(`✓ Copied image: ${newImageName}`);
+  } else {
+    console.warn(`Warning: image.webp not found for ${slug}`);
+  }
 
-    // Insert recipe
-    const result = insertRecipe.run(
+  // Insert recipe
+  db.run(
+    `INSERT INTO recipes (slug, name, description, servings, prep_time, cook_time, total_time, difficulty, tags)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
       slug,
       recipe.name || slug,
       recipe.description || null,
@@ -191,30 +173,39 @@ const processRecipes = db.transaction(() => {
       recipe.total_time || null,
       recipe.difficulty || null,
       recipe.tags || null,
-    );
+    ]
+  );
 
-    const recipeId = result.lastInsertRowid;
+  // Get the last inserted recipe ID
+  const recipeId = db.exec("SELECT last_insert_rowid() as id")[0].values[0][0];
 
-    // Insert ingredients
-    for (const ingredient of recipe.ingredients) {
-      insertIngredient.run(recipeId, ingredient);
-    }
-
-    // Insert instructions
-    for (let i = 0; i < recipe.instructions.length; i++) {
-      insertInstruction.run(recipeId, i + 1, recipe.instructions[i]);
-    }
-
-    // Insert notes
-    for (const note of recipe.notes) {
-      insertNote.run(recipeId, note);
-    }
-
-    console.log(`✓ Processed recipe: ${recipe.name || slug}`);
+  // Insert ingredients
+  for (const ingredient of recipe.ingredients) {
+    db.run(`INSERT INTO ingredients (recipe_id, ingredient) VALUES (?, ?)`, [
+      recipeId,
+      ingredient,
+    ]);
   }
-});
 
-processRecipes();
+  // Insert instructions
+  for (let i = 0; i < recipe.instructions.length; i++) {
+    db.run(
+      `INSERT INTO instructions (recipe_id, step_number, instruction) VALUES (?, ?, ?)`,
+      [recipeId, i + 1, recipe.instructions[i]]
+    );
+  }
+
+  // Insert notes
+  for (const note of recipe.notes) {
+    db.run(`INSERT INTO notes (recipe_id, note) VALUES (?, ?)`, [recipeId, note]);
+  }
+
+  console.log(`✓ Processed recipe: ${recipe.name || slug}`);
+}
+
+// Export database to file
+const data = db.export();
+fs.writeFileSync(DB_PATH, data);
 
 db.close();
 
