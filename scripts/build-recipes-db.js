@@ -173,7 +173,7 @@ for (const slug of recipeSlugs) {
       recipe.total_time || null,
       recipe.difficulty || null,
       recipe.tags || null,
-    ]
+    ],
   );
 
   // Get the last inserted recipe ID
@@ -191,13 +191,16 @@ for (const slug of recipeSlugs) {
   for (let i = 0; i < recipe.instructions.length; i++) {
     db.run(
       `INSERT INTO instructions (recipe_id, step_number, instruction) VALUES (?, ?, ?)`,
-      [recipeId, i + 1, recipe.instructions[i]]
+      [recipeId, i + 1, recipe.instructions[i]],
     );
   }
 
   // Insert notes
   for (const note of recipe.notes) {
-    db.run(`INSERT INTO notes (recipe_id, note) VALUES (?, ?)`, [recipeId, note]);
+    db.run(`INSERT INTO notes (recipe_id, note) VALUES (?, ?)`, [
+      recipeId,
+      note,
+    ]);
   }
 
   console.log(`✓ Processed recipe: ${recipe.name || slug}`);
