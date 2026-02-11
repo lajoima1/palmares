@@ -165,9 +165,6 @@ export function createAppTheme(mode: PaletteMode, colorTheme: ColorTheme) {
               backgroundImage: isLight
                 ? `linear-gradient(to bottom, rgba(251, 246, 237, 0.9), rgba(248, 241, 225, 0.9))`
                 : "none",
-              boxShadow: isLight
-                ? "0 2px 8px rgba(139, 69, 19, 0.15), inset 0 0 60px rgba(139, 69, 19, 0.05)"
-                : undefined,
             },
           },
         },
