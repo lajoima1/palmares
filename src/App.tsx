@@ -48,9 +48,7 @@ function App() {
       return JSON.parse(saved);
     }
     // Default to Parchment theme
-    return (
-      colorThemes.find((t) => t.name === "Parchment") || colorThemes[0]
-    );
+    return colorThemes.find((t) => t.name === "Parchment") || colorThemes[0];
   });
 
   // Update localStorage when theme changes
@@ -261,7 +259,11 @@ function App() {
               component="h1"
               gutterBottom
               textAlign="center"
-              color="primary.main"
+              color={
+                isDarkMode && currentColorTheme.name === "Parchment"
+                  ? "text.primary"
+                  : "primary.main"
+              }
             >
               Palmarès
             </Typography>
