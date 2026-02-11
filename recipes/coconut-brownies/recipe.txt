@@ -1,11 +1,11 @@
-name: Coconut Flour Brownies  
+name: Coconut flour brownies  
 description: Brownies sans gluten, faibles en sucre et à base de farine de noix de coco, riches en chocolat et avec une texture fondante (keto-friendly et adaptés aux intolérances).  
 servings: 16 brownies  
 prep_time: 10 minutes  
 cook_time: 20 to 25 minutes  
 total_time: 30 to 35 minutes  
 difficulty: Easy  
-tags: dessert, keto  
+tags: dessert, keto, gd-friendly
 
 ingredients:
 - ⅓ tasse de farine de noix de coco  

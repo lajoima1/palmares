@@ -1,0 +1,34 @@
+name: Baked pork tenderloin
+description: Un filet de porc tendre et juteux rôti au four avec un savoureux mélange d’épices.
+servings: 6 portions
+prep_time: 10 minutes
+cook_time: 25 minutes
+total_time: 35 minutes
+difficulty: Easy
+tags: pork, potato, weeknight, main, hosting, gd-friendly
+
+ingredients:
+- 2 pork tenderloins d’environ 1 lb chacun
+- 1 c. à thé de paprika fumé
+- 1 c. à thé de poudre d’ail
+- 1 c. à thé de poudre d’oignon
+- 1 c. à thé d’assaisonnement italien (origan, basilique)
+- 1 c. à thé de sel
+- ¼ c. à thé de poivre (ou au goût)
+- ¼ tasse de beurre, coupé en petits morceaux
+- Persil haché (facultatif, pour garnir)
+
+instructions:
+1. Préchauffer le four à 400°F (205°C). Placer la grille au centre du four.
+2. Préparer les filets de porc : retirer l’excès de gras et la membrane argentée avec un couteau, puis les sécher avec un essuie-tout.
+3. Dans un petit bol, mélanger le paprika fumé, la poudre d’ail, la poudre d’oignon, l’assaisonnement italien, le sel et le poivre.
+4. Enrober uniformément les filets de porc avec ce mélange d’épices.
+5. Déposer les filets assaisonnés dans un plat de cuisson (9×13 po ou similaire) et répartir les morceaux de beurre sur le dessus.
+6. Cuire au four à découvert pendant environ 25 minutes, ou jusqu’à ce que la température interne atteigne 145°F (63°C). Pour femme enceinte: 165°F.
+7. Retirer du four et laisser reposer 5 à 10 minutes avant de trancher en médaillons.
+8. Verser les jus de cuisson sur le porc et garnir de persil si désiré.
+
+notes:
+- Si les filets sont plus petits ou plus gros, ajuster le temps de cuisson.
+- Servir avec purée de pommes de terre ou légumes rôtis pour un repas réconfortant.
+- Patates cuites avec jus de citron, herbes du bas du fleuve, paprika, poudre d'oignon, poudre d'ail, poivre.

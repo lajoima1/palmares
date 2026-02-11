@@ -28,4 +28,5 @@ instructions:
 5. Beurrer deux poêlons de 23 cm ou préparer des plaques à biscuits.
 6. Cuire les biscuits au four de 10 à 15 minutes ou jusqu’à ce qu’ils soient dorés et légèrement croustillants.
 
-notes: La présentation dans un poêlon en fonte, rigide et conviviale, est idéale pour les réunions de famille ou pour un goûter d’après-midi avec les enfants!
+notes: 
+- La présentation dans un poêlon en fonte, rigide et conviviale, est idéale pour les réunions de famille ou pour un goûter d’après-midi avec les enfants!

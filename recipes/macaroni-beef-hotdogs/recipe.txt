@@ -29,4 +29,5 @@ instructions:
 4. Ajouter le céleri, l’ail, le jus de tomate, la crème de tomate, la sauce tomate, le basilic, le sel et le poivre. Laisser mijoter à découvert à feu moyen de 15 à 20 minutes.  
 5. Préchauffer le four à 205 °C (400 °F). Incorporer les macaronis dans la sauce. Verser dans un plat de cuisson de 33 cm x 23 cm (13 po x 9 po). Saupoudrer de mozzarella et de parmesan. Cuire au four 25 minutes.  
 
-notes: On peut ajouter des hotdogs en dés vers la fin de la cuisson de la viande.
+notes: 
+- On peut ajouter des hotdogs en dés vers la fin de la cuisson de la viande.

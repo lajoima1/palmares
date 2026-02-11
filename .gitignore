@@ -25,3 +25,7 @@ dist-ssr
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+
+# Generated recipe assets (auto-generated during build)
+public/recipes.db
+public/recipes/*.webp

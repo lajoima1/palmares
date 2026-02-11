@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   ThemeProvider,
   CssBaseline,
@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import Restaurant from "@mui/icons-material/Restaurant";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
-import { type Recipe, loadAllRecipes } from "./types/Recipe";
+import { type Recipe } from "./types/Recipe";
+import { loadAllRecipesFromDb } from "./utils/recipeDatabase";
 import { RecipeCard } from "./components/RecipeCard";
 import { RecipeDetail } from "./components/RecipeDetail";
 import { SearchFilter } from "./components/SearchFilter";
@@ -32,6 +33,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
+  const recipesLoaded = useRef(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -56,7 +58,7 @@ function App() {
 
   const currentTheme = createAppTheme(
     isDarkMode ? "dark" : "light",
-    currentColorTheme
+    currentColorTheme,
   );
 
   const toggleDarkMode = () => {
@@ -68,10 +70,14 @@ function App() {
   };
 
   useEffect(() => {
+    // Prevent double-loading in React StrictMode (development only)
+    if (recipesLoaded.current) return;
+    recipesLoaded.current = true;
+
     const loadRecipes = async () => {
       try {
         setLoading(true);
-        const loadedRecipes = await loadAllRecipes();
+        const loadedRecipes = await loadAllRecipesFromDb();
         setRecipes(loadedRecipes);
       } catch (err) {
         setError("Failed to load recipes. Please try again later.");
@@ -143,7 +149,7 @@ function App() {
         recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         recipe.ingredients.some((ingredient) =>
-          ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+          ingredient.toLowerCase().includes(searchTerm.toLowerCase()),
         );
 
       const matchesTags =
@@ -219,7 +225,7 @@ function App() {
           >
             Palmarès
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9, mr: 2 }}>
+          <Typography variant="body1" sx={{ mr: 2, fontWeight: "bold" }}>
             {filteredRecipes.length} recipe
             {filteredRecipes.length !== 1 ? "s" : ""}
           </Typography>
@@ -382,3 +388,15 @@ function App() {
 }
 
 export default App;
+
+// TODO:
+// 1. Convert all recipes to use SQLite and load them from there instead of JSON files. Image path can be in database. or just standard naming.
+// 2. Make all images WEBP format https://imagemagick.org/script/webp.php#gsc.tab=0 magick mogrify -format webp -quality 50 -define webp:lossless=false -resize "1200x1200>" *.jpg
+// Keep your recipes as Markdown/Text files for easy editing.
+
+// Run a small script that parses those files and "builds" the recipes.sqlite file. Will need to remove the recipes from public folder.
+// When it builds from recipes folder (outside public) it also puts images inside public folder with the sqlite db.
+
+// Deploy that .sqlite file to GitHub Pages.
+// magick mogrify -format webp -quality 50 -define webp:lossless=false -resize "1200x1200>" *.jpg
+// Make nicer header with the recipes wreath

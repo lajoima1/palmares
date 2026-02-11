@@ -29,4 +29,5 @@ instructions:
 7. Cuire au four à 350 °F pendant 45 minutes.  
 8. Servir sur un lit de linguinis.  
 
-notes: Ce plat est idéal pour un souper copieux et peut facilement être adapté selon les légumes disponibles.  
+notes: 
+- Ce plat est idéal pour un souper copieux et peut facilement être adapté selon les légumes disponibles.  

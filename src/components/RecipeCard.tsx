@@ -83,6 +83,13 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         height="200"
         image={recipe.image_url}
         alt={recipe.name}
+        onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+          const basePath = import.meta.env.BASE_URL || "/";
+          e.currentTarget.src = `${basePath}recipe-not-found.webp`.replace(
+            "//",
+            "/",
+          );
+        }}
         sx={{
           objectFit: "cover",
           display: "block",
@@ -126,8 +133,8 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
                 recipe.difficulty === "Easy"
                   ? "success"
                   : recipe.difficulty === "Medium"
-                  ? "warning"
-                  : "error"
+                    ? "warning"
+                    : "error"
               }
             />
           </Stack>

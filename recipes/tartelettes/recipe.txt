@@ -22,4 +22,5 @@ instructions:
 3. Verser la préparation dans des croûtes à tartelettes.
 4. Cuire au four pendant 20 à 25 minutes.
 
-notes: Se conserve quelques jours au réfrigérateur dans un contenant hermétique.
+notes: 
+- Se conserve quelques jours au réfrigérateur dans un contenant hermétique.

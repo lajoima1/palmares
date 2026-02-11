@@ -1,11 +1,11 @@
-name: Tuna Pancakes
+name: Tuna pancakes
 description: Des pancakes salés et croustillants à base de thon, de légumes et de cheddar, rapides à préparer et parfaits pour un repas léger ou un lunch. Servis idéalement avec une sauce sésame-érable.
 servings: 8 pancakes
 prep_time: 15 minutes
 cook_time: 10 minutes
 total_time: 25 minutes
 difficulty: Easy
-tags: fish, weeknight, main, keto
+tags: fish, weeknight, main, keto, gd-friendly
 
 ingredients:
 - 3 conserves de thon de 170 g, égouttées

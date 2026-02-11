@@ -111,6 +111,13 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
           <img
             src={recipe.image_url}
             alt={recipe.name}
+            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+              const basePath = import.meta.env.BASE_URL || "/";
+              e.currentTarget.src = `${basePath}recipe-not-found.webp`.replace(
+                "//",
+                "/",
+              );
+            }}
             style={{
               width: "100%",
               height: "300px",
@@ -200,8 +207,8 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
                   recipe.difficulty === "Easy"
                     ? "success"
                     : recipe.difficulty === "Medium"
-                    ? "warning"
-                    : "error"
+                      ? "warning"
+                      : "error"
                 }
               />
             </Box>
@@ -300,19 +307,25 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
             </List>
           </Box>
         </Box>
-        {recipe.notes && (
+        {recipe.notes && recipe.notes.length > 0 && (
           <>
             <Divider sx={{ my: 3 }} />
             <Typography variant="h6" gutterBottom>
               Notes
             </Typography>
-            <Typography
-              variant={contentFontSize}
-              color="text.secondary"
-              sx={{ whiteSpace: "pre-line" }}
-            >
-              {recipe.notes}
-            </Typography>
+            <List dense>
+              {recipe.notes.map((note, index) => (
+                <ListItem key={index} sx={{ pl: 0 }}>
+                  <ListItemText
+                    primary={note}
+                    primaryTypographyProps={{
+                      variant: contentFontSize,
+                      color: "text.secondary",
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
           </>
         )}
       </DialogContent>

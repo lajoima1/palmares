@@ -18,4 +18,5 @@ instructions:
 3. Ajouter le sel et le beurre fondu.
 4. Mettre au four 250 environ 30-40 minutes.
 
-notes: Miam!
+notes: 
+- Miam!

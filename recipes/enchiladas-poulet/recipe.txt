@@ -30,4 +30,5 @@ instructions:
 8. Retirer le papier, parsemer de fromage et remettre au four 5 minutes ou jusqu’à ce que le fromage soit fondu.
 9. Garnir de persil, si désiré.
 
-notes: Vous pouvez remplacer la crème sure par un mélange de crème sure et salsa pour une touche piquante. Servir avec riz mexicain ou une salade verte pour un repas complet.
+notes: 
+- Vous pouvez remplacer la crème sure par un mélange de crème sure et salsa pour une touche piquante. Servir avec riz mexicain ou une salade verte pour un repas complet.
