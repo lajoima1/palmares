@@ -3,8 +3,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
   Typography,
   Box,
   Stack,
@@ -329,14 +327,6 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
           </>
         )}
       </DialogContent>
-
-      {!isMobile && (
-        <DialogActions>
-          <Button onClick={onClose} variant="contained">
-            Close
-          </Button>
-        </DialogActions>
-      )}
     </Dialog>
   );
 };

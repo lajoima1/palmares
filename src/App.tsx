@@ -44,7 +44,13 @@ function App() {
   });
   const [currentColorTheme, setCurrentColorTheme] = useState<ColorTheme>(() => {
     const saved = localStorage.getItem("color-theme");
-    return saved ? JSON.parse(saved) : colorThemes[0];
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    // Default to Parchment theme
+    return (
+      colorThemes.find((t) => t.name === "Parchment") || colorThemes[0]
+    );
   });
 
   // Update localStorage when theme changes
@@ -390,13 +396,6 @@ function App() {
 export default App;
 
 // TODO:
-// 1. Convert all recipes to use SQLite and load them from there instead of JSON files. Image path can be in database. or just standard naming.
-// 2. Make all images WEBP format https://imagemagick.org/script/webp.php#gsc.tab=0 magick mogrify -format webp -quality 50 -define webp:lossless=false -resize "1200x1200>" *.jpg
-// Keep your recipes as Markdown/Text files for easy editing.
-
-// Run a small script that parses those files and "builds" the recipes.sqlite file. Will need to remove the recipes from public folder.
-// When it builds from recipes folder (outside public) it also puts images inside public folder with the sqlite db.
-
-// Deploy that .sqlite file to GitHub Pages.
-// magick mogrify -format webp -quality 50 -define webp:lossless=false -resize "1200x1200>" *.jpg
 // Make nicer header with the recipes wreath
+// Make the app wider. We need to see more recipes at once.
+// Make the aestethic better and more consistent. Parchment aestethic.
