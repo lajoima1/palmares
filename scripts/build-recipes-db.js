@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import Database from "better-sqlite3";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,6 +10,9 @@ const PUBLIC_DIR = path.join(__dirname, "..", "public");
 const PUBLIC_RECIPES_DIR = path.join(PUBLIC_DIR, "recipes");
 const DB_PATH = path.join(PUBLIC_DIR, "recipes.db");
 const INDEX_PATH = path.join(RECIPES_DIR, "index.json");
+
+// Dynamically import better-sqlite3 (CommonJS module)
+const Database = (await import("better-sqlite3")).default;
 
 // Ensure public directory exists
 if (!fs.existsSync(PUBLIC_DIR)) {
