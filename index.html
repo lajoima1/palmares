@@ -123,6 +123,7 @@
     function setSpinnerColor() {
       try {
         const colorThemes = [
+          { name: "Parchment", primary: "#8B4513", secondary: "#D2691E" },
           { name: "Classic Red", primary: "#d32f2f", secondary: "#ff9800" },
           { name: "Ocean Blue", primary: "#1976d2", secondary: "#ff9800" },
           { name: "Forest Green", primary: "#388e3c", secondary: "#ff7043" },
@@ -131,16 +132,23 @@
         ];
 
         const savedTheme = localStorage.getItem('color-theme');
-        const currentTheme = savedTheme ? JSON.parse(savedTheme) : colorThemes[0]; // Default to Ocean Blue
+        const currentTheme = savedTheme ? JSON.parse(savedTheme) : colorThemes[0]; // Default to Parchment
 
         // Get user's dark mode preference
         const savedDarkMode = localStorage.getItem('theme-mode');
         const isDarkMode = savedDarkMode ? JSON.parse(savedDarkMode) : window.matchMedia('(prefers-color-scheme: dark)').matches;
 
         // Set theme-based colors
-        const backgroundColor = isDarkMode ? '#121212' : '#fafafa';
-        const textColor = isDarkMode ? '#ffffff' : '#000000';
-        const subtitleColor = isDarkMode ? '#bdbdbd' : '#757575';
+        const isParchment = currentTheme.name === "Parchment";
+        const backgroundColor = isParchment
+          ? (isDarkMode ? '#2C2416' : '#F4E8D0')
+          : (isDarkMode ? '#121212' : '#fafafa');
+        const textColor = isParchment
+          ? (isDarkMode ? '#E8D5B7' : '#3E2723')
+          : (isDarkMode ? '#ffffff' : '#000000');
+        const subtitleColor = isParchment
+          ? (isDarkMode ? '#C4A882' : '#5D4037')
+          : (isDarkMode ? '#bdbdbd' : '#757575');
         const spinnerBorder = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
 
         // Create a style element to override the colors
