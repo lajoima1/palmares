@@ -9,8 +9,12 @@ import {
   Toolbar,
   Paper,
   Fab,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
+import OpenInFull from "@mui/icons-material/OpenInFull";
+import CloseFullscreen from "@mui/icons-material/CloseFullscreen";
 import { type Recipe } from "./types/Recipe";
 import { loadAllRecipesFromDb } from "./utils/recipeDatabase";
 import { RecipeCard } from "./components/RecipeCard";
@@ -49,6 +53,10 @@ function App() {
     // Default to Parchment theme
     return colorThemes.find((t) => t.name === "Parchment") || colorThemes[0];
   });
+  const [contentWidth, setContentWidth] = useState<"normal" | "wide">(() => {
+    const saved = localStorage.getItem("content-width");
+    return saved ? JSON.parse(saved) : "normal";
+  });
 
   // Update localStorage when theme changes
   useEffect(() => {
@@ -58,6 +66,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("color-theme", JSON.stringify(currentColorTheme));
   }, [currentColorTheme]);
+
+  useEffect(() => {
+    localStorage.setItem("content-width", JSON.stringify(contentWidth));
+  }, [contentWidth]);
 
   const currentTheme = createAppTheme(
     isDarkMode ? "dark" : "light",
@@ -241,6 +253,22 @@ function App() {
             {filteredRecipes.length} recipe
             {filteredRecipes.length !== 1 ? "s" : ""}
           </Typography>
+          <Tooltip
+            title={contentWidth === "normal" ? "Expand width" : "Normal width"}
+          >
+            <IconButton
+              onClick={() =>
+                setContentWidth(contentWidth === "normal" ? "wide" : "normal")
+              }
+              sx={{
+                color: "white",
+                mr: 1,
+                display: { xs: "none", md: "inline-flex" },
+              }}
+            >
+              {contentWidth === "normal" ? <OpenInFull /> : <CloseFullscreen />}
+            </IconButton>
+          </Tooltip>
           <ThemeToggle
             isDarkMode={isDarkMode}
             onToggleDarkMode={toggleDarkMode}
@@ -250,7 +278,13 @@ function App() {
         </Toolbar>
       </AppBar>{" "}
       {/* Hero Section */}
-      <Box sx={{ maxWidth: "900px", margin: "auto" }}>
+      <Box
+        sx={{
+          maxWidth: contentWidth === "wide" ? "1400px" : "900px",
+          margin: "auto",
+          transition: "max-width 0.3s ease",
+        }}
+      >
         <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 4 }}>
           <Paper
             elevation={0}
@@ -448,5 +482,3 @@ export default App;
 
 // TODO:
 // Make the app wider. We need to see more recipes at once.
-// Change the loading srceen icon to the garlic icon (needs to be square...)
-// Change app logo to the garlic icon
