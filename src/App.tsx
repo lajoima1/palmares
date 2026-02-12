@@ -10,7 +10,6 @@ import {
   Paper,
   Fab,
 } from "@mui/material";
-import Restaurant from "@mui/icons-material/Restaurant";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import { type Recipe } from "./types/Recipe";
 import { loadAllRecipesFromDb } from "./utils/recipeDatabase";
@@ -221,7 +220,16 @@ function App() {
         }}
       >
         <Toolbar>
-          <Restaurant sx={{ mr: 2 }} />
+          <Box
+            component="img"
+            src={`${import.meta.env.BASE_URL || "/"}squared-garlic-64x64.webp`}
+            alt="Garlic icon"
+            sx={{
+              width: 32,
+              height: 32,
+              mr: 2,
+            }}
+          />
           <Typography
             variant="h6"
             component="div"
