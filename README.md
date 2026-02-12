@@ -125,3 +125,7 @@ The codebase is well-structured for extending with new features:
 - Add new search filters in `SearchFilter.tsx`
 - Enhance recipe cards in `RecipeCard.tsx`
 - Extend recipe format in `types/Recipe.ts`
+
+### Minifying images
+
+`magick mogrify -format webp -quality 50 -define webp:lossless=false -resize "1200x1200>" **/*.jpg`

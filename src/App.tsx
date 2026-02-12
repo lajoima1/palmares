@@ -247,31 +247,65 @@ function App() {
           <Paper
             elevation={0}
             sx={{
-              p: { xs: 4, sm: 6 },
+              p: { xs: 3, sm: 4 },
               mb: 4,
               backgroundColor: "background.paper",
               border: `1px solid ${currentColorTheme.primary}20`,
               width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              textAlign="center"
-              color={
-                isDarkMode && currentColorTheme.name === "Parchment"
-                  ? "text.primary"
-                  : "primary.main"
-              }
+            {/* Wreath with centered title */}
+            <Box
+              sx={{
+                position: "relative",
+                width: { xs: "220px", sm: "280px", md: "320px" },
+                height: { xs: "220px", sm: "280px", md: "320px" },
+                mb: 3,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              Palmarès
-            </Typography>
+              <Box
+                component="img"
+                src={`${import.meta.env.BASE_URL || "/"}recipe-wreath.webp`}
+                alt=""
+                sx={{
+                  position: "absolute",
+                  height: "100%",
+                  opacity: isDarkMode ? 0.6 : 0.8,
+                  pointerEvents: "none",
+                }}
+              />
+              <Typography
+                variant="h3"
+                component="h1"
+                sx={{
+                  position: "relative",
+                  zIndex: 1,
+                  fontWeight: 700,
+                  fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                  color:
+                    isDarkMode && currentColorTheme.name === "Parchment"
+                      ? "text.primary"
+                      : "primary.main",
+                  textAlign: "center",
+                  ml: 1,
+                }}
+              >
+                Palmarès
+              </Typography>
+            </Box>
+
+            {/* Subtitle */}
             <Typography
               variant="h6"
               textAlign="center"
               color="text.secondary"
-              sx={{ maxWidth: 600, mx: "auto" }}
+              sx={{ maxWidth: 600, px: 2 }}
             >
               Une collection de recettes accumulées au fil des générations et
               testées dans notre cuisine familiale
@@ -382,7 +416,14 @@ function App() {
           mt: 8,
           py: 4,
           px: { xs: 2, sm: 3, md: 4 },
-          backgroundColor: isDarkMode ? "background.paper" : "grey.100",
+          backgroundColor:
+            currentColorTheme.name === "Parchment"
+              ? isDarkMode
+                ? "#241E10"
+                : "#E8D5B7"
+              : isDarkMode
+                ? "background.paper"
+                : "grey.100",
           borderTop: "1px solid",
           borderColor: "divider",
         }}
@@ -398,6 +439,4 @@ function App() {
 export default App;
 
 // TODO:
-// Make nicer header with the recipes wreath
 // Make the app wider. We need to see more recipes at once.
-// Make the aestethic better and more consistent. Parchment aestethic.
