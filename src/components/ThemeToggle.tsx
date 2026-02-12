@@ -47,7 +47,12 @@ export function ThemeToggle({
   return (
     <Box display="flex" alignItems="center">
       <Tooltip title={`Switch to ${isDarkMode ? "light" : "dark"} mode`}>
-        <IconButton onClick={onToggleDarkMode} color="inherit" size="medium">
+        <IconButton
+          onClick={onToggleDarkMode}
+          color="inherit"
+          size="medium"
+          sx={{ mr: 1 }}
+        >
           {isDarkMode ? <Brightness7 /> : <Brightness4 />}
         </IconButton>
       </Tooltip>

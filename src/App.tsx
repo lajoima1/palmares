@@ -219,7 +219,11 @@ function App() {
           backgroundColor: "primary.main",
           backgroundImage: "none",
           borderBottom: `1px solid ${
-            isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+            isDarkMode && currentColorTheme.name === "Parchment"
+              ? "rgba(0,0,0,0.2)"
+              : isDarkMode
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(0,0,0,0.1)"
           }`,
           transition: "box-shadow 0.2s ease-in-out",
           color: "white", // Force white text for all AppBar content
