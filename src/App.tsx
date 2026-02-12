@@ -440,3 +440,5 @@ export default App;
 
 // TODO:
 // Make the app wider. We need to see more recipes at once.
+// Change the loading srceen icon to the garlic icon (needs to be square...)
+// Change app logo to the garlic icon

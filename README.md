@@ -126,6 +126,16 @@ The codebase is well-structured for extending with new features:
 - Enhance recipe cards in `RecipeCard.tsx`
 - Extend recipe format in `types/Recipe.ts`
 
-### Minifying images
+### Image Commands
+
+## Minifying size
 
 `magick mogrify -format webp -quality 50 -define webp:lossless=false -resize "1200x1200>" **/*.jpg`
+
+## To favicon
+
+`magick input.webp -define icon:auto-resize=16,32,48 favicon.ico`
+
+## Make square
+
+`magick input.webp -gravity center -background transparent -extent 362x362 squared.webp`

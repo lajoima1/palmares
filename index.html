@@ -55,12 +55,17 @@
     }
 
     .spinner::after {
-      content: "🍽️";
+      content: "";
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      background-image: url('/squared-garlic-64x64.webp');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     @keyframes spin {
