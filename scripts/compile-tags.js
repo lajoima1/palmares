@@ -65,7 +65,9 @@ console.log(`Total unique tags: ${allTags.length}\n`);
 
 allTags.forEach((tag, index) => {
   const count = tagCounts[tag];
-  console.log(`${(index + 1).toString().padStart(2)}. ${tag.padEnd(20)} (used in ${count} recipe${count > 1 ? "s" : ""})`);
+  console.log(
+    `${(index + 1).toString().padStart(2)}. ${tag.padEnd(20)} (used in ${count} recipe${count > 1 ? "s" : ""})`,
+  );
 });
 
 console.log("\n" + "=".repeat(60));
@@ -73,7 +75,9 @@ console.log("TAGS BY USAGE FREQUENCY");
 console.log("=".repeat(60));
 
 tagsByCount.forEach((item, index) => {
-  console.log(`${(index + 1).toString().padStart(2)}. ${item.tag.padEnd(20)} (${item.count} recipe${item.count > 1 ? "s" : ""})`);
+  console.log(
+    `${(index + 1).toString().padStart(2)}. ${item.tag.padEnd(20)} (${item.count} recipe${item.count > 1 ? "s" : ""})`,
+  );
 });
 
 console.log("\n" + "=".repeat(60));
@@ -82,18 +86,43 @@ console.log("=".repeat(60));
 
 // Categorize tags (manual categorization based on analysis)
 const categories = {
-  "Protein": allTags.filter(t => ["beef", "chicken", "fish", "pork", "veal", "sausage"].includes(t)),
-  "Dish Type": allTags.filter(t => ["main", "dessert", "soup", "snack", "appetizer", "cookies", "pasta"].includes(t)),
-  "Occasion": allTags.filter(t => ["weeknight", "hosting", "christmas", "breakfast"].includes(t)),
-  "Dietary": allTags.filter(t => ["keto", "gd-friendly"].includes(t)),
-  "Equipment": allTags.filter(t => ["slowcooker", "air fryer"].includes(t)),
-  "Other": allTags.filter(t => ["large portion", "made by mom", "meal prep", "campbell", "chocolate chip", "potato", "rice", "sweet potato"].includes(t)),
+  Protein: allTags.filter((t) =>
+    ["beef", "chicken", "fish", "pork", "veal", "sausage"].includes(t),
+  ),
+  "Dish Type": allTags.filter((t) =>
+    [
+      "main",
+      "dessert",
+      "soup",
+      "snack",
+      "appetizer",
+      "cookies",
+      "pasta",
+    ].includes(t),
+  ),
+  Occasion: allTags.filter((t) =>
+    ["weeknight", "hosting", "christmas", "breakfast"].includes(t),
+  ),
+  Dietary: allTags.filter((t) => ["keto", "gd-friendly"].includes(t)),
+  Equipment: allTags.filter((t) => ["slowcooker", "air fryer"].includes(t)),
+  Other: allTags.filter((t) =>
+    [
+      "large portion",
+      "made by mom",
+      "meal prep",
+      "campbell",
+      "chocolate chip",
+      "potato",
+      "rice",
+      "sweet potato",
+    ].includes(t),
+  ),
 };
 
 for (const [category, tags] of Object.entries(categories)) {
   if (tags.length > 0) {
     console.log(`\n${category}:`);
-    tags.forEach(tag => {
+    tags.forEach((tag) => {
       console.log(`  - ${tag} (${tagCounts[tag]})`);
     });
   }
