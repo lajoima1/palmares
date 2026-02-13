@@ -1,0 +1,33 @@
+name: Mini pizzas au four
+description: Mini pizzas rapides et personnalisables faites avec des pains hamburger ou des tortillas, parfaites pour un repas simple ou une collation.
+servings: N/A
+prep_time: 10 minutes
+cook_time: 12 minutes
+total_time: 22 minutes
+difficulty: Easy
+tags: snack, main, gd-friendly, weeknight
+
+ingredients:
+- Pains hamburger ou tortillas
+- Sauce à pizza
+- Fromage râpé (mozzarella ou mélange italien)
+- Poivrons verts en dés
+- Champignons tranchés
+- Bacon cuit émietté
+- Pepperoni tranché
+- Oignon émincé
+- Autres garnitures au choix
+
+instructions:
+1. Préchauffer le four à 400°F (205°C).
+2. Placer les pains hamburger coupés en deux ou les tortillas sur une plaque de cuisson tapissée de papier parchemin.
+3. Étendre une couche de sauce à pizza sur chaque base.
+4. Ajouter une portion de fromage râpé.
+5. Répartir les garnitures au choix: poivrons verts, champignons, bacon, pepperoni, oignons ou autres.
+6. Ajouter un peu de fromage supplémentaire sur le dessus si désiré.
+7. Cuire au four de 10 à 12 minutes, jusqu’à ce que le fromage soit fondu et légèrement doré et que les bords soient croustillants.
+8. Retirer du four, laisser refroidir 2 à 3 minutes et servir.
+
+notes:
+- Les pains hamburger donnent une base plus épaisse et moelleuse; les tortillas donnent une pizza plus mince et croustillante.
+- Idéal pour utiliser des restes de viande et de légumes.

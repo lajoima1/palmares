@@ -5,7 +5,7 @@ prep_time: 10 minutes
 cook_time: 10 à 15 minutes  
 total_time: 30 minutes 
 difficulty: Easy  
-tags: cookies, dessert, chocolate chip, christmas  
+tags: cookies, dessert, chocolate, christmas  
 
 ingredients:  
 - ½ c. à thé de bicarbonate de soude  

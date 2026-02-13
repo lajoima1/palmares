@@ -483,6 +483,3 @@ function App() {
 }
 
 export default App;
-
-// TODO:
-// Make the app wider. We need to see more recipes at once.

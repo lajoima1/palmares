@@ -5,7 +5,7 @@ prep_time: 15 minutes
 cook_time: 10 minutes
 total_time: 25 minutes
 difficulty: Easy
-tags: fish, weeknight, main, keto, gd-friendly
+tags: fish, weeknight, main, gd-friendly
 
 ingredients:
 - 3 conserves de thon de 170 g, égouttées

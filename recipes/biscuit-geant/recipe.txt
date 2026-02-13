@@ -5,7 +5,7 @@ prep_time: 15 minutes
 cook_time: 15 minutes
 total_time: 30 minutes
 difficulty: Medium
-tags: dessert, cookies, chocolate chip, made by mom, hosting
+tags: dessert, cookies, chocolate, made by mom, hosting
 
 ingredients:
 - 450 g (1 lb) de beurre

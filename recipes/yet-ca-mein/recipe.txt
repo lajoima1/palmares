@@ -1,0 +1,36 @@
+name: Yet-ca-mein
+description: Un bol de nouilles Yet-ca-mein dans un bouillon riche au bœuf et soya, garni de poulet effiloché, légumes, œuf dur, oignons verts et graines de sésame.
+servings: 10
+prep_time: 15 minutes
+cook_time: 20 minutes
+total_time: 35 minutes
+difficulty: Easy
+tags: pasta, weeknight, main, made by mom, chicken
+
+ingredients:
+- Nouilles Yet-ca-mein
+- Œufs
+- Eau
+- Concentré de bouillon de bœuf liquide
+- Sauce soya
+- Poulet cuit effiloché
+- Mini-épis de maïs en conserve
+- Légumes au choix (ex: carottes, pois mange-tout, poivrons, champignons)
+- Oignons verts tranchés
+- Graines de sésame
+
+instructions:
+1. Déposer les œufs dans une casserole, couvrir d’eau froide et porter à ébullition. Cuire 10 minutes, puis refroidir dans l’eau froide. Écaler et réserver.
+2. Porter une grande marmite d’eau à ébullition.
+3. Ajouter le concentré de bouillon de bœuf et la sauce soya. Goûter et ajuster jusqu’à obtenir un bouillon au goût prononcé de bœuf et bien salé.
+4. Ajouter les légumes choisis, en incluant toujours les mini-épis de maïs. Laisser mijoter quelques minutes jusqu’à tendreté.
+5. Ajouter les nouilles Yet-ca-mein dans le bouillon et cuire jusqu’à texture al dente.
+6. Ajouter le poulet cuit effiloché dans la marmite et réchauffer 2 à 3 minutes.
+7. Déposer une passoire sur un grand bol en acier inoxydable et verser une portion de la soupe pour récupérer du bouillon.
+8. Répartir les nouilles, légumes et poulet dans les bols, puis arroser avec le bouillon réservé.
+9. Garnir chaque bol d’un œuf dur coupé en deux, d’oignons verts et de graines de sésame.
+
+notes:
+- Ajuster la salinité avec plus de sauce soya ou de concentré de bouillon.
+- Se personnalise facilement avec les légumes disponibles.
+- Excellent avec un filet d’huile de sésame ou sauce chili au service.
