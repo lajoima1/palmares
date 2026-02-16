@@ -1,0 +1,34 @@
+name: Rotini thon et fromage
+description: Pâtes en spirales au thon avec légumes et sauce crémeuse au fromage.
+servings: 4 portions
+prep_time: 10 minutes
+cook_time: 20 minutes
+total_time: 30 minutes
+difficulty: Easy
+tags: pasta, fish, weeknight, main, made by mom
+
+ingredients:
+- 225 g macaroni en spirales (non cuits)
+- 30 ml (2 c. à soupe) margarine ou beurre
+- 1 paquet (300 g) mélange de légumes surgelés, décongelés
+- 1 gousse d’ail, hachée fin
+- 1 boîte (284 ml) crème de champignons condensée
+- 175 ml (3/4 tasse) lait
+- 375 ml (1 1/2 tasse) mozzarella râpée (≈180 g)
+- 0,5 ml (1/8 c. à thé) poivre
+- Généreuse pincée de muscade moulue
+- 1 boîte (184 g) thon, égoutté
+
+instructions:
+1. Cuire les pâtes en spirales selon les instructions de l’emballage. Égoutter et réserver.
+2. Dans une grande poêle (≈25 cm), faire fondre la margarine ou le beurre à feu moyen.
+3. Ajouter les légumes mélangés et l’ail. Cuire environ 2 minutes en remuant souvent.
+4. Ajouter la crème de champignons dans la poêle et bien mélanger avec les légumes.
+5. Incorporer graduellement le lait en remuant jusqu’à l’obtention d’une sauce lisse.
+6. Ajouter le fromage râpé, le poivre et la muscade. Chauffer en remuant jusqu’à ce que le fromage soit fondu.
+7. Ajouter le thon égoutté et les pâtes cuites. Mélanger délicatement.
+8. Réchauffer quelques minutes jusqu’à ce que tout soit bien chaud, puis servir.
+
+notes:
+- Pour un goût de fromage plus prononcé, remplacer la mozzarella par du cheddar fort.
+- On peut utiliser d’autres légumes mélangés au choix.

@@ -1,0 +1,35 @@
+name: Rouleaux de poulet au jambon et fromage
+description: Roulades de poulet farcies au jambon et au fromage, dorées à la poêle et nappées d’une sauce crémeuse.
+servings: 4 portions
+prep_time: 20 minutes
+cook_time: 20 minutes
+total_time: 40 minutes
+difficulty: Medium
+tags: chicken, pork, main, weeknight, hosting
+
+ingredients:
+- 4 demi-poitrines de poulet désossées et sans peau (≈450 g / 1 lb)
+- 4 tranches fines de jambon cuit
+- 4 tranches fines de fromage suisse (≈85 g / 3 oz)
+- 30 ml (2 c. à soupe) d’huile végétale
+- 1 boîte (284 ml / 10 oz) de crème de brocoli condensée
+- 75 ml (1/3 tasse) de lait
+- 50 ml (1/4 tasse) d’oignons verts tranchés
+- 0,5 ml (1/8 c. à thé) de thym séché, écrasé
+- Persil frais haché pour garnir
+- Cure-dents en bois (au besoin)
+
+instructions:
+1. Aplatir les demi-poitrines de poulet uniformément avec la paume de la main ou le côté plat d’un maillet.
+2. Déposer une tranche de jambon et une tranche de fromage sur chaque morceau de poulet.
+3. Rouler le poulet en commençant par l’extrémité la plus étroite pour former des rouleaux. Rentrer le jambon et le fromage si nécessaire et fixer avec des cure-dents.
+4. Chauffer l’huile dans une grande poêle (≈25 cm / 10 po) à feu moyen-vif.
+5. Faire cuire les rouleaux de poulet environ 10 minutes, en les retournant pour bien les dorer sur toutes les faces.
+6. Retirer l’excès de gras de la poêle à l’aide d’une cuillère.
+7. Ajouter la crème de brocoli, le lait, les oignons verts et le thym dans la poêle. Mélanger.
+8. Porter à ébullition, puis réduire à feu doux. Couvrir et laisser mijoter environ 10 minutes, en remuant de temps en temps, jusqu’à ce que le poulet soit bien cuit et que la sauce épaississe.
+9. Servir les rouleaux nappés de sauce et garnir de persil frais.
+
+notes:
+- Variante: remplacer le poulet par des escalopes de dinde et réduire le temps de brunissage d’environ 5 minutes.
+- Servir avec du riz, des pâtes ou une purée de pommes de terre pour accompagner la sauce.

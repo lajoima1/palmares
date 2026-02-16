@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "tags": "node scripts/generate-tags.js",
+    "tags": "node scripts/compile-tags.js",
+    "add-recipe": "node scripts/add-recipe.js",
     "minify": "magick mogrify -format webp -quality 50 -define webp:lossless=false -resize \"1200x1200>\" **/*.jpg"
   },
   "dependencies": {

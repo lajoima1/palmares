@@ -1,0 +1,44 @@
+name: Teriyaki meatballs
+description: Boulettes de porc juteuses, du riz jasmin et du brocoli, nappés d’une sauce teriyaki maison sucrée et savoureuse.
+servings: 4 portions
+prep_time: 20 minutes
+cook_time: 20 minutes
+total_time: 40 minutes
+difficulty: Easy
+tags: pork, main, weeknight, rice
+
+ingredients:
+- 1 lb (≈450 g) de porc haché
+- 1 gros œuf
+- 1/2 tasse de chapelure
+- 1 gousse d’ail, émincée
+- 1 c. à thé de gingembre frais râpé
+- 1/2 c. à thé de sauce soya (dans les boulettes)
+- 2 oignons verts, tranchés
+- 1/2 tasse de sauce soya (pour la sauce)
+- 1/2 tasse de cassonade (pour la sauce)
+- 2 c. à thé de gingembre frais râpé (pour la sauce)
+- 2 gousses d’ail, émincées (pour la sauce)
+- 1 tasse d’eau
+- 2 c. à soupe de fécule de maïs
+- 1 tasse de riz jasmin cru (≈2 tasses cuit)
+- 2 lb (≈900 g) de brocoli surgelé
+- Graines de sésame (pour garnir)
+- Oignons verts tranchés (pour garnir)
+
+instructions:
+1. Préchauffer le four à 400°F (205°C). :contentReference[oaicite:0]{index=0}
+2. Dans un grand bol, mélanger le porc haché, l’œuf, la chapelure, l’ail émincé, le gingembre râpé, la sauce soya et les oignons verts tranchés jusqu’à ce que tout soit bien incorporé.
+3. Façonner la préparation en ~16 boulettes de la taille d’une balle de ping-pong et les déposer sur une plaque de cuisson tapissée de papier parchemin. 
+4. Cuire les boulettes au four environ 20 minutes, ou jusqu’à ce qu’elles soient dorées et bien cuites (température interne ≥ 160°F).
+5. Pendant ce temps, cuire le riz jasmin : ajouter le riz et l’eau dans une casserole, porter à ébullition, réduire le feu à doux, couvrir et laisser mijoter 15 minutes, puis retirer du feu et laisser reposer 5 minutes.
+6. Préparer la sauce teriyaki : dans une casserole moyenne, combiner la sauce soya, la cassonade, le gingembre, l’ail, l’eau et la fécule de maïs. Remuer pour dissoudre la fécule. 
+7. Placer sur feu moyen et remuer jusqu’à ce que la sauce épaississe et devienne brillante, environ quelques minutes.
+8. Cuire le brocoli surgelé selon les instructions du paquet (micro-ondes ou vapeur). 
+9. Ajouter les boulettes cuites dans la sauce teriyaki et remuer pour bien les enrober. 
+10. Répartir le riz et le brocoli dans 4 bols, ajouter 4 boulettes dans chaque bol, puis napper de sauce. 
+11. Garnir de graines de sésame et d’oignons verts supplémentaires avant de servir. 
+
+notes:
+- Les composants (boulettes, riz, brocoli) se congèlent bien; réchauffe avant d’ajouter la sauce. 
+- Original recipe URL: https://www.budgetbytes.com/teriyaki-meatball-bowls/ 
