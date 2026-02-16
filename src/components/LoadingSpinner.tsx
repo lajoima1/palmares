@@ -24,12 +24,17 @@ const SpinnerContainer = styled(Box)(({ theme }) => ({
   animation: `${spin} 1.5s linear infinite`,
   position: "relative",
   "&::after": {
-    content: '"🍽️"',
+    content: '""',
     position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    fontSize: "24px",
+    width: "40px",
+    height: "40px",
+    backgroundImage: `url('${import.meta.env.BASE_URL || "/"}squared-garlic-64x64.webp')`,
+    backgroundSize: "contain",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
   },
 }));
 
