@@ -24,7 +24,7 @@ export function parseSimpleMarkdown(text: string): React.ReactNode {
     // Map heading levels to font sizes (not semantic headings, just styled text)
     // Level 1 = same as h6 (1.25rem), then decreasing
     const fontSizeMap: Record<number, string> = {
-      1: "1.25rem",   // Same as h6
+      1: "1.25rem", // Same as h6
       2: "1.1rem",
       3: "1rem",
       4: "0.95rem",
