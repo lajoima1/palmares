@@ -8,15 +8,15 @@ difficulty: Easy
 tags: dessert, made by mom, hosting, christmas
 
 ingredients:
-- Pour le gâteau:
+- ## Pour le gâteau:
 - 1 1/2 tasse de farine tamisée
 - 1 c. à thé de poudre à pâte
 - 1/4 tasse de beurre
 - 2/3 tasse de sucre
 - 1 œuf
-- 1 c. à thé d’extrait de vanille
+- 1 c. à thé d'extrait de vanille
 - 1/2 tasse de lait
-- Pour la sauce: 
+- ## Pour la sauce: 
 - 1 tasse de sirop d’érable
 - 1 tasse de cassonade
 - 1 tasse d’eau bouillante

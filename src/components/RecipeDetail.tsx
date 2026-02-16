@@ -21,6 +21,7 @@ import Restaurant from "@mui/icons-material/Restaurant";
 import LocalOffer from "@mui/icons-material/LocalOffer";
 import MenuBook from "@mui/icons-material/MenuBook";
 import { type Recipe } from "../types/Recipe";
+import { parseSimpleMarkdown } from "../utils/simpleMarkdown";
 
 interface RecipeDetailProps {
   recipe: Recipe | null;
@@ -264,7 +265,7 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
               {recipe.ingredients.map((ingredient, index) => (
                 <ListItem key={index} sx={{ pl: 0 }}>
                   <ListItemText
-                    primary={ingredient}
+                    primary={parseSimpleMarkdown(ingredient)}
                     primaryTypographyProps={{ variant: contentFontSize }}
                   />
                 </ListItem>
@@ -297,7 +298,7 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
                     {index + 1}
                   </Box>
                   <ListItemText
-                    primary={instruction}
+                    primary={parseSimpleMarkdown(instruction)}
                     primaryTypographyProps={{ variant: contentFontSize }}
                   />
                 </ListItem>
@@ -315,7 +316,7 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
               {recipe.notes.map((note, index) => (
                 <ListItem key={index} sx={{ pl: 0 }}>
                   <ListItemText
-                    primary={note}
+                    primary={parseSimpleMarkdown(note)}
                     primaryTypographyProps={{
                       variant: contentFontSize,
                       color: "text.secondary",
