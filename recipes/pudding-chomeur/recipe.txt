@@ -1,6 +1,6 @@
 name: Pouding chômeur
 description: Dessert composé d’un gâteau moelleux nappé d’une sauce à l’érable et à la cassonade qui s’infiltre pendant la cuisson.
-servings: 9 portions
+servings: 9-12 portions
 prep_time: 15 minutes
 cook_time: 45 minutes
 total_time: 1 hour
