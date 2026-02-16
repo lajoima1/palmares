@@ -1,0 +1,42 @@
+name: Pouding chômeur
+description: Dessert composé d’un gâteau moelleux nappé d’une sauce à l’érable et à la cassonade qui s’infiltre pendant la cuisson.
+servings: 9 portions
+prep_time: 15 minutes
+cook_time: 45 minutes
+total_time: 1 hour
+difficulty: Easy
+tags: dessert, made by mom, hosting, christmas
+
+ingredients:
+- Pour le gâteau:
+- 1 1/2 tasse de farine tamisée
+- 1 c. à thé de poudre à pâte
+- 1/4 tasse de beurre
+- 2/3 tasse de sucre
+- 1 œuf
+- 1 c. à thé d’extrait de vanille
+- 1/2 tasse de lait
+- Pour la sauce: 
+- 1 tasse de sirop d’érable
+- 1 tasse de cassonade
+- 1 tasse d’eau bouillante
+- 1/4 tasse de beurre
+
+instructions:
+1. Préchauffer le four à 325°F.
+2. Mélanger la farine et la poudre à pâte dans un bol. Réserver.
+3. Dans un autre bol, battre le beurre en crème puis ajouter le sucre graduellement.
+4. Ajouter l’œuf et la vanille. Bien mélanger.
+5. Ajouter le lait en plusieurs fois en mélangeant vigoureusement jusqu’à consistance homogène.
+6. Incorporer les ingrédients secs aux ingrédients humides et mélanger jusqu’à texture lisse.
+7. Beurrer un plat en pyrex 8 x 8.
+8. Verser la pâte dans le plat.
+9. Dans un petit chaudron, mélanger le sirop d’érable, la cassonade, l’eau bouillante et le beurre.
+10. Porter à ébullition à feu moyen en remuant de temps en temps. Laisser mijoter 5 à 7 minutes, jusqu’à ce que la sauce épaississe légèrement mais reste bien coulante.
+11. Verser uniformément la sauce chaude sur la pâte.
+12. Cuire au four pendant 45 minutes.
+
+notes:
+- La sauce s’infiltre dans le gâteau pendant la cuisson.
+- Se congèle bien.
+- Servir chaud, idéalement avec crème ou glace à la vanille.
