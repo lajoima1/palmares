@@ -5,7 +5,7 @@ prep_time: 10 minutes
 cook_time: 20 minutes
 total_time: 30 minutes
 difficulty: Easy
-tags: pasta, fish, weeknight, main, made by mom
+tags: pasta, campbell, fish, weeknight, main, made by mom
 
 ingredients:
 - 225 g macaroni en spirales (non cuits)

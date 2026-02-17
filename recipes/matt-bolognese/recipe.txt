@@ -5,7 +5,7 @@ prep_time: 30 minutes
 cook_time: 2 h 30
 total_time: 3 heures
 difficulty: Medium
-tags: beef, main, pasta, hosting, meal prep
+tags: beef, main, pasta, hosting
 
 ingredients:
 - 1 lb de carottes (ou plus, selon ce que tu as sous la main)
