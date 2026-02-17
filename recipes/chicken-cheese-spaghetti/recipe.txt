@@ -1,0 +1,47 @@
+name: Chicken and cheese spaghetti
+description: Un gratin de spaghetti crémeux au poulet et fromage, parfait pour un souper familial ou pour préparer des restes pour plusieurs jours.
+servings: 6 portions
+prep_time: 15 minutes
+cook_time: 30 minutes
+total_time: 45 minutes
+difficulty: Easy
+tags: chicken, pasta, main, weeknight, large portion
+
+ingredients:
+- 340 g (12 oz) de spaghetti
+- 2 c. à soupe d’huile d’olive
+- 1 oignon moyen, haché
+- 4 gousses d’ail, émincées
+- 2 poitrines de poulet désossées et sans peau (~450 g)
+- 1/2 c. à thé de sel
+- 1/4 c. à thé de poivre
+- 1/2 c. à thé de paprika
+- 1/2 c. à thé d’origan séché
+- 1/2 c. à thé de poudre d’oignon
+- 2 c. à soupe de beurre
+- 2 c. à soupe de farine tout usage
+- 2 tasses de lait
+- 1 tasse de bouillon de poulet
+- 1 tasse de crème 35 %
+- 2 tasses de fromage cheddar râpé
+- 1 boîte (284 ml) de tomates en dés, égouttées
+- 2 oignons verts, tranchés (pour garnir, optionnel)
+
+instructions:
+1. Cuire les spaghetti selon les instructions de l’emballage jusqu’à al dente. Égoutter et réserver.
+2. Dans une grande poêle, chauffer l’huile d’olive à feu moyen. Ajouter l’oignon et l’ail, puis cuire jusqu’à ce que l’oignon soit tendre.
+3. Ajouter les poitrines de poulet, le sel, le poivre, le paprika, l’origan et la poudre d’oignon. Cuire jusqu’à ce que le poulet soit doré et bien cuit.
+4. Retirer le poulet de la poêle, l’effilocher avec deux fourchettes et réserver.
+5. Dans la même poêle, ajouter le beurre et laisser fondre. Incorporer la farine en remuant pour former un roux.
+6. Ajouter graduellement le lait, le bouillon de poulet et la crème en remuant continuellement jusqu’à ce que la sauce épaississe.
+7. Ajouter 1 tasse de fromage cheddar et remuer jusqu’à ce qu’il soit fondu.
+8. Incorporer les tomates en dés égouttées, le poulet effiloché et les pâtes cuites. Bien mélanger.
+9. Transférer le tout dans un plat allant au four légèrement graissé.
+10. Parsemer du reste du fromage cheddar sur le dessus.
+11. Cuire au four à 350°F (175°C) pendant 15 minutes, ou jusqu’à ce que le fromage soit bien fondu et bouillonnant.
+12. Garnir d’oignons verts tranchés avant de servir, si désiré.
+
+notes:
+- Tu peux ajouter du piment jalapeño pour une touche piquante.
+- Servir avec une salade verte pour un repas complet.
+- Original recipe URL: https://www.budgetbytes.com/chicken-spaghetti/

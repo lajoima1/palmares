@@ -1,0 +1,38 @@
+name: Chicken taco bowls
+description: Poulet effiloché cuit lentement avec salsa, haricots et maïs, servis sur du riz ou en fajitas.
+servings: 6 portions
+prep_time: 10 minutes
+cook_time: 8 hours
+total_time: 8 heures 10 minutes
+difficulty: Easy
+tags: chicken, slowcooker, weeknight, main, large portion
+
+ingredients:
+- 1 1/2 lb (≈680 g) de poitrines de poulet (3 poitrines)
+- 1 tasse de salsa (≈16 oz/450 g) (1 boîte)
+- 1 boîte (15 oz/425 g) de haricots noirs, égouttés
+- 1/2 lb (≈225 g) de maïs surgelé
+- 2 gousses d’ail, émincées
+- 1 c. à soupe de chili en poudre
+- 1/2 c. à soupe de cumin moulu
+- 1/2 c. à thé d’origan séché
+- 1/4 c. à thé de poivre de cayenne
+- Poivre noir fraîchement moulu
+- 1/4 tasse (60 ml) d’eau
+- 6 tasses de riz cuit (environ 2 tasses de riz cru)
+- 225 g (8 oz) de cheddar râpé
+- 3 oignons verts, tranchés
+
+instructions:
+1. Placer les poitrines de poulet au fond d’une mijoteuse de 5 qt ou plus.
+2. Ajouter la salsa, les haricots noirs égouttés, le maïs, l’eau, l’ail, le chili en poudre, le cumin, l’origan, le poivre de cayenne et le poivre noir. Bien mélanger pour répartir les épices. 
+3. Couvrir et cuire sur **low pendant 8 heures** ou **high pendant 4 heures**.
+4. Pendant que le poulet cuit, préparer le riz selon les indications du paquet pour obtenir environ 6 tasses de riz cuit.
+5. Une fois la cuisson terminée, retirer le couvercle et utiliser deux fourchettes pour effilocher le poulet directement dans la mijoteuse. Goûter et ajouter du sel si nécessaire.
+6. Pour assembler les bols, mettre environ 1 tasse de riz au fond de chaque bol, puis 1 tasse de mélange de poulet effiloché. 
+7. Garnir chaque bol de cheddar râpé et d’oignons verts tranchés avant de servir. 
+
+notes:
+- Tu peux aussi servir ce mélange dans des tortillas pour faire des tacos. 
+- Les restes se conservent bien au réfrigérateur jusqu’à 4 jours, ou congelés pour plus tard. 
+- Original recipe URL: https://www.budgetbytes.com/taco-chicken-bowls/  
