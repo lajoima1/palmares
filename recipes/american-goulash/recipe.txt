@@ -1,0 +1,43 @@
+name: American goulash
+description: Un mélange savoureux de bœuf haché, de légumes et de pâtes cuites dans une sauce tomate riche et parfumée au vin.
+servings: 6-8 portions
+prep_time: 15 minutes
+cook_time: 1 heure
+total_time: 1 heure 15 minutes
+difficulty: Easy
+tags: beef, pasta, weeknight, main
+
+ingredients:
+- 1 c. à soupe d’huile d’olive
+- 1 oignon jaune, haché
+- 4 gousses d’ail, émincées
+- 2 poivrons, coupés en dés
+- 1 lb (≈450 g) de bœuf haché
+- 1/2 tasse de vin rouge (ou bouillon de bœuf)
+- 1 boîte (≈793 g / 28 oz) de tomates en dés (avec jus)
+- 1 boîte (≈425 g / 15 oz) de sauce tomate
+- 2 c. à soupe de sauce soya
+- 2 feuilles de laurier (facultatif)
+- 1/2 c. à thé d’origan séché
+- 1/2 c. à thé de basilic séché
+- 1/4 c. à thé de flocons de piment rouge (facultatif)
+- 1/2 tasse d’eau
+- 2 tasses de macaroni (≈225 g / 1/2 lb)
+- Sel, au goût
+
+instructions:
+1. Chauffer l’huile d’olive dans une grande marmite à feu moyen.
+2. Ajouter l’oignon et l’ail émincés. Faire revenir jusqu’à ce que l’oignon devienne translucide.
+3. Ajouter les poivrons et poursuivre la cuisson 2 minutes supplémentaires.
+4. Ajouter le bœuf haché et cuire en émiettant jusqu’à ce qu’il soit bien doré.
+5. Verser le vin rouge et remuer en raclant le fond de la marmite pour décoller les sucs.
+6. Ajouter les tomates en dés (avec leur jus), la sauce tomate, la sauce soya, les feuilles de laurier, l’origan, le basilic, les flocons de piment et l’eau. Bien mélanger.
+7. Porter le mélange à ébullition, puis réduire à feu doux. Couvrir et laisser mijoter 30 minutes.
+8. Ajouter les pâtes macaroni dans la marmite et remuer pour bien les incorporer.
+9. Poursuivre la cuisson à feu doux, avec le couvercle, pendant 10 à 12 minutes ou jusqu’à ce que les pâtes soient tendres, en remuant de temps en temps.
+10. Goûter et ajouter du sel au besoin. Retirer les feuilles de laurier avant de servir.
+
+notes:
+- Le vin rouge peut être remplacé par du bouillon de bœuf si désiré.
+- Tu peux ajouter du fromage râpé au service pour une touche crémeuse.
+- Original recipe URL: https://www.budgetbytes.com/goulash/  
