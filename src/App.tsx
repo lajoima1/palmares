@@ -284,7 +284,7 @@ function App() {
       {/* Hero Section */}
       <Box
         sx={{
-          maxWidth: contentWidth === "wide" ? "1400px" : "900px",
+          maxWidth: contentWidth === "wide" ? "1340px" : "900px",
           margin: "auto",
           transition: "max-width 0.3s ease",
         }}

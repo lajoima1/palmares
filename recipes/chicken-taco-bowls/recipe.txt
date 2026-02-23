@@ -1,6 +1,6 @@
 name: Chicken taco bowls
 description: Poulet effiloché cuit lentement avec salsa, haricots et maïs, servis sur du riz ou en fajitas.
-servings: 6 portions
+servings: 8-10 portions
 prep_time: 10 minutes
 cook_time: 8 hours
 total_time: 8 heures 10 minutes
