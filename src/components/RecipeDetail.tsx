@@ -97,7 +97,7 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({
           alignItems: "center",
         }}
       >
-        <Typography variant="h5" component="h1">
+        <Typography variant="h5" component="span">
           {recipe.name}
         </Typography>
         <IconButton onClick={onClose}>
