@@ -1,0 +1,33 @@
+name: Keto chili
+description: Un chili riche et copieux sans haricots, fait avec du bœuf haché, poivrons, tomates et épices, idéal pour un repas réconfortant faible en glucides.
+servings: 6 portions
+prep_time: 10 minutes
+cook_time: 1 hour
+total_time: 1 heure 10 minutes
+difficulty: Easy
+tags: beef, main, weeknight, gd-friendly
+
+ingredients:
+- 1 ½ lb (≈680 g) de bœuf haché
+- 1 oignon jaune, haché
+- 1 poivron vert, coupé en dés
+- 1 jalapeño, émincé
+- 1 gousse d’ail, hachée
+- ¼ tasse de pâte de tomate
+- 1 boîte (≈425 g / 15 oz) de tomates en dés
+- 2 tasses de bouillon de bœuf
+- 2 c. à soupe de chili en poudre
+- 1 c. à thé de cumin
+- 1 c. à thé de sel
+
+instructions:
+1. Dans une grande marmite, ajouter le bœuf haché, l’oignon et le poivron. Cuire à feu moyen jusqu’à ce que le bœuf soit bien doré et les légumes ramollis, en émiettant la viande pendant la cuisson.
+2. Ajouter le jalapeño et l’ail, puis cuire une minute de plus.
+3. Incorporer la pâte de tomate, les tomates en dés, le bouillon de bœuf, le chili en poudre, le cumin et le sel. Bien mélanger.
+4. Porter à ébullition, puis réduire à feu doux. Laisser mijoter au moins 20 minutes, de préférence jusqu’à 1 heure pour développer les saveurs, en remuant de temps en temps.
+5. Servir chaud, garni de cheddar râpé ou de crème sûre si désiré.
+
+notes:
+- Plus le chili mijote longtemps, plus les saveurs sont profondes.
+- Ajouter un peu de bouillon supplémentaire si le liquide réduit trop pendant la cuisson.
+- Original recipe URL: https://thatlowcarblife.com/keto-chili/

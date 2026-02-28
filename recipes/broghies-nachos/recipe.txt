@@ -1,0 +1,21 @@
+name: Broghies nachos
+description: Low carb and gd-friendly snack to satisfy a pizza or nacho craving.
+servings: 8-10 broghies
+prep_time: 5 minutes
+cook_time: 10 minutes
+total_time: 15 minutes
+difficulty: Easy
+tags: snack, gd-friendly
+
+ingredients:
+- Broghies
+- Salsa or tomato sauce (low sugar)
+- Shredded cheese
+
+instructions:
+1. Add thin layer of sauce to broghies.
+2. Spread some cheese on top.
+3. Cook in mini-oven at 400 until cheese is melted.
+
+notes:
+- Fantastic snack for gestational diabetes.
