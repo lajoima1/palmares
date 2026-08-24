@@ -1,0 +1,38 @@
+name: Stuffed Pepper Skillet
+description: A skillet version of classic stuffed peppers with savory Italian sausage, tender rice, tomatoes, and melty Colby Jack cheese, all in one pan.
+servings: 6 servings (≈1 ½ cups each)
+prep_time: 20 minutes
+cook_time: 20 minutes
+total_time: 40 minutes
+difficulty: Easy
+tags: pork, rice, main, weeknight
+
+ingredients:
+- 1 lb (≈450 g) ground Italian sausage
+- 1 medium onion, diced (≈1 cup)
+- 3 bell peppers, diced
+- 3 garlic cloves, minced
+- 1 cup long grain rice, uncooked
+- 1 tsp Italian seasoning
+- ½ tsp smoked paprika
+- 2 cups beef broth
+- 1 can (≈411 g / 14.5 oz) diced tomatoes (with juices)
+- 1 can (≈227 g / 8 oz) tomato sauce
+- 1 cup shredded Colby Jack cheese
+- 1 Tbsp fresh parsley, chopped
+
+instructions:
+1. Brown the Italian sausage in a large deep skillet over medium heat for 5-6 minutes, breaking it apart as it cooks. Drain excess fat if needed.
+2. Add the onion, bell peppers, and garlic. Cook 4-5 minutes until softened.
+3. Stir in the rice, Italian seasoning, and smoked paprika. Cook 1 minute to lightly toast the rice.
+4. Add the beef broth, diced tomatoes with their juices, and tomato sauce. Scrape the pan bottom to release the browned bits.
+5. Bring to a boil, then reduce heat to low. Cover and simmer 18-20 minutes, until the rice is tender and the liquid is mostly absorbed.
+6. Remove from heat, sprinkle the cheese on top, and cover 2-3 minutes to melt.
+7. Garnish with parsley and serve hot.
+
+notes:
+- Sweet, mild, or hot Italian sausage all work well.
+- To substitute ground beef, chicken, turkey, or pork, increase the Italian seasoning to 2 tsp and season with salt and pepper.
+- Use long grain white rice for proper liquid absorption, and keep the lid on during simmering so the rice cooks via steam.
+- Leftovers keep in the fridge for 3 days and freeze up to 1 month.
+- Original recipe URL: https://www.budgetbytes.com/stuffed-pepper-skillet/

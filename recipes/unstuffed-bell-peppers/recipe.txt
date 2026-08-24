@@ -1,0 +1,43 @@
+name: Unstuffed Bell Peppers
+description: All the ingredients and flavor of stuffed bell peppers cooked in one skillet for an easy, free-form bowl meal.
+servings: 6 servings (≈1 ⅓ cups each)
+prep_time: 15 minutes
+cook_time: 45 minutes
+total_time: 1 hour
+difficulty: Easy
+tags: beef, rice, main, weeknight
+
+ingredients:
+- 1 garlic clove
+- 1 yellow onion
+- 2 bell peppers
+- 1 Tbsp olive oil
+- ½ lb (≈225 g) ground beef
+- 1 can (≈425 g / 15 oz) diced tomatoes
+- 1 cup long grain white rice, uncooked
+- 1 tsp dried basil
+- 1 tsp dried oregano
+- ¼ tsp freshly cracked black pepper
+- 1 ½ cups beef broth
+- 1 can (≈227 g / 8 oz) tomato sauce
+- 1 tsp Worcestershire sauce
+- 1 cup shredded mozzarella
+- 1 Tbsp chopped parsley (optional garnish)
+
+instructions:
+1. Mince the garlic; dice the onion and bell peppers.
+2. Add the olive oil and ground beef to a large deep skillet over medium heat and brown completely.
+3. Add the diced vegetables, garlic, basil, oregano, and pepper. Stir until the onion softens.
+4. Add the diced tomatoes with their juices, uncooked rice, and beef broth. Stir briefly.
+5. Cover the skillet and increase heat to medium-high until the broth boils. Reduce to low and simmer 15 minutes.
+6. Turn off the heat and let rest, covered, for 5 minutes.
+7. Meanwhile, combine the tomato sauce with the Worcestershire sauce.
+8. Remove the lid and fluff the rice with a fork, gently folding the ingredients together.
+9. Pour the tomato sauce mixture over the rice and sprinkle with mozzarella.
+10. Cover and let the residual heat melt the cheese. Garnish with parsley and serve.
+
+notes:
+- Do not substitute cauliflower rice (it releases too much liquid).
+- Freezes well; store in individual portions up to 3 months.
+- Use heavy, thick cookware for even cooking.
+- Original recipe URL: https://www.budgetbytes.com/unstuffed-bell-peppers/
