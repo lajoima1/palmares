@@ -29,3 +29,6 @@ dist-ssr
 # Generated recipe assets (auto-generated during build)
 public/recipes.db
 public/recipes/*.webp
+
+# Playwright MCP browser snapshots and logs
+.playwright-mcp

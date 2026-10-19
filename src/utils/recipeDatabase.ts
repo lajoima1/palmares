@@ -25,6 +25,9 @@
  */
 
 import initSqlJs, { type Database } from "sql.js";
+// The WASM binary must come from the same sql.js version as the JS glue.
+// A version mismatch fails with "LinkError: WebAssembly.instantiate()".
+import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 
 let sqlJs: any = null;
 
@@ -34,7 +37,7 @@ let sqlJs: any = null;
 async function initSql() {
   if (!sqlJs) {
     sqlJs = await initSqlJs({
-      locateFile: (file) => `https://sql.js.org/dist/${file}`,
+      locateFile: () => sqlWasmUrl,
     });
   }
   return sqlJs;
