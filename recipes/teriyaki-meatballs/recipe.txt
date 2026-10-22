@@ -27,7 +27,7 @@ ingredients:
 - Oignons verts tranchés (pour garnir)
 
 instructions:
-1. Préchauffer le four à 400°F (205°C). :contentReference[oaicite:0]{index=0}
+1. Préchauffer le four à 400°F (205°C).
 2. Dans un grand bol, mélanger le porc haché, l’œuf, la chapelure, l’ail émincé, le gingembre râpé, la sauce soya et les oignons verts tranchés jusqu’à ce que tout soit bien incorporé.
 3. Façonner la préparation en ~16 boulettes de la taille d’une balle de ping-pong et les déposer sur une plaque de cuisson tapissée de papier parchemin. 
 4. Cuire les boulettes au four environ 20 minutes, ou jusqu’à ce qu’elles soient dorées et bien cuites (température interne ≥ 160°F).
