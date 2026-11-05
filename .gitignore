@@ -36,3 +36,6 @@ public/recipes/*.webp
 # Local Claude Code setup (not published)
 .claude/
 CLAUDE.md
+docs/workflow.md
+docs/templates/
+work/
