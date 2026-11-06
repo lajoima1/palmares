@@ -3,5 +3,15 @@
   "name": "palmares",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-11-05",
-  "assets": { "directory": "./dist/" }
+  "assets": { "directory": "./dist/" },
+  // Passkeys and users. The namespace "palmares-auth" was made in the dashboard. The ID is not a secret.
+  "kv_namespaces": [{ "binding": "AUTH", "id": "5d928eebc159415fa220962f37301add" }],
+  // .dev.vars overrides these in a local run. The secrets GITHUB_TOKEN, SESSION_SECRET and
+  // SETUP_CODE are Worker secrets in the dashboard, never in this file.
+  "vars": {
+    "ORIGIN": "https://palmares.lajoie.workers.dev",
+    "RP_ID": "palmares.lajoie.workers.dev",
+    "GITHUB_REPO": "lajoima1/palmares",
+    "GITHUB_BRANCH": "main"
+  }
 }

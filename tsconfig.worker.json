@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["worker"]
+  "include": ["worker", "src/utils/recipeText.ts"]
 }

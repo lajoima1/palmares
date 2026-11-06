@@ -1,0 +1,73 @@
+import type { Env } from "./env.ts";
+import { checkOrigin, error, HttpError, json } from "./http.ts";
+import { clearSession, readSession, type Session } from "./session.ts";
+
+export interface Context {
+  request: Request;
+  env: Env;
+  params: string[];
+  session: Session | null;
+}
+
+interface Route {
+  method: string;
+  path: RegExp;
+  // true: a request with no valid session gets 401 before the handler runs.
+  session: boolean;
+  handle: (ctx: Context) => Response | Promise<Response>;
+}
+
+export const SETUP_DONE_KEY = "setup:done";
+
+export const routes: Route[] = [
+  {
+    method: "GET",
+    path: /^\/api\/session$/,
+    session: false,
+    handle: async ({ env, session }) =>
+      json({
+        signedIn: session !== null,
+        setupOpen: (await env.AUTH.get(SETUP_DONE_KEY)) === null,
+        ...(session && env.TOKEN_EXPIRES ? { tokenExpires: env.TOKEN_EXPIRES } : {}),
+      }),
+  },
+  {
+    method: "POST",
+    path: /^\/api\/logout$/,
+    session: false,
+    handle: () => {
+      const res = json({ signedIn: false });
+      for (const c of clearSession()) res.headers.append("Set-Cookie", c);
+      return res;
+    },
+  },
+];
+
+export function health(request: Request, env: Env): Response {
+  // Uptime monitors often probe with HEAD. The runtime drops the body for HEAD.
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response("Method not allowed", { status: 405, headers: { Allow: "GET, HEAD" } });
+  }
+  return Response.json(env.COMMIT ? { status: "ok", commit: env.COMMIT } : { status: "ok" });
+}
+
+export async function handleApi(request: Request, env: Env): Promise<Response> {
+  const { pathname } = new URL(request.url);
+  const matches = routes.filter((r) => r.path.test(pathname));
+  if (matches.length === 0) return error(404, "Not found.");
+  const route = matches.find((r) => r.method === request.method);
+  if (!route) return error(405, "Method not allowed.");
+
+  try {
+    checkOrigin(request, env);
+    const session = await readSession(request, env);
+    if (route.session && !session) return error(401, "Sign in first.");
+    const params = pathname.match(route.path)!.slice(1).map(decodeURIComponent);
+    return await route.handle({ request, env, params, session });
+  } catch (e) {
+    if (e instanceof HttpError) return error(e.status, e.message);
+    if (e instanceof URIError) return error(400, "The address is not valid.");
+    console.error(e);
+    return error(500, "Something went wrong. Try again.");
+  }
+}
