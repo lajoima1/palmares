@@ -12,6 +12,9 @@
     "ORIGIN": "https://palmares.lajoie.workers.dev",
     "RP_ID": "palmares.lajoie.workers.dev",
     "GITHUB_REPO": "lajoima1/palmares",
-    "GITHUB_BRANCH": "main"
+    "GITHUB_BRANCH": "main",
+    // The end date of GITHUB_TOKEN, like "2027-11-06". The admin page warns 30 days before it.
+    // Empty: the token has no end date, and the page shows no warning.
+    "TOKEN_EXPIRES": ""
   }
 }
