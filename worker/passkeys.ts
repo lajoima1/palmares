@@ -128,8 +128,13 @@ async function storePasskey(
 }
 
 const EXPIRED = "The passkey prompt expired. Try again.";
+// `openssl rand -base64 32` gives 44 characters. A missing secret hashes like "", so it must not pass.
+const MIN_SETUP_CODE = 16;
 
 export async function setupOptions({ request, env }: Context): Promise<Response> {
+  if ((env.SETUP_CODE ?? "").length < MIN_SETUP_CODE) {
+    throw new HttpError(503, "The setup code is not set on the server.");
+  }
   const { code } = await readJson<{ code?: unknown }>(request, MAX_BODY);
   if (typeof code !== "string" || !(await sameSecret(code, env.SETUP_CODE))) {
     throw new HttpError(403, "The setup code is wrong.");

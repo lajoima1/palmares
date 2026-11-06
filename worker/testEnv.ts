@@ -37,7 +37,7 @@ export function testEnv(overrides: Partial<Env> = {}): Env & { AUTH: FakeKV } {
     AUTH: new FakeKV(),
     GITHUB_TOKEN: "test-token",
     SESSION_SECRET: "test-secret-that-is-long-enough-1234567890",
-    SETUP_CODE: "open-sesame",
+    SETUP_CODE: "open-sesame-setup-code",
     ORIGIN,
     RP_ID: "palmares.example",
     GITHUB_REPO: "owner/repo",

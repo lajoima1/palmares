@@ -39,6 +39,13 @@ describe("first setup", () => {
     expect((await post(env, "/api/setup/options", {})).status).toBe(403);
   });
 
+  it("stays closed when the setup code secret is missing or short", async () => {
+    const missing = testEnv({ SETUP_CODE: undefined });
+    expect((await post(missing, "/api/setup/options", { code: "" })).status).toBe(503);
+    const short = testEnv({ SETUP_CODE: "1234" });
+    expect((await post(short, "/api/setup/options", { code: "1234" })).status).toBe(503);
+  });
+
   it("gives options that need a discoverable passkey and user verification", async () => {
     const env = testEnv();
     const res = await post(env, "/api/setup/options", { code: env.SETUP_CODE });

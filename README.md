@@ -104,8 +104,8 @@ page shows a "Manage recipes" link.
 1. **Make a GitHub token.** GitHub → Settings → Developer settings → Fine-grained tokens:
    - repository access: only `lajoima1/palmares`;
    - permissions: Contents, read and write, and nothing else;
-   - expiration: 1 year. Write the end date in `TOKEN_EXPIRES` in `wrangler.jsonc`, as
-     `YYYY-MM-DD`. The admin page warns 30 days before that date.
+   - expiration: if the token has an end date, write it in `TOKEN_EXPIRES` in `wrangler.jsonc`,
+     as `YYYY-MM-DD`. The admin page warns 30 days before that date.
 2. **Make the KV namespace** `palmares-auth` (Cloudflare → Storage & databases → Workers KV). Its
    ID goes in `wrangler.jsonc` under `kv_namespaces`, with the binding `AUTH`.
 3. **Add three Worker secrets** (Cloudflare → the `palmares` Worker → Settings → Variables and
@@ -120,7 +120,7 @@ If no passkey is left, delete all keys in `palmares-auth`, `setup:done` too. The
 opens the registration again.
 
 When the token ends, make a new one, replace the `GITHUB_TOKEN` secret, and change
-`TOKEN_EXPIRES`.
+`TOKEN_EXPIRES`. Until the `SETUP_CODE` secret exists, the setup answers 503.
 
 ### Local work
 
