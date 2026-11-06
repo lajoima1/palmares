@@ -8,7 +8,7 @@ A beautiful, static website to showcase and organize your household's favorite r
 - 🏷️ **Smart Tagging**: Tag recipes for easy categorization and searching
 - 🔍 **Advanced Search**: Search by name, ingredients, description, tags, and difficulty level
 - 📱 **Responsive Design**: Beautiful Material-UI interface that works on all devices
-- 🚀 **GitHub Pages Ready**: Automatically deploys to GitHub Pages with GitHub Actions
+- 🚀 **Two Sites, One Push**: Each push to `main` deploys to Cloudflare Workers and to GitHub Pages
 - 📂 **File-Based**: Simple text file format for easy recipe management
 
 ## Recipe Format
@@ -58,26 +58,27 @@ notes: Optional additional notes
 3. Add your recipe folder name to `public/recipes/index.json`
 4. Optionally add an image file or update the image placeholder
 
-### Deployment to GitHub Pages
+### Deployment
 
-The site automatically deploys to GitHub Pages when you push to the main branch.
+One push to `main` deploys the same commit to two sites:
 
-#### Manual Deployment
+- `https://palmares.lajoie.workers.dev/`: Cloudflare Workers Builds builds and deploys it.
+- `https://lajoima1.github.io/palmares/`: the GitHub Actions workflow in
+  `.github/workflows/deploy.yml` builds and deploys it.
 
-You can also deploy manually:
+The Cloudflare build sets `WORKERS_CI`, so `vite.config.ts` serves the app from `/`. The GitHub
+Pages build serves it from `/palmares/`.
+
+`/api/health` on the Cloudflare site returns `{"status":"ok","commit":"<sha>"}`. Use it to see which
+commit is live.
+
+To test the Worker on your computer:
 
 ```bash
-npm run build
-npm run deploy
+WORKERS_CI=1 npm run build && npx wrangler dev
 ```
 
-#### GitHub Pages Setup
-
-1. Go to your repository settings
-2. Navigate to Pages section
-3. Set source to "Deploy from a branch"
-4. Select the `gh-pages` branch
-5. Your site will be available at `https://yourusername.github.io/palmares/`
+Then open http://localhost:8787.
 
 ## Project Structure
 
