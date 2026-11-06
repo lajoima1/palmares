@@ -15,6 +15,7 @@ import {
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import OpenInFull from "@mui/icons-material/OpenInFull";
 import CloseFullscreen from "@mui/icons-material/CloseFullscreen";
+import EditNote from "@mui/icons-material/EditNote";
 import { type Recipe } from "./types/Recipe";
 import { loadAllRecipesFromDb } from "./utils/recipeDatabase";
 import { RecipeCard } from "./components/RecipeCard";
@@ -53,6 +54,8 @@ function App() {
     // Default to Parchment theme
     return colorThemes.find((t) => t.name === "Parchment") || colorThemes[0];
   });
+  // The admin page sets this cookie at sign-in. Reading it makes no request.
+  const [isEditor] = useState(() => document.cookie.split("; ").includes("palmares_editor=1"));
   const [contentWidth, setContentWidth] = useState<"normal" | "wide">(() => {
     const saved = localStorage.getItem("content-width");
     return saved ? JSON.parse(saved) : "normal";
@@ -273,6 +276,17 @@ function App() {
               {contentWidth === "normal" ? <OpenInFull /> : <CloseFullscreen />}
             </IconButton>
           </Tooltip>
+          {isEditor && (
+            <Tooltip title="Manage recipes">
+              <IconButton
+                href={`${import.meta.env.BASE_URL}admin/`}
+                aria-label="Manage recipes"
+                sx={{ color: "white", mr: 1 }}
+              >
+                <EditNote />
+              </IconButton>
+            </Tooltip>
+          )}
           <ThemeToggle
             isDarkMode={isDarkMode}
             onToggleDarkMode={toggleDarkMode}

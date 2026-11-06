@@ -1,0 +1,6 @@
+# Cloudflare applies these to the static files of the admin page. GitHub Pages ignores this file.
+# 'wasm-unsafe-eval' lets the webp encoder run. 'unsafe-inline' styles are the styles of MUI.
+/admin/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'
+  X-Frame-Options: DENY
+  Referrer-Policy: same-origin
