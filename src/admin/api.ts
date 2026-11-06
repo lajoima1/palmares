@@ -4,6 +4,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
 } from "@simplewebauthn/browser";
+import type { RecipeFields } from "../utils/recipeText";
 
 export interface SessionInfo {
   signedIn: boolean;
@@ -17,6 +18,36 @@ export interface PasskeyInfo {
   createdAt: string;
   current: boolean;
 }
+
+export interface RecipeListItem {
+  slug: string;
+  name: string;
+  tags: string[];
+  hasImage: boolean;
+  notLive: boolean;
+}
+
+export interface RecipeList {
+  recipes: RecipeListItem[];
+  tags: string[];
+  tokenExpires?: string;
+}
+
+export interface RecipeDetail {
+  slug: string;
+  fields: RecipeFields;
+  baseOid: string;
+  hasImage: boolean;
+}
+
+export interface SaveResult {
+  slug: string;
+  commit: string;
+  changed?: boolean;
+}
+
+// A base64 webp to save, null to remove the photo, undefined to keep it.
+export type PhotoChange = string | null | undefined;
 
 export class ApiError extends Error {
   readonly status: number;
@@ -65,7 +96,19 @@ export const api = {
   addPasskeyVerify: (response: RegistrationResponseJSON, name: string) =>
     request<unknown>("POST", "/passkeys/verify", { response, name }),
   removePasskey: (id: string) => request<unknown>("DELETE", `/passkeys/${encodeURIComponent(id)}`, {}),
+  recipes: () => request<RecipeList>("GET", "/recipes"),
+  recipe: (slug: string) => request<RecipeDetail>("GET", `/recipes/${slug}`),
+  createRecipe: (fields: RecipeFields, image: PhotoChange) =>
+    request<SaveResult>("POST", "/recipes", { fields, image: image ?? undefined }),
+  updateRecipe: (slug: string, fields: RecipeFields, baseOid: string, image: PhotoChange) =>
+    request<SaveResult>("PUT", `/recipes/${slug}`, { fields, baseOid, image }),
+  deleteRecipe: (slug: string, baseOid: string) => request<SaveResult>("DELETE", `/recipes/${slug}`, { baseOid }),
 };
+
+// The site serves this photo once the recipe is live. Before that, only the Worker has it.
+export function photoUrl(recipe: { slug: string; notLive?: boolean }): string {
+  return recipe.notLive ? `/api/recipes/${recipe.slug}/image` : `${import.meta.env.BASE_URL}recipes/${recipe.slug}.webp`;
+}
 
 // A name the owner recognises in the passkey list, like "iPhone".
 export function deviceName(): string {

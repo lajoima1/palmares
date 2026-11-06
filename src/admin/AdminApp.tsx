@@ -9,18 +9,29 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Snackbar,
   ThemeProvider,
   Toolbar,
   Typography,
 } from "@mui/material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import MoreVert from "@mui/icons-material/MoreVert";
-import { api, whenSignedOut, type SessionInfo } from "./api";
+import { api, whenSignedOut, type RecipeList as RecipeListData, type SaveResult, type SessionInfo } from "./api";
 import { Passkeys } from "./Passkeys";
+import { RecipeForm, type SaveKind } from "./RecipeForm";
+import { RecipeList } from "./RecipeList";
 import { SignIn } from "./SignIn";
 import { useAdminTheme } from "./useAdminTheme";
+import { servedCommit, useLiveStatus, type LiveStatus } from "./useLiveStatus";
 
-type View = "passkeys";
+type View = "recipes" | "passkeys";
+
+const LIVE_TEXT: Record<Exclude<LiveStatus, "idle">, string> = {
+  building: "live in about 2 minutes",
+  live: "live on the site",
+  slow: "the site is still building. Check again later",
+  saved: "live after the next build",
+};
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -39,8 +50,15 @@ export default function AdminApp() {
   const { theme, isDarkMode } = useAdminTheme();
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [view, setView] = useState<View>("passkeys");
+  const [view, setView] = useState<View>("recipes");
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [list, setList] = useState<RecipeListData | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
+  // undefined: no form. null: a new recipe.
+  const [editing, setEditing] = useState<string | null | undefined>(undefined);
+  const [lastSave, setLastSave] = useState<{ kind: SaveKind; name: string } | null>(null);
+  const live = useLiveStatus();
+  const signedIn = session?.signedIn ?? false;
 
   const loadSession = useCallback(async () => {
     setLoadError(null);
@@ -51,10 +69,42 @@ export default function AdminApp() {
     }
   }, []);
 
+  const loadList = useCallback(async () => {
+    setListError(null);
+    try {
+      setList(await api.recipes());
+    } catch (e) {
+      setListError(e instanceof Error ? e.message : "The recipes could not load.");
+    }
+  }, []);
+
   useEffect(() => {
     whenSignedOut(() => setSession((s) => (s ? { ...s, signedIn: false } : s)));
     loadSession();
   }, [loadSession]);
+
+  useEffect(() => {
+    if (signedIn) loadList();
+  }, [signedIn, loadList]);
+
+  // The commit that the site serves before the save. A different one later means it is live.
+  const [before, setBefore] = useState<string | undefined>(undefined);
+  function openForm(slug: string | null) {
+    servedCommit().then(setBefore);
+    setEditing(slug);
+  }
+
+  function done(result: SaveResult, kind: SaveKind, name: string) {
+    setEditing(undefined);
+    if (result.changed === false) {
+      setLastSave(null);
+      live.reset();
+      return;
+    }
+    setLastSave({ kind, name });
+    live.follow(result.commit, before);
+    loadList();
+  }
 
   async function signOut() {
     setMenuAnchor(null);
@@ -100,6 +150,7 @@ export default function AdminApp() {
                 <MoreVert />
               </IconButton>
               <Menu anchorEl={menuAnchor} open={menuAnchor !== null} onClose={() => setMenuAnchor(null)}>
+                <MenuItem onClick={() => show("recipes")}>Recipes</MenuItem>
                 <MenuItem onClick={() => show("passkeys")}>Passkeys</MenuItem>
                 <MenuItem onClick={signOut}>Sign out</MenuItem>
               </Menu>
@@ -134,10 +185,26 @@ export default function AdminApp() {
                 {warning.text}
               </Alert>
             )}
+            {view === "recipes" && (
+              <RecipeList data={list} error={listError} onRetry={loadList} onOpen={openForm} onAdd={() => openForm(null)} />
+            )}
             {view === "passkeys" && <Passkeys />}
           </>
         )}
       </Box>
+      {editing !== undefined && signedIn && (
+        <RecipeForm slug={editing} tagOptions={list?.tags ?? []} onClose={() => setEditing(undefined)} onDone={done} />
+      )}
+      <Snackbar
+        open={lastSave !== null && live.status !== "idle"}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        onClose={(_, reason) => reason !== "clickaway" && live.status !== "building" && setLastSave(null)}
+        autoHideDuration={live.status === "building" ? null : 8000}
+      >
+        <Alert severity={live.status === "live" ? "success" : "info"} variant="filled" onClose={() => setLastSave(null)}>
+          “{lastSave?.name}” {lastSave?.kind}. {live.status !== "idle" && LIVE_TEXT[live.status]}.
+        </Alert>
+      </Snackbar>
     </ThemeProvider>
   );
 }
