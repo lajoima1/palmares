@@ -39,3 +39,6 @@ CLAUDE.md
 docs/workflow.md
 docs/templates/
 work/
+
+# Local state of wrangler dev
+.wrangler/
