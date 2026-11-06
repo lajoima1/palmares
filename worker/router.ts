@@ -1,5 +1,16 @@
 import type { Env } from "./env.ts";
 import { checkOrigin, error, HttpError, json } from "./http.ts";
+import {
+  addPasskeyOptions,
+  addPasskeyVerify,
+  listPasskeys,
+  loginOptions,
+  loginVerify,
+  removePasskey,
+  SETUP_DONE_KEY,
+  setupOptions,
+  setupVerify,
+} from "./passkeys.ts";
 import { clearSession, readSession, type Session } from "./session.ts";
 
 export interface Context {
@@ -16,8 +27,6 @@ interface Route {
   session: boolean;
   handle: (ctx: Context) => Response | Promise<Response>;
 }
-
-export const SETUP_DONE_KEY = "setup:done";
 
 export const routes: Route[] = [
   {
@@ -41,6 +50,14 @@ export const routes: Route[] = [
       return res;
     },
   },
+  { method: "POST", path: /^\/api\/setup\/options$/, session: false, handle: setupOptions },
+  { method: "POST", path: /^\/api\/setup\/verify$/, session: false, handle: setupVerify },
+  { method: "POST", path: /^\/api\/login\/options$/, session: false, handle: loginOptions },
+  { method: "POST", path: /^\/api\/login\/verify$/, session: false, handle: loginVerify },
+  { method: "GET", path: /^\/api\/passkeys$/, session: true, handle: listPasskeys },
+  { method: "POST", path: /^\/api\/passkeys\/options$/, session: true, handle: addPasskeyOptions },
+  { method: "POST", path: /^\/api\/passkeys\/verify$/, session: true, handle: addPasskeyVerify },
+  { method: "DELETE", path: /^\/api\/passkeys\/([^/]+)$/, session: true, handle: removePasskey },
 ];
 
 export function health(request: Request, env: Env): Response {

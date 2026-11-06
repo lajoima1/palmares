@@ -71,7 +71,7 @@ describe("challenge cookie", () => {
   it("gives the challenge back for the same purpose", async () => {
     const env = testEnv();
     const cookie = cookieHeader([await setChallenge(env, "abc", "setup")]);
-    expect(await takeChallenge(apiRequest("/api/x", { cookie }), env, "setup")).toBe("abc");
+    expect((await takeChallenge(apiRequest("/api/x", { cookie }), env, "setup"))?.challenge).toBe("abc");
   });
 
   it("refuses a challenge made for another purpose", async () => {
@@ -84,7 +84,7 @@ describe("challenge cookie", () => {
     const env = testEnv();
     const cookie = cookieHeader([await setChallenge(env, "abc", "add", "u1")]);
     expect(await takeChallenge(apiRequest("/api/x", { cookie }), env, "add", "u2")).toBeNull();
-    expect(await takeChallenge(apiRequest("/api/x", { cookie }), env, "add", "u1")).toBe("abc");
+    expect((await takeChallenge(apiRequest("/api/x", { cookie }), env, "add", "u1"))?.challenge).toBe("abc");
   });
 
   it("refuses a challenge after 5 minutes", async () => {

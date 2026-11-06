@@ -3,6 +3,7 @@ import type { Env } from "./env.ts";
 // A Map-based stand-in for Workers KV, with the calls that the Worker makes.
 export class FakeKV {
   readonly data = new Map<string, string>();
+  readonly metadata = new Map<string, unknown>();
 
   async get(key: string, type?: "text" | "json"): Promise<unknown> {
     const value = this.data.get(key);
@@ -10,16 +11,21 @@ export class FakeKV {
     return type === "json" ? JSON.parse(value) : value;
   }
 
-  async put(key: string, value: string): Promise<void> {
+  async put(key: string, value: string, options: { metadata?: unknown } = {}): Promise<void> {
     this.data.set(key, value);
+    this.metadata.set(key, options.metadata);
   }
 
   async delete(key: string): Promise<void> {
     this.data.delete(key);
+    this.metadata.delete(key);
   }
 
   async list({ prefix = "" }: { prefix?: string } = {}) {
-    const keys = [...this.data.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name }));
+    const keys = [...this.data.keys()]
+      .filter((k) => k.startsWith(prefix))
+      .sort()
+      .map((name) => ({ name, metadata: this.metadata.get(name) }));
     return { keys, list_complete: true, cacheStatus: null };
   }
 }

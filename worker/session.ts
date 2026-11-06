@@ -17,7 +17,7 @@ export interface Session {
 
 export type ChallengePurpose = "setup" | "login" | "add";
 
-interface Challenge {
+export interface Challenge {
   challenge: string;
   purpose: ChallengePurpose;
   userId?: string;
@@ -25,13 +25,13 @@ interface Challenge {
 
 const encoder = new TextEncoder();
 
-function toBase64Url(bytes: Uint8Array): string {
+export function toBase64Url(bytes: Uint8Array): string {
   let text = "";
   for (const b of bytes) text += String.fromCharCode(b);
   return btoa(text).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
+export function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
   const text = atob(value.replace(/-/g, "+").replace(/_/g, "/"));
   return Uint8Array.from(text, (c) => c.charCodeAt(0));
 }
@@ -110,16 +110,18 @@ export async function setChallenge(
 }
 
 // A challenge works only for the step that made it. Else the public sign-in options could
-// open the first setup, which needs the setup code.
+// open the first setup, which needs the setup code. With `userId`, the challenge must be for
+// that user.
 export async function takeChallenge(
   request: Request,
   env: Env,
   purpose: ChallengePurpose,
   userId?: string,
-): Promise<string | null> {
+): Promise<Challenge | null> {
   const payload = await unsign<Challenge>(env, readCookie(request, CHALLENGE_COOKIE));
-  if (!payload || payload.purpose !== purpose || payload.userId !== userId) return null;
-  return payload.challenge;
+  if (!payload || payload.purpose !== purpose) return null;
+  if (userId !== undefined && payload.userId !== userId) return null;
+  return payload;
 }
 
 export function clearChallenge(): string {
