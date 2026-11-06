@@ -93,8 +93,10 @@ describe("commitChanges", () => {
   });
 
   it("refuses a local run that targets main", async () => {
-    const env = testEnv({ ORIGIN: "http://localhost:8787", GITHUB_BRANCH: "main" });
-    await expect(commitChanges(env, "m", "x", add("x"))).rejects.toThrow(/must not write to main/);
+    for (const ORIGIN of ["http://localhost:8787", "http://127.0.0.1:8787", "http://localhost:5173"]) {
+      const env = testEnv({ ORIGIN, GITHUB_BRANCH: "main" });
+      await expect(commitChanges(env, "m", "x", add("x"))).rejects.toThrow(/must not write to main/);
+    }
     expect(gh.calls).toEqual([]);
   });
 

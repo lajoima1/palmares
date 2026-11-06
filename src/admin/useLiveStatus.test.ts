@@ -18,6 +18,11 @@ describe("liveState", () => {
     expect(liveState(C, B, A)).toBe("live");
   });
 
+  it("waits while the site serves an earlier save of this page", () => {
+    expect(liveState(C, B, A, [C])).toBe("building");
+    expect(liveState(B, B, A, [C])).toBe("live");
+  });
+
   it("only says saved when the site gives no commit SHA", () => {
     expect(liveState(undefined, B, A)).toBe("saved");
     expect(liveState("main", B, A)).toBe("saved");

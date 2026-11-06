@@ -19,6 +19,7 @@ import {
 import { emptyRecipe, linesToItems, oneLine, type RecipeFields } from "../utils/recipeText";
 import { api, ApiError, type PhotoChange, type SaveResult } from "./api";
 import { PhotoField } from "./PhotoField";
+import { servedCommit } from "./useLiveStatus";
 
 export type SaveKind = "added" | "saved" | "deleted";
 
@@ -27,7 +28,8 @@ interface RecipeFormProps {
   slug: string | null;
   tagOptions: string[];
   onClose: () => void;
-  onDone: (result: SaveResult, kind: SaveKind, name: string) => void;
+  // `before`: the commit that the site served just before the save.
+  onDone: (result: SaveResult, kind: SaveKind, name: string, before: string | undefined) => void;
 }
 
 const ONE_LINE_FIELDS = [
@@ -144,17 +146,19 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
     act(async () => {
       if (!form) return;
       const fields = collect(form);
+      const before = await servedCommit();
       const result = slug
         ? await api.updateRecipe(slug, fields, baseOid, image)
         : await api.createRecipe(fields, image);
-      onDone(result, slug ? "saved" : "added", fields.name);
+      onDone(result, slug ? "saved" : "added", fields.name, before);
     });
 
   const remove = () =>
     act(async () => {
       setConfirmDelete(false);
+      const before = await servedCommit();
       const result = await api.deleteRecipe(slug!, baseOid);
-      onDone(result, "deleted", form?.fields.name ?? slug!);
+      onDone(result, "deleted", form?.fields.name ?? slug!, before);
     });
 
   const name = form?.fields.name ?? "";

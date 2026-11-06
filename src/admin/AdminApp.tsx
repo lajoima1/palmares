@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   AppBar,
@@ -22,7 +22,7 @@ import { RecipeForm, type SaveKind } from "./RecipeForm";
 import { RecipeList } from "./RecipeList";
 import { SignIn } from "./SignIn";
 import { useAdminTheme } from "./useAdminTheme";
-import { servedCommit, useLiveStatus, type LiveStatus } from "./useLiveStatus";
+import { useLiveStatus, type LiveStatus } from "./useLiveStatus";
 
 type View = "recipes" | "passkeys";
 
@@ -87,14 +87,11 @@ export default function AdminApp() {
     if (signedIn) loadList();
   }, [signedIn, loadList]);
 
-  // The commit that the site serves before the save. A different one later means it is live.
-  const [before, setBefore] = useState<string | undefined>(undefined);
-  function openForm(slug: string | null) {
-    servedCommit().then(setBefore);
-    setEditing(slug);
-  }
+  // The commits that this page saved before. If the site serves one of them, the last save is
+  // not live yet.
+  const savedCommits = useRef<string[]>([]);
 
-  function done(result: SaveResult, kind: SaveKind, name: string) {
+  function done(result: SaveResult, kind: SaveKind, name: string, before: string | undefined) {
     setEditing(undefined);
     if (result.changed === false) {
       setLastSave(null);
@@ -102,7 +99,8 @@ export default function AdminApp() {
       return;
     }
     setLastSave({ kind, name });
-    live.follow(result.commit, before);
+    live.follow(result.commit, before, savedCommits.current);
+    savedCommits.current = [...savedCommits.current, result.commit];
     loadList();
   }
 
@@ -186,7 +184,7 @@ export default function AdminApp() {
               </Alert>
             )}
             {view === "recipes" && (
-              <RecipeList data={list} error={listError} onRetry={loadList} onOpen={openForm} onAdd={() => openForm(null)} />
+              <RecipeList data={list} error={listError} onRetry={loadList} onOpen={setEditing} onAdd={() => setEditing(null)} />
             )}
             {view === "passkeys" && <Passkeys />}
           </>

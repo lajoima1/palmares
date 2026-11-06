@@ -21,6 +21,6 @@ export function useAdminTheme() {
       "color-theme",
       colorThemes.find((t) => t.name === "Parchment") || colorThemes[0],
     );
-    return { theme: createAppTheme(isDarkMode ? "dark" : "light", colorTheme), isDarkMode, colorTheme };
+    return { theme: createAppTheme(isDarkMode ? "dark" : "light", colorTheme), isDarkMode };
   }, []);
 }

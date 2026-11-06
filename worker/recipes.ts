@@ -66,7 +66,7 @@ function recipeText(fields: RecipeFields): string {
 
 // "RIFF", 4 bytes of size, then "WEBP". The first 16 base64 characters hold those 12 bytes.
 function readImage64(value: unknown): string {
-  if (typeof value !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(value)) {
+  if (typeof value !== "string" || value.length < 16 || value.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(value)) {
     throw new HttpError(400, "The photo is not valid.");
   }
   if (value.length * 0.75 > MAX_IMAGE_BYTES) throw new HttpError(413, "The photo is too large.");
@@ -114,7 +114,6 @@ export async function listHandler({ env }: Context): Promise<Response> {
   return json({
     recipes: recipes.sort((a, b) => a.name.localeCompare(b.name)),
     tags,
-    ...(env.TOKEN_EXPIRES ? { tokenExpires: env.TOKEN_EXPIRES } : {}),
   });
 }
 

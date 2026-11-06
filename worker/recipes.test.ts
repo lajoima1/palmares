@@ -148,6 +148,10 @@ describe("adding", () => {
   it("refuses a photo that is not webp", async () => {
     expect((await call("POST", "/api/recipes", { fields: { name: "A" }, image: JPEG })).status).toBe(400);
     expect((await call("POST", "/api/recipes", { fields: { name: "A" }, image: "not base64!" })).status).toBe(400);
+    // atob throws on a length that is not a multiple of 4. That must be a 400, not a 500.
+    for (const image of ["AAAAA", "UklGR", "UklGRhAAAABXRUJQVlA4IA"]) {
+      expect((await call("POST", "/api/recipes", { fields: { name: "A" }, image })).status).toBe(400);
+    }
   });
 
   it("gives 413 for a body over 3 MB", async () => {

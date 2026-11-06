@@ -232,8 +232,10 @@ export async function removePasskey({ env, session, params }: Context): Promise<
   const [id] = params;
   const stored = await env.AUTH.get<StoredPasskey>(`passkey:${id}`, "json");
   if (!stored || stored.userId !== session!.userId) throw new HttpError(404, "This passkey does not exist.");
-  const passkeys = await userPasskeys(env, session!.userId);
-  if (passkeys.filter((p) => p.id !== id).length === 0) {
+  // A KV list can still show a passkey that was removed a moment ago. A read of each key is current.
+  const others = (await userPasskeys(env, session!.userId)).filter((p) => p.id !== id);
+  const left = await Promise.all(others.map((p) => env.AUTH.get(`passkey:${p.id}`)));
+  if (left.every((value) => value === null)) {
     throw new HttpError(409, "You cannot remove your last passkey. Add another device first.");
   }
   await env.AUTH.delete(`passkey:${id}`);

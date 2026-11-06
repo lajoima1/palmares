@@ -29,7 +29,7 @@ interface Route {
   handle: (ctx: Context) => Response | Promise<Response>;
 }
 
-export const routes: Route[] = [
+const routes: Route[] = [
   {
     method: "GET",
     path: /^\/api\/session$/,

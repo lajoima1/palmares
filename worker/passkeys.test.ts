@@ -111,6 +111,17 @@ describe("passkey list", () => {
     expect(res.status).toBe(409);
   });
 
+  it("refuses to remove the last passkey when the KV list still shows a removed one", async () => {
+    const { env, cookie } = await signedIn(["pk1", "pk2"]);
+    // pk2 was removed a moment ago. Its key is gone, but the list can show it for up to 60 s.
+    const staleList = await env.AUTH.list({ prefix: "passkey:" });
+    await env.AUTH.delete("passkey:pk2");
+    env.AUTH.list = (async () => staleList) as typeof env.AUTH.list;
+    const res = await handleApi(apiRequest("/api/passkeys/pk1", { method: "DELETE", headers: { Origin: ORIGIN }, cookie }), env);
+    expect(res.status).toBe(409);
+    expect(await env.AUTH.get("passkey:pk1")).not.toBeNull();
+  });
+
   it("removes another passkey, and its session ends", async () => {
     const { env, cookie } = await signedIn(["pk1", "pk2"]);
     const pk2Cookie = cookieHeader(await createSession(env, { userId: "u1", passkeyId: "pk2" }));

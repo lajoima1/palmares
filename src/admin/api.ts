@@ -30,7 +30,6 @@ export interface RecipeListItem {
 export interface RecipeList {
   recipes: RecipeListItem[];
   tags: string[];
-  tokenExpires?: string;
 }
 
 export interface RecipeDetail {

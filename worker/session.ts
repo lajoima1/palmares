@@ -3,7 +3,7 @@ import type { Env } from "./env.ts";
 // 30 days in seconds. After that the owner signs in again with the passkey.
 export const MAX_AGE = 30 * 24 * 60 * 60;
 // 5 minutes in seconds: the time to answer one passkey prompt.
-export const CHALLENGE_MAX_AGE = 5 * 60;
+const CHALLENGE_MAX_AGE = 5 * 60;
 
 const SESSION_COOKIE = "__Host-session";
 const CHALLENGE_COOKIE = "__Host-challenge";

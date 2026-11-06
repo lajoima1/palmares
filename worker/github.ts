@@ -202,8 +202,9 @@ export async function commitChanges(
   slug: string,
   build: (head: HeadWithText) => Change[] | Promise<Change[]>,
 ): Promise<{ commit: string; changed: boolean }> {
-  // .dev.vars holds the real token. A local run that targets main would deploy both sites.
-  if (env.ORIGIN.startsWith("http://localhost") && env.GITHUB_BRANCH === "main") {
+  // .dev.vars holds the real token. A local run (an http:// origin, like localhost or 127.0.0.1)
+  // that targets main would deploy both sites.
+  if (!env.ORIGIN.startsWith("https://") && env.GITHUB_BRANCH === "main") {
     throw new Error("A local run must not write to main. Set GITHUB_BRANCH in .dev.vars.");
   }
 
