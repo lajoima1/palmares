@@ -137,6 +137,7 @@ describe("adding", () => {
       { name: "A", notes: "one note" },
       { name: 5 },
       { name: "A", description: "x".repeat(20_001) },
+      { name: "N".repeat(101) },
     ];
     for (const f of cases) {
       const res = await call("POST", "/api/recipes", { fields: f });

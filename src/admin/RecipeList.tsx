@@ -28,9 +28,14 @@ interface RecipeListProps {
   onAdd: () => void;
 }
 
-// Accents do not count in the search, so "pate" finds "Pâté chinois".
+// Accents do not count in the search, so "pate" finds "Pâté chinois" and "boeuf" finds "Bœuf".
 function plain(text: string): string {
-  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/œ/g, "oe")
+    .replace(/æ/g, "ae");
 }
 
 export function RecipeList({ data, error, onRetry, onOpen, onAdd }: RecipeListProps) {

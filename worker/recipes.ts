@@ -7,6 +7,8 @@ import type { Context } from "./router.ts";
 const MAX_BODY = 3 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
 const MAX_TEXT = 20_000;
+// The slug comes from the name and is a folder name. Some file systems refuse more than 255 bytes.
+const MAX_NAME = 100;
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DIFFICULTIES = ["", "Easy", "Medium", "Hard"];
 const ONE_LINE = ["name", "description", "servings", "prep_time", "cook_time", "total_time", "difficulty"] as const;
@@ -49,6 +51,7 @@ function readFields(value: unknown): RecipeFields {
   fields.tags = [...new Set(fields.tags)];
 
   if (!fields.name) throw new HttpError(400, "The recipe needs a name.");
+  if (fields.name.length > MAX_NAME) throw new HttpError(400, `The name is longer than ${MAX_NAME} characters.`);
   if (!DIFFICULTIES.includes(fields.difficulty)) throw new HttpError(400, "The difficulty must be Easy, Medium or Hard.");
   if (fields.tags.some((t) => t.includes(","))) throw new HttpError(400, "A tag cannot hold a comma.");
   return fields;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Autocomplete,
@@ -31,6 +31,9 @@ interface RecipeFormProps {
   // `before`: the commit that the site served just before the save.
   onDone: (result: SaveResult, kind: SaveKind, name: string, before: string | undefined) => void;
 }
+
+// A longer name makes a folder name that some file systems refuse (255 bytes at most).
+export const MAX_NAME = 100;
 
 const ONE_LINE_FIELDS = [
   { key: "name", label: "Name", required: true },
@@ -88,6 +91,53 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
   const [conflict, setConflict] = useState(false);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  // The form as it was loaded, to tell if the owner changed something.
+  const [loaded, setLoaded] = useState<string | null>(slug ? null : JSON.stringify(toForm(emptyRecipe())));
+  const alerts = useRef<HTMLDivElement>(null);
+  const closing = useRef(false);
+  const dirty = form !== null && (JSON.stringify(form) !== loaded || image !== undefined);
+  const dirtyNow = useRef(dirty);
+  const onCloseNow = useRef(onClose);
+  useEffect(() => {
+    dirtyNow.current = dirty;
+    onCloseNow.current = onClose;
+  });
+
+  // On a phone, Back closes a full-screen dialog. A history entry makes Back close the form, not
+  // leave the admin page. With typed changes, Back asks first.
+  useEffect(() => {
+    if (!history.state?.recipeForm) history.pushState({ recipeForm: true }, "");
+    const onBack = () => {
+      if (closing.current) return;
+      if (dirtyNow.current) {
+        history.pushState({ recipeForm: true }, "");
+        setConfirmDiscard(true);
+      } else {
+        closing.current = true;
+        onCloseNow.current();
+      }
+    };
+    window.addEventListener("popstate", onBack);
+    return () => window.removeEventListener("popstate", onBack);
+  }, []);
+
+  function leave(then: () => void) {
+    closing.current = true;
+    if (history.state?.recipeForm) history.back();
+    then();
+  }
+
+  function requestClose() {
+    if (busy) return;
+    if (dirty) setConfirmDiscard(true);
+    else leave(onClose);
+  }
+
+  // A save error shows at the top of the form. At 375 px the owner is often at the bottom.
+  useEffect(() => {
+    if (error || conflict) alerts.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [error, conflict]);
 
   const load = useCallback(async () => {
     if (!slug) return;
@@ -97,6 +147,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
     try {
       const recipe = await api.recipe(slug);
       setForm(toForm(recipe.fields));
+      setLoaded(JSON.stringify(toForm(recipe.fields)));
       setBaseOid(recipe.baseOid);
       setHasImage(recipe.hasImage);
       setImage(undefined);
@@ -150,7 +201,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
       const result = slug
         ? await api.updateRecipe(slug, fields, baseOid, image)
         : await api.createRecipe(fields, image);
-      onDone(result, slug ? "saved" : "added", fields.name, before);
+      leave(() => onDone(result, slug ? "saved" : "added", fields.name, before));
     });
 
   const remove = () =>
@@ -158,13 +209,13 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
       setConfirmDelete(false);
       const before = await servedCommit();
       const result = await api.deleteRecipe(slug!, baseOid);
-      onDone(result, "deleted", form?.fields.name ?? slug!, before);
+      leave(() => onDone(result, "deleted", form?.fields.name ?? slug!, before));
     });
 
   const name = form?.fields.name ?? "";
 
   return (
-    <Dialog open fullScreen={fullScreen} fullWidth maxWidth="md" onClose={busy ? undefined : onClose}>
+    <Dialog open fullScreen={fullScreen} fullWidth maxWidth="md" onClose={requestClose}>
       <DialogTitle>{slug ? "Change recipe" : "Add recipe"}</DialogTitle>
       <DialogContent dividers>
         {loadError && (
@@ -186,6 +237,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
         )}
         {form && (
           <Stack spacing={2} sx={{ pt: 1 }}>
+            <Box ref={alerts} sx={{ scrollMarginTop: 16, display: error || conflict ? "block" : "none" }} />
             {conflict && (
               <Alert
                 severity="warning"
@@ -216,6 +268,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
                 onChange={(e) => setField(f.key, noLineBreak(e.target.value))}
                 multiline={f.key === "description"}
                 helperText={!slug && f.key === "name" ? "The name also makes the address of the recipe." : undefined}
+                slotProps={f.key === "name" ? { htmlInput: { maxLength: MAX_NAME } } : undefined}
               />
             ))}
             <TextField
@@ -265,7 +318,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
             Delete
           </Button>
         )}
-        <Button color="inherit" onClick={onClose} disabled={busy}>
+        <Button color="inherit" onClick={requestClose} disabled={busy}>
           Cancel
         </Button>
         <Button variant="contained" onClick={save} disabled={busy || photoBusy || !form || !oneLine(name) || conflict}>
@@ -276,7 +329,8 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
       <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)}>
         <DialogTitle>Delete this recipe?</DialogTitle>
         <DialogContentText sx={{ px: 3 }}>
-          “{name}” and its photo leave both sites after the next build. The git history keeps a copy.
+          “{name}”{hasImage ? " and its photo" : ""} leave{hasImage ? "" : "s"} both sites after the next build. The git
+          history keeps a copy.
         </DialogContentText>
         <DialogActions>
           <Button color="inherit" onClick={() => setConfirmDelete(false)}>
@@ -284,6 +338,19 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
           </Button>
           <Button color="error" variant="contained" onClick={remove}>
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={confirmDiscard} onClose={() => setConfirmDiscard(false)}>
+        <DialogTitle>Discard your changes?</DialogTitle>
+        <DialogContentText sx={{ px: 3 }}>The changes in this form are not saved.</DialogContentText>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setConfirmDiscard(false)}>
+            Keep editing
+          </Button>
+          <Button color="error" variant="contained" onClick={() => leave(onClose)}>
+            Discard
           </Button>
         </DialogActions>
       </Dialog>

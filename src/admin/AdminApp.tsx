@@ -57,6 +57,7 @@ export default function AdminApp() {
   // undefined: no form. null: a new recipe.
   const [editing, setEditing] = useState<string | null | undefined>(undefined);
   const [lastSave, setLastSave] = useState<{ kind: SaveKind; name: string } | null>(null);
+  const [unchanged, setUnchanged] = useState(false);
   const live = useLiveStatus();
   const signedIn = session?.signedIn ?? false;
 
@@ -96,6 +97,7 @@ export default function AdminApp() {
     if (result.changed === false) {
       setLastSave(null);
       live.reset();
+      setUnchanged(true);
       return;
     }
     setLastSave({ kind, name });
@@ -200,8 +202,24 @@ export default function AdminApp() {
         onClose={(_, reason) => reason !== "clickaway" && live.status !== "building" && setLastSave(null)}
         autoHideDuration={live.status === "building" ? null : 8000}
       >
-        <Alert severity={live.status === "live" ? "success" : "info"} variant="filled" onClose={() => setLastSave(null)}>
+        {/* The Parchment theme puts a cream gradient on each Paper. It would cover the filled colour. */}
+        <Alert
+          severity={live.status === "live" ? "success" : "info"}
+          variant="filled"
+          onClose={() => setLastSave(null)}
+          sx={{ backgroundImage: "none" }}
+        >
           “{lastSave?.name}” {lastSave?.kind}. {live.status !== "idle" && LIVE_TEXT[live.status]}.
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={unchanged && editing === undefined}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        autoHideDuration={5000}
+        onClose={() => setUnchanged(false)}
+      >
+        <Alert severity="info" variant="filled" onClose={() => setUnchanged(false)} sx={{ backgroundImage: "none" }}>
+          Nothing changed, so nothing was saved.
         </Alert>
       </Snackbar>
     </ThemeProvider>
