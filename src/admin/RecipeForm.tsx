@@ -98,9 +98,11 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
   const closing = useRef(false);
   const dirty = form !== null && (JSON.stringify(form) !== loaded || image !== undefined);
   const dirtyNow = useRef(dirty);
+  const busyNow = useRef(busy);
   const onCloseNow = useRef(onClose);
   useEffect(() => {
     dirtyNow.current = dirty;
+    busyNow.current = busy;
     onCloseNow.current = onClose;
   });
 
@@ -110,6 +112,11 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
     if (!history.state?.recipeForm) history.pushState({ recipeForm: true }, "");
     const onBack = () => {
       if (closing.current) return;
+      // During a save or a delete the form stays, so its result or its error shows.
+      if (busyNow.current) {
+        history.pushState({ recipeForm: true }, "");
+        return;
+      }
       if (dirtyNow.current) {
         history.pushState({ recipeForm: true }, "");
         setConfirmDiscard(true);
@@ -349,7 +356,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
           <Button color="inherit" onClick={() => setConfirmDiscard(false)}>
             Keep editing
           </Button>
-          <Button color="error" variant="contained" onClick={() => leave(onClose)}>
+          <Button color="error" variant="contained" onClick={() => leave(onClose)} disabled={busy}>
             Discard
           </Button>
         </DialogActions>
