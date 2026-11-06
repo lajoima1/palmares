@@ -1,0 +1,17 @@
+name: cool
+description: stuff
+servings: dummy
+prep_time: dududj
+cook_time: djsafjk
+total_time: jdksjf
+difficulty: Easy
+tags: air fryer
+
+ingredients:
+- 121212
+
+instructions:
+1. 121212
+
+notes:
+- 121221
