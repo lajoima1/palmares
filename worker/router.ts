@@ -11,6 +11,7 @@ import {
   setupOptions,
   setupVerify,
 } from "./passkeys.ts";
+import { createHandler, deleteHandler, getHandler, imageHandler, listHandler, updateHandler } from "./recipes.ts";
 import { clearSession, readSession, type Session } from "./session.ts";
 
 export interface Context {
@@ -58,6 +59,12 @@ export const routes: Route[] = [
   { method: "POST", path: /^\/api\/passkeys\/options$/, session: true, handle: addPasskeyOptions },
   { method: "POST", path: /^\/api\/passkeys\/verify$/, session: true, handle: addPasskeyVerify },
   { method: "DELETE", path: /^\/api\/passkeys\/([^/]+)$/, session: true, handle: removePasskey },
+  { method: "GET", path: /^\/api\/recipes$/, session: true, handle: listHandler },
+  { method: "POST", path: /^\/api\/recipes$/, session: true, handle: createHandler },
+  { method: "GET", path: /^\/api\/recipes\/([^/]+)$/, session: true, handle: getHandler },
+  { method: "PUT", path: /^\/api\/recipes\/([^/]+)$/, session: true, handle: updateHandler },
+  { method: "DELETE", path: /^\/api\/recipes\/([^/]+)$/, session: true, handle: deleteHandler },
+  { method: "GET", path: /^\/api\/recipes\/([^/]+)\/image$/, session: true, handle: imageHandler },
 ];
 
 export function health(request: Request, env: Env): Response {
