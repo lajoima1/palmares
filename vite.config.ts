@@ -21,6 +21,9 @@ export default defineConfig({
       },
     },
   },
+  // The webp encoder loads its WebAssembly from a URL next to its own file. Pre-bundling moves the
+  // file and breaks that URL in `npm run dev`.
+  optimizeDeps: { exclude: ["@jsquash/webp"] },
   server: {
     // `npx wrangler dev` runs the Worker on 8787. The proxy keeps the Origin of the browser.
     proxy: { "/api": "http://localhost:8787" },

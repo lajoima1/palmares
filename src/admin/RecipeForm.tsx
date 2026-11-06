@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { emptyRecipe, linesToItems, oneLine, type RecipeFields } from "../utils/recipeText";
 import { api, ApiError, type PhotoChange, type SaveResult } from "./api";
+import { PhotoField } from "./PhotoField";
 
 export type SaveKind = "added" | "saved" | "deleted";
 
@@ -77,7 +78,9 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [form, setForm] = useState<FormState | null>(slug ? null : toForm(emptyRecipe()));
   const [baseOid, setBaseOid] = useState("");
-  const [image] = useState<PhotoChange>(undefined);
+  const [image, setImage] = useState<PhotoChange>(undefined);
+  const [hasImage, setHasImage] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
@@ -93,6 +96,8 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
       const recipe = await api.recipe(slug);
       setForm(toForm(recipe.fields));
       setBaseOid(recipe.baseOid);
+      setHasImage(recipe.hasImage);
+      setImage(undefined);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : "The recipe could not load.");
     }
@@ -191,6 +196,12 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
               </Alert>
             )}
             {error && <Alert severity="error">{error}</Alert>}
+            <PhotoField
+              currentUrl={slug && hasImage ? `/api/recipes/${slug}/image` : null}
+              change={image}
+              onChange={setImage}
+              onBusy={setPhotoBusy}
+            />
             {ONE_LINE_FIELDS.map((f) => (
               <TextField
                 key={f.key}
@@ -253,7 +264,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
         <Button onClick={onClose} disabled={busy}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={save} disabled={busy || !form || !oneLine(name) || conflict}>
+        <Button variant="contained" onClick={save} disabled={busy || photoBusy || !form || !oneLine(name) || conflict}>
           {busy ? "Saving…" : "Save"}
         </Button>
       </DialogActions>

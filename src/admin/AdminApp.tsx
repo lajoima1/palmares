@@ -196,7 +196,8 @@ export default function AdminApp() {
         <RecipeForm slug={editing} tagOptions={list?.tags ?? []} onClose={() => setEditing(undefined)} onDone={done} />
       )}
       <Snackbar
-        open={lastSave !== null && live.status !== "idle"}
+        // A snackbar shows above a dialog. At 375 px it would cover the Save button of the form.
+        open={lastSave !== null && live.status !== "idle" && editing === undefined}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         onClose={(_, reason) => reason !== "clickaway" && live.status !== "building" && setLastSave(null)}
         autoHideDuration={live.status === "building" ? null : 8000}
