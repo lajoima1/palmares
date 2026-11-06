@@ -42,3 +42,8 @@ work/
 
 # Local state of wrangler dev
 .wrangler/
+
+# Local Worker secrets for wrangler dev. Only the example with no values is tracked.
+.dev.vars
+.dev.vars.*
+!.dev.vars.example

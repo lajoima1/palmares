@@ -1,0 +1,13 @@
+# Copy to .dev.vars for wrangler dev. Git ignores .dev.vars. Never commit or print the values.
+# A fine-grained GitHub token: this repo only, Contents read and write.
+GITHUB_TOKEN=
+# Long random values: openssl rand -base64 32
+SESSION_SECRET=
+SETUP_CODE=
+# Local saves go to this branch, never to main.
+GITHUB_BRANCH=admin-test
+# http://localhost:5173 behind the Vite proxy, http://localhost:8787 on wrangler dev alone.
+ORIGIN=http://localhost:8787
+RP_ID=localhost
+# A 40-character SHA to mark recipes that differ from it as "Not live yet". Empty: no marks.
+COMMIT=
