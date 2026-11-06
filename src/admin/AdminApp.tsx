@@ -27,10 +27,10 @@ import { servedCommit, useLiveStatus, type LiveStatus } from "./useLiveStatus";
 type View = "recipes" | "passkeys";
 
 const LIVE_TEXT: Record<Exclude<LiveStatus, "idle">, string> = {
-  building: "live in about 2 minutes",
-  live: "live on the site",
-  slow: "the site is still building. Check again later",
-  saved: "live after the next build",
+  building: "Live in about 2 minutes",
+  live: "Live on the site",
+  slow: "The site is still building. Check again later",
+  saved: "Live after the next build",
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -174,7 +174,7 @@ export default function AdminApp() {
         )}
         {!session && !loadError && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-            <CircularProgress aria-label="Loading" />
+            <CircularProgress color="inherit" aria-label="Loading" />
           </Box>
         )}
         {session && !session.signedIn && <SignIn setupOpen={session.setupOpen} onSignedIn={loadSession} />}

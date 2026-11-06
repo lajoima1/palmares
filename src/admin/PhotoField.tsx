@@ -69,7 +69,7 @@ export function PhotoField({ currentUrl, change, onChange, onBusy }: PhotoFieldP
           <Typography color="text.secondary">No photo</Typography>
         )}
       </Box>
-      {processing && <LinearProgress aria-label="Processing the photo" />}
+      {processing && <LinearProgress color="inherit" aria-label="Processing the photo" />}
       {size && typeof change === "string" && (
         <Typography variant="caption" color="text.secondary">
           New photo: {size}
@@ -77,7 +77,7 @@ export function PhotoField({ currentUrl, change, onChange, onBusy }: PhotoFieldP
       )}
       {error && <Alert severity="error">{error}</Alert>}
       <Stack direction="row" spacing={1}>
-        <Button variant="outlined" startIcon={<AddPhotoAlternate />} onClick={() => input.current?.click()} disabled={processing}>
+        <Button variant="outlined" color="inherit" startIcon={<AddPhotoAlternate />} onClick={() => input.current?.click()} disabled={processing}>
           Choose photo
         </Button>
         {shown && (

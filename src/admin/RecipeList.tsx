@@ -84,7 +84,7 @@ export function RecipeList({ data, error, onRetry, onOpen, onAdd }: RecipeListPr
       )}
       {!data && !error && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <CircularProgress aria-label="Loading recipes" />
+          <CircularProgress color="inherit" aria-label="Loading recipes" />
         </Box>
       )}
       {data && shown.length === 0 && (

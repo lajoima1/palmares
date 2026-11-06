@@ -78,7 +78,7 @@ export function Passkeys() {
       <Paper elevation={0} sx={{ border: 1, borderColor: "divider" }}>
         {passkeys === null && !error && (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-            <CircularProgress aria-label="Loading passkeys" />
+            <CircularProgress color="inherit" aria-label="Loading passkeys" />
           </Box>
         )}
         {passkeys && (

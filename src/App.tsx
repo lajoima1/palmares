@@ -256,7 +256,16 @@ function App() {
           >
             Palmarès
           </Typography>
-          <Typography variant="body1" sx={{ mr: 2, fontWeight: "bold" }}>
+          {/* At 375 px the header has no room for the count and the admin link together. */}
+          <Typography
+            variant="body1"
+            sx={{
+              mr: 2,
+              fontWeight: "bold",
+              whiteSpace: "nowrap",
+              display: { xs: isEditor ? "none" : "block", sm: "block" },
+            }}
+          >
             {filteredRecipes.length} recipe
             {filteredRecipes.length !== 1 ? "s" : ""}
           </Typography>

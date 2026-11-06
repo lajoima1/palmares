@@ -177,7 +177,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
         )}
         {!form && !loadError && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-            <CircularProgress aria-label="Loading the recipe" />
+            <CircularProgress color="inherit" aria-label="Loading the recipe" />
           </Box>
         )}
         {form && (
@@ -261,7 +261,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
             Delete
           </Button>
         )}
-        <Button onClick={onClose} disabled={busy}>
+        <Button color="inherit" onClick={onClose} disabled={busy}>
           Cancel
         </Button>
         <Button variant="contained" onClick={save} disabled={busy || photoBusy || !form || !oneLine(name) || conflict}>
@@ -275,7 +275,9 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
           “{name}” and its photo leave both sites after the next build. The git history keeps a copy.
         </DialogContentText>
         <DialogActions>
-          <Button onClick={() => setConfirmDelete(false)}>Cancel</Button>
+          <Button color="inherit" onClick={() => setConfirmDelete(false)}>
+            Cancel
+          </Button>
           <Button color="error" variant="contained" onClick={remove}>
             Delete
           </Button>
