@@ -51,6 +51,13 @@ notes: Optional additional notes
 3. Start development server: `npm run dev`
 4. Open http://localhost:5173
 
+Checks:
+
+- `npm run lint`: ESLint.
+- `npm test`: the unit tests, with Vitest.
+- `npm run check:recipes`: each recipe gives the same database rows after a save from the admin
+  page. It prints `round-trip OK: <n> recipes`.
+
 ### Adding New Recipes
 
 1. Create a new folder in `public/recipes/` with your recipe name (use kebab-case)
@@ -79,6 +86,54 @@ WORKERS_CI=1 npm run build && npx wrangler dev
 ```
 
 Then open http://localhost:8787.
+
+## Admin page
+
+The owner adds, changes and deletes recipes at `https://palmares.lajoie.workers.dev/admin/`, from
+a phone or a computer. The sign-in is a passkey: the fingerprint, the face or the PIN of the
+device. Only the Cloudflare build has this page. The GitHub Pages copy gets each saved recipe
+through the next build.
+
+Each save is one commit on `main`, with `recipe.txt`, `image.webp` and `recipes/index.json`. The
+commit starts both builds, so the change is live in about two minutes. The browser makes the photo
+small and turns it into webp before the upload. On a device where the owner signed in, the main
+page shows a "Manage recipes" link.
+
+### Setup (once)
+
+1. **Make a GitHub token.** GitHub → Settings → Developer settings → Fine-grained tokens:
+   - repository access: only `lajoima1/palmares`;
+   - permissions: Contents, read and write, and nothing else;
+   - expiration: 1 year. Write the end date in `TOKEN_EXPIRES` in `wrangler.jsonc`, as
+     `YYYY-MM-DD`. The admin page warns 30 days before that date.
+2. **Make the KV namespace** `palmares-auth` (Cloudflare → Storage & databases → Workers KV). Its
+   ID goes in `wrangler.jsonc` under `kv_namespaces`, with the binding `AUTH`.
+3. **Add three Worker secrets** (Cloudflare → the `palmares` Worker → Settings → Variables and
+   Secrets). Make `SESSION_SECRET` and `SETUP_CODE` with `openssl rand -base64 32`.
+   - `GITHUB_TOKEN`: the token of step 1.
+   - `SESSION_SECRET`: signs the session cookie. A new value signs out each device.
+   - `SETUP_CODE`: opens the first registration. Keep it in a password manager.
+4. Open `/admin/`, enter the setup code, and register the first device.
+
+Add more devices from the "Passkeys" screen. Remove a lost device there: its sessions end at once.
+If no passkey is left, delete all keys in `palmares-auth`, `setup:done` too. Then the setup code
+opens the registration again.
+
+When the token ends, make a new one, replace the `GITHUB_TOKEN` secret, and change
+`TOKEN_EXPIRES`.
+
+### Local work
+
+1. Copy `.dev.vars.example` to `.dev.vars`. Git ignores `.dev.vars`. Never commit it.
+2. Put a token in `GITHUB_TOKEN`, and random values in `SESSION_SECRET` and `SETUP_CODE`.
+   `GITHUB_BRANCH=admin-test` sends local saves to a test branch. The Worker refuses a local save
+   to `main`.
+3. Run `WORKERS_CI=1 npm run build && npx wrangler dev`, then open http://localhost:8787/admin/.
+   Use `localhost`, not `127.0.0.1`: passkeys need it.
+
+For the Vite dev server, run `npx wrangler dev` and `WORKERS_CI=1 npm run dev` together, set
+`ORIGIN=http://localhost:5173` in `.dev.vars`, and open http://localhost:5173/admin/. Vite sends
+`/api` to the Worker on port 8787.
 
 ## Project Structure
 
