@@ -25,4 +25,10 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ['worker/**/*.ts'],
+    languageOptions: {
+      globals: globals.serviceworker,
+    },
+  },
 )
