@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "tags": "node scripts/compile-tags.js",
     "add-recipe": "node scripts/add-recipe.js",
-    "minify": "magick mogrify -format webp -quality 50 -define webp:lossless=false -resize \"1200x1200>\" **/*.jpg"
+    "minify": "magick mogrify -format webp -quality 50 -define webp:lossless=false -resize \"1200x1200>\" **/*.jpg",
+    "test": "vitest run",
+    "check:recipes": "node scripts/check-recipe-roundtrip.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -40,6 +42,7 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5",
+    "vitest": "^5.1.0",
     "wrangler": "^4.158.0"
   }
 }
