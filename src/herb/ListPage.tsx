@@ -107,6 +107,11 @@ function Results({ desktop, status, recipes, shown, filters, onFilters, onRetry 
     const parts = [filters.query.trim() && `“${filters.query.trim()}”`, ...filters.tags.map(tagLabel), filters.difficulty].filter(Boolean);
     return <NothingMatches summary={`Nothing matches ${parts.join(", ")}.`} onClear={() => onFilters(noFilters)} />;
   }
+  // The filtered list starts at the top, as after a tag on a recipe page.
+  const showTag = (tag: string) => {
+    onFilters(withTag(filters, tag));
+    window.scrollTo(0, 0);
+  };
   return (
     <Box
       sx={{
@@ -116,7 +121,7 @@ function Results({ desktop, status, recipes, shown, filters, onFilters, onRetry 
       }}
     >
       {shown.map((r) =>
-        desktop ? <RecipeCard key={r.id} recipe={r} onTag={(tag) => onFilters(withTag(filters, tag))} /> : <RecipeTile key={r.id} recipe={r} />,
+        desktop ? <RecipeCard key={r.id} recipe={r} onTag={showTag} /> : <RecipeTile key={r.id} recipe={r} />,
       )}
     </Box>
   );
