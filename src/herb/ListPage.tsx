@@ -205,30 +205,43 @@ function PhoneList(props: ListPageProps) {
   );
 }
 
+// The top bar of a desktop page: the mark, the search and the settings button. On a recipe page,
+// the mark and a search go back to the list.
+export function DesktopHeader({ query, onQuery, onOpenSettings, onHome }: { query: string; onQuery: (q: string) => void; onOpenSettings: (anchor: HTMLElement) => void; onHome?: () => void }) {
+  const t = useTheme().herb;
+  const brand = (
+    <>
+      <Mark />
+      <Box component="span" sx={{ fontFamily: headingFont, fontWeight: 800, fontSize: 26, letterSpacing: "-0.02em" }}>
+        Palmarès
+      </Box>
+    </>
+  );
+  return (
+    <Box component="header" sx={{ borderBottom: `1px solid ${t.line}`, bgcolor: t.surface }}>
+      <Box sx={{ maxWidth: 1240, mx: "auto", px: 4, py: 2, display: "flex", alignItems: "center", gap: 3 }}>
+        {onHome ? (
+          <ButtonBase onClick={onHome} aria-label="Palmarès, all recipes" sx={{ gap: 1.5, borderRadius: "12px" }}>
+            {brand}
+          </ButtonBase>
+        ) : (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>{brand}</Box>
+        )}
+        <Box sx={{ flex: "1 1 320px", maxWidth: 560, mx: "auto", display: "flex" }}>
+          <SearchField value={query} onChange={onQuery} placeholder="Search by name, ingredient or description" height={48} />
+        </Box>
+        <SettingsButton onOpen={onOpenSettings} />
+      </Box>
+    </Box>
+  );
+}
+
 function DesktopList(props: ListPageProps) {
   const t = useTheme().herb;
   const { recipes, tags, filters, onFilters, onOpenSettings, status } = props;
   return (
     <Box sx={{ pb: 8 }}>
-      <Box component="header" sx={{ borderBottom: `1px solid ${t.line}`, bgcolor: t.surface }}>
-        <Box sx={{ maxWidth: 1240, mx: "auto", px: 4, py: 2, display: "flex", alignItems: "center", gap: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Mark />
-            <Box component="span" sx={{ fontFamily: headingFont, fontWeight: 800, fontSize: 26, letterSpacing: "-0.02em" }}>
-              Palmarès
-            </Box>
-          </Box>
-          <Box sx={{ flex: "1 1 320px", maxWidth: 560, mx: "auto", display: "flex" }}>
-            <SearchField
-              value={filters.query}
-              onChange={(query) => onFilters({ ...filters, query })}
-              placeholder="Search by name, ingredient or description"
-              height={48}
-            />
-          </Box>
-          <SettingsButton onOpen={onOpenSettings} />
-        </Box>
-      </Box>
+      <DesktopHeader query={filters.query} onQuery={(query) => onFilters({ ...filters, query })} onOpenSettings={onOpenSettings} />
 
       <Box sx={{ maxWidth: 1240, mx: "auto", px: 4, pt: 5, pb: 3 }}>
         <Box component="h1" sx={{ m: 0, fontFamily: headingFont, fontWeight: 800, fontSize: 48, lineHeight: 1.05, letterSpacing: "-0.025em" }}>

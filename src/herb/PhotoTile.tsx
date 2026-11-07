@@ -6,7 +6,10 @@ import { headingFont } from "../theme/herb";
 interface PhotoTileProps {
   src: string;
   name: string;
-  aspectRatio: string;
+  aspectRatio?: string;
+  // A fixed height in place of the aspect ratio, as for the photo at the top of a recipe page.
+  height?: number;
+  letterHeight?: number;
   radius: number | string;
   letterSize: number;
   alt?: string;
@@ -14,7 +17,7 @@ interface PhotoTileProps {
 
 // The recipe photo, or the first letter of the name on the herb tint if the photo is missing or
 // does not load.
-export function PhotoTile({ src, name, aspectRatio, radius, letterSize, alt = "" }: PhotoTileProps) {
+export function PhotoTile({ src, name, aspectRatio, height, letterHeight, radius, letterSize, alt = "" }: PhotoTileProps) {
   const t = useTheme().herb;
   const [failed, setFailed] = useState(false);
 
@@ -24,7 +27,8 @@ export function PhotoTile({ src, name, aspectRatio, radius, letterSize, alt = ""
         aria-hidden="true"
         sx={{
           width: "100%",
-          aspectRatio,
+          aspectRatio: height ? undefined : aspectRatio,
+          height: letterHeight ?? height,
           borderRadius: radius,
           bgcolor: t.herbTint,
           color: t.herb,
@@ -47,7 +51,7 @@ export function PhotoTile({ src, name, aspectRatio, radius, letterSize, alt = ""
       alt={alt}
       loading="lazy"
       onError={() => setFailed(true)}
-      sx={{ width: "100%", aspectRatio, objectFit: "cover", borderRadius: radius, display: "block", bgcolor: t.herbTint }}
+      sx={{ width: "100%", aspectRatio: height ? undefined : aspectRatio, height, objectFit: "cover", borderRadius: radius, display: "block", bgcolor: t.herbTint }}
     />
   );
 }

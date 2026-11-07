@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CssBaseline, ThemeProvider, useMediaQuery } from "@mui/material";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Box, CssBaseline, ThemeProvider, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { Recipe } from "../types/Recipe";
 import { loadAllRecipesFromDb } from "../utils/recipeDatabase";
 import { setLook, useAppearanceMode } from "../look";
 import { createHerbTheme } from "../theme/herb";
-import { filterRecipes, noFilters, tagCounts, type Filters } from "./filters";
+import { filterRecipes, noFilters, tagCounts, withTag, type Filters } from "./filters";
 import { FiltersSheet } from "./FiltersPanel";
-import { ListPage, type LoadStatus } from "./ListPage";
+import { DesktopHeader, ListPage, type LoadStatus } from "./ListPage";
+import { LoadError } from "./ListStates";
+import { NotFound } from "./NotFound";
+import { RecipePage, RecipeSkeleton } from "./RecipePage";
+import { openList, useRoute } from "./router";
 
 export default function HerbApp() {
   const { mode } = useAppearanceMode();
@@ -22,11 +26,13 @@ export default function HerbApp() {
 
 function Shell() {
   const desktop = useMediaQuery(useTheme().breakpoints.up("md"));
+  const route = useRoute();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [filters, setFilters] = useState<Filters>(noFilters);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const started = useRef(false);
+  const listScroll = useRef(0);
 
   const load = useCallback(() => {
     setStatus("loading");
@@ -48,26 +54,92 @@ function Shell() {
     load();
   }, [load]);
 
+  // The app restores the scroll of the list itself; the browser would restore it too early.
+  useEffect(() => {
+    history.scrollRestoration = "manual";
+  }, []);
+
+  // Remember the scroll of the list while it shows, so Back returns to the same place.
+  useEffect(() => {
+    if (route.page !== "list") return;
+    const save = () => {
+      listScroll.current = window.scrollY;
+    };
+    window.addEventListener("scroll", save, { passive: true });
+    return () => window.removeEventListener("scroll", save);
+  }, [route.page]);
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, route.page === "list" ? listScroll.current : 0);
+  }, [route]);
+
   const tags = useMemo(() => tagCounts(recipes), [recipes]);
   const shown = useMemo(() => filterRecipes(recipes, filters), [recipes, filters]);
+  const recipe = route.page === "recipe" ? recipes.find((r) => r.id === route.slug) : undefined;
+
+  useEffect(() => {
+    document.title = recipe ? `${recipe.name} · Palmarès` : "Palmarès";
+  }, [recipe]);
+
+  const openSettings = () => setLook("old");
+  // A tag on a recipe page opens the list with that tag added.
+  const showTag = (tag: string) => {
+    setFilters((f) => withTag(f, tag));
+    listScroll.current = 0;
+    openList();
+  };
+  const searchFromRecipe = (query: string) => {
+    setFilters((f) => ({ ...f, query }));
+    listScroll.current = 0;
+    openList();
+  };
+
+  let page = null;
+  if (route.page === "notfound" || (route.page === "recipe" && status === "ready" && !recipe)) {
+    page = <NotFound onList={() => openList()} />;
+  } else if (route.page === "recipe") {
+    const header = desktop ? (
+      <DesktopHeader query="" onQuery={searchFromRecipe} onOpenSettings={openSettings} onHome={() => openList()} />
+    ) : undefined;
+    if (recipe) {
+      page = <RecipePage recipe={recipe} desktop={desktop} onBack={() => openList()} onTag={showTag} header={header} />;
+    } else if (status === "error") {
+      page = (
+        <Box sx={{ p: 2.5, pt: 6 }}>
+          <LoadError onRetry={load} />
+        </Box>
+      );
+    } else {
+      page = (
+        <>
+          {header}
+          <RecipeSkeleton desktop={desktop} />
+        </>
+      );
+    }
+  }
 
   return (
     <>
-      <ListPage
-        desktop={desktop}
-        status={status}
-        recipes={recipes}
-        shown={shown}
-        tags={tags}
-        filters={filters}
-        onFilters={setFilters}
-        onRetry={load}
-        onOpenFilters={() => setFiltersOpen(true)}
-        onOpenSettings={() => setLook("old")}
-      />
+      {/* The list stays mounted under a recipe page, so its search, filters and photos stay. */}
+      <Box sx={{ display: page ? "none" : "block" }}>
+        <ListPage
+          desktop={desktop}
+          status={status}
+          recipes={recipes}
+          shown={shown}
+          tags={tags}
+          filters={filters}
+          onFilters={setFilters}
+          onRetry={load}
+          onOpenFilters={() => setFiltersOpen(true)}
+          onOpenSettings={openSettings}
+        />
+      </Box>
+      {page}
       {!desktop && (
         <FiltersSheet
-          open={filtersOpen}
+          open={filtersOpen && !page}
           onClose={() => setFiltersOpen(false)}
           filters={filters}
           onChange={setFilters}
