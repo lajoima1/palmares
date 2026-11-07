@@ -3,7 +3,9 @@
   "name": "palmares",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-11-05",
-  "assets": { "directory": "./dist/" },
+  // A page address with no file, like /recipe/pate-chinois, gets index.html. A fetch with no file
+  // (an /api/ call, a missing photo) still reaches the Worker.
+  "assets": { "directory": "./dist/", "not_found_handling": "single-page-application" },
   // Passkeys and users. The namespace "palmares-auth" was made in the dashboard. The ID is not a secret.
   "kv_namespaces": [{ "binding": "AUTH", "id": "5d928eebc159415fa220962f37301add" }],
   // .dev.vars overrides these in a local run. The secrets GITHUB_TOKEN, SESSION_SECRET and
