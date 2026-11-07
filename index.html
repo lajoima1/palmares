@@ -107,10 +107,180 @@
       display: none;
     }
   </style>
+  <!--herb-->
+  <style>
+    /* The new look's loader (mockup A). vite.config.ts removes each herb block from the GitHub Pages build. */
+    .herb-loader {
+      display: none;
+    }
+
+    html.herb #initial-loader {
+      --ground: #F4F5F2;
+      --ink: #16201B;
+      --line: #E1E5E0;
+      --herb: #2E6A4C;
+      --on-herb: #FFFFFF;
+      background-color: var(--ground);
+      color: var(--ink);
+    }
+
+    html.herb.herb-dark #initial-loader {
+      --ground: #0F1412;
+      --ink: #E8EEEA;
+      --line: #2A3530;
+      --herb: #7CC9A0;
+      --on-herb: #0F1412;
+    }
+
+    html.herb #initial-loader > :not(.herb-loader) {
+      display: none;
+    }
+
+    html.herb .herb-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding-bottom: 64px;
+    }
+
+    .herb-mark {
+      width: 76px;
+      height: 76px;
+      border-radius: 23px;
+      background: var(--herb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .herb-mark svg {
+      transform-origin: 22% 82%;
+      animation: herb-sway 2.4s ease-in-out infinite;
+    }
+
+    .herb-name {
+      font: 800 34px/1 "Bricolage Grotesque", system-ui, sans-serif;
+      letter-spacing: -0.02em;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    html.herb-font .herb-name {
+      opacity: 1;
+    }
+
+    .herb-bar {
+      width: 120px;
+      height: 4px;
+      margin-top: 4px;
+      border-radius: 2px;
+      background: var(--line);
+      overflow: hidden;
+    }
+
+    .herb-bar span {
+      display: block;
+      width: 40%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--herb);
+      animation: herb-slide 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes herb-sway {
+      0%, 100% {
+        transform: rotate(-7deg);
+      }
+
+      50% {
+        transform: rotate(7deg);
+      }
+    }
+
+    @keyframes herb-slide {
+      from {
+        transform: translateX(-100%);
+      }
+
+      to {
+        transform: translateX(250%);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .herb-mark svg,
+      .herb-bar span {
+        animation: none;
+      }
+    }
+  </style>
+  <script>
+    // Runs before the body paints, so a device on the new look never sees the garlic loader.
+    // The same rules as getLook() and getAppearance() in src/look.ts.
+    (function () {
+      var look = null;
+      var appearance = null;
+      try {
+        look = localStorage.getItem('look');
+        appearance = localStorage.getItem('appearance');
+      } catch (error) {
+        // No storage: the defaults apply.
+      }
+      if (look === 'old') return;
+      var root = document.documentElement;
+      var dark = appearance === 'dark' ||
+        (appearance !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      root.classList.add('herb');
+      if (dark) root.classList.add('herb-dark');
+
+      var showName = function () {
+        root.classList.add('herb-font');
+      };
+      // Show the name in its own font, or in the fallback font if the font is slow.
+      setTimeout(showName, 1500);
+      var fonts = document.createElement('link');
+      fonts.rel = 'stylesheet';
+      fonts.href = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap';
+      fonts.onload = function () {
+        if (document.fonts) document.fonts.load('800 34px "Bricolage Grotesque"').then(showName, showName);
+        else showName();
+      };
+      document.head.appendChild(fonts);
+
+      // The favicon link holds the base path, like /palmares/ or /.
+      var icon = document.querySelector('link[rel="icon"]');
+      var base = icon.href.replace(/favicon\.ico$/, '');
+      icon.type = 'image/png';
+      icon.sizes = '32x32';
+      icon.href = base + 'icon-32.png';
+      [['icon', 'icon.svg', 'image/svg+xml'], ['apple-touch-icon', 'apple-touch-icon.png', '']].forEach(function (item) {
+        var link = document.createElement('link');
+        link.rel = item[0];
+        link.href = base + item[1];
+        if (item[2]) link.type = item[2];
+        document.head.appendChild(link);
+      });
+    })();
+  </script>
+  <!--/herb-->
 </head>
 
 <body>
   <div id="initial-loader">
+    <!--herb-->
+    <div class="herb-loader" role="status" aria-label="Loading recipes">
+      <span class="herb-mark">
+        <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 20C4 11 10 5 20 5c0 10-6 15.5-15 15z" fill="var(--on-herb)" />
+          <path d="M8.5 16.5l6.5-6.5" stroke="var(--herb)" stroke-width="1.6" stroke-linecap="round" />
+          <path d="M5.6 19.4l-2.2 2.2" stroke="var(--on-herb)" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      </span>
+      <span class="herb-name">Palmarès</span>
+      <span class="herb-bar" aria-hidden="true"><span></span></span>
+    </div>
+    <!--/herb-->
     <div class="spinner"></div>
     <div class="loading-text">
       <h1 class="loading-title">Palmarès</h1>
@@ -126,23 +296,8 @@
     // Set dynamic spinner color based on user's theme preference
     function setSpinnerColor() {
       try {
-        // vite.config.ts writes true here where the new look exists, false in the GitHub Pages build.
-        var looks = __LOOKS__;
-        if (looks && localStorage.getItem('look') !== 'old') {
-          var appearance = localStorage.getItem('appearance');
-          var dark = appearance === 'dark' ||
-            (appearance !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          var herb = document.createElement('style');
-          herb.textContent = dark
-            ? '#initial-loader{background-color:#0F1412 !important;color:#E8EEEA !important}' +
-              '.spinner{border:4px solid #2A3530 !important;border-left-color:#7CC9A0 !important}' +
-              '.loading-title{color:#E8EEEA !important}.loading-subtitle{color:#A7B4AD !important}'
-            : '#initial-loader{background-color:#F4F5F2 !important;color:#16201B !important}' +
-              '.spinner{border:4px solid #E1E5E0 !important;border-left-color:#2E6A4C !important}' +
-              '.loading-title{color:#16201B !important}.loading-subtitle{color:#4A5650 !important}';
-          document.head.appendChild(herb);
-          return;
-        }
+        // The new look draws its own loader (the head script sets this class).
+        if (document.documentElement.classList.contains('herb')) return;
         const colorThemes = [
           { name: "Parchment", primary: "#8B4513", secondary: "#D2691E" },
           { name: "Classic Red", primary: "#d32f2f", secondary: "#ff9800" },

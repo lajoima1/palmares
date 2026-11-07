@@ -18,8 +18,10 @@ export default defineConfig(({ command, isPreview }) => {
       react(),
       {
         name: "looks-flag",
-        // The first loading screen in index.html runs before the bundle, so it gets the flag here.
-        transformIndexHtml: (html: string) => html.replaceAll("__LOOKS__", String(looks)),
+        // index.html marks the new look's loader, fonts and icons with <!--herb--> … <!--/herb-->.
+        // The GitHub Pages build drops these blocks, so its page holds nothing of the new look.
+        transformIndexHtml: (html: string) =>
+          looks ? html : html.replace(/<!--herb-->[\s\S]*?<!--\/herb-->/g, ""),
       },
     ],
     // Cloudflare and `npm run dev` serve from "/". GitHub Pages serves from "/palmares/".

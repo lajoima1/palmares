@@ -48,7 +48,7 @@ export const herbTokens = {
 export type HerbTokens = (typeof herbTokens)["light"];
 
 export const headingFont = '"Bricolage Grotesque", "Inter", system-ui, sans-serif';
-// src/main.tsx and admin/index.html load these fonts, only for the new look.
+// index.html and admin/index.html load these fonts, only for the new look.
 const textFont = '"Inter", system-ui, sans-serif';
 
 export function difficultyColor(t: HerbTokens, difficulty: string): string {
