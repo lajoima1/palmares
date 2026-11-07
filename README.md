@@ -87,6 +87,23 @@ WORKERS_CI=1 npm run build && npx wrangler dev
 
 Then open http://localhost:8787.
 
+## Two looks
+
+The Cloudflare site has two looks:
+
+- **The new look** (`src/herb/`, theme `src/theme/herb.ts`) is the default. A recipe opens at
+  `/recipe/<slug>`. An old link `/#/<slug>` forwards to that address.
+- **The old look** (`src/App.tsx`, `src/components/`, theme `src/theme/themes.ts`) is the app
+  before the redesign. Settings → "Old look" switches a device to it. Its colour menu has "Use the
+  new look" to switch back.
+
+Each device remembers its look (`look` in `localStorage`) and its appearance (`appearance`:
+system, light or dark). `src/main.tsx` loads the code of one look only.
+
+The GitHub Pages copy has only the old look, with `#/<slug>` links. `vite.config.ts` sets
+`__LOOKS__` to `false` for that build, so its bundle has no code of the new look. `npm run dev`
+shows the new look at http://localhost:5173/.
+
 ## Admin page
 
 The owner adds, changes and deletes recipes at `https://palmares.lajoie.workers.dev/admin/`, from
@@ -96,8 +113,8 @@ through the next build.
 
 Each save is one commit on `main`, with `recipe.txt`, `image.webp` and `recipes/index.json`. The
 commit starts both builds, so the change is live in about two minutes. The browser makes the photo
-small and turns it into webp before the upload. On a device where the owner signed in, the main
-page shows a "Manage recipes" link.
+small and turns it into webp before the upload. On a device where the owner signed in, Settings
+on the main page has a "Manage recipes" link. The old look shows it in its header.
 
 ### Setup (once)
 
@@ -162,25 +179,15 @@ src/
 
 ### Theming
 
-Edit the theme in `src/App.tsx` to customize colors, fonts, and styling:
-
-```typescript
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#d32f2f', // Your primary color
-    },
-    // ... other theme options
-  },
-});
-```
+The colours, fonts and shapes of the new look are in `src/theme/herb.ts`. `src/theme/herb.test.ts`
+checks that each text colour has a contrast of 4.5:1 or more on its background. The old look keeps
+its six colour themes in `src/theme/themes.ts`.
 
 ### Adding New Features
 
-The codebase is well-structured for extending with new features:
-- Add new search filters in `SearchFilter.tsx`
-- Enhance recipe cards in `RecipeCard.tsx`
-- Extend recipe format in `types/Recipe.ts`
+- The new look: the list in `src/herb/ListPage.tsx`, the recipe page in `src/herb/RecipePage.tsx`,
+  the filter rules in `src/herb/filters.ts`.
+- The recipe format: `src/types/Recipe.ts` and `scripts/build-recipes-db.js`.
 
 ### Image Commands
 
