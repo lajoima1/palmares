@@ -5,6 +5,7 @@ import { PhotoTile } from "./PhotoTile";
 import { tagLabel } from "./filters";
 import { DifficultyDot, RecipeLink } from "./parts";
 import { shortTime } from "./time";
+import { tapArea } from "./tapArea";
 
 // A recipe in the desktop grid: the photo, the name, two lines of description, the time, the
 // servings, the difficulty, and up to three tags that add a filter.
@@ -51,7 +52,7 @@ export function RecipeCard({ recipe, onTag }: { recipe: Recipe; onTag: (tag: str
             <ButtonBase
               key={tag}
               onClick={() => onTag(tag)}
-              sx={{ height: 28, px: 1.25, borderRadius: 999, fontSize: 12, fontWeight: 600, color: t.herb, bgcolor: t.herbTint }}
+              sx={{ ...tapArea(28), height: 28, px: 1.25, borderRadius: 999, fontSize: 12, fontWeight: 600, color: t.herb, bgcolor: t.herbTint }}
             >
               {tagLabel(tag)}
             </ButtonBase>

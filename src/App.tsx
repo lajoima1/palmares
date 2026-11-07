@@ -24,6 +24,8 @@ import { SearchFilter } from "./components/SearchFilter";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { createAppTheme, colorThemes, type ColorTheme } from "./theme/themes";
+// The base styles of the old look. The new look has its own (src/theme/herb.ts).
+import "./index.css";
 
 // Our Family's Favorite Recipes
 // A curated collection of beloved family recipes, passed

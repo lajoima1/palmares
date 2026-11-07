@@ -17,7 +17,6 @@ export const herbTokens = {
     saffronInk: "#6B4508",
     error: "#B5452A",
     errorTint: "#F8E4DE",
-    errorInk: "#7A2E1B",
     skeleton: "#E4E8E3",
     easy: "#2E6A4C",
     medium: "#C98A1E",
@@ -37,7 +36,6 @@ export const herbTokens = {
     saffronInk: "#F3D9A8",
     error: "#F08A6A",
     errorTint: "#3A221B",
-    errorInk: "#F7C8B8",
     skeleton: "#222B27",
     easy: "#7CC9A0",
     medium: "#F0B65A",
@@ -49,7 +47,7 @@ export type HerbTokens = (typeof herbTokens)["light"];
 
 export const headingFont = '"Bricolage Grotesque", "Inter", system-ui, sans-serif';
 // src/main.tsx and admin/index.html load these fonts, only for the new look.
-export const textFont = '"Inter", system-ui, sans-serif';
+const textFont = '"Inter", system-ui, sans-serif';
 
 export function difficultyColor(t: HerbTokens, difficulty: string): string {
   if (difficulty === "Easy") return t.easy;
@@ -93,8 +91,11 @@ export function createHerbTheme(mode: PaletteMode) {
     },
     components: {
       MuiCssBaseline: {
-        // index.css centres the body with flex for the old look; the new look flows from the top.
-        styleOverrides: { body: { backgroundColor: t.ground, color: t.ink, display: "block" } },
+        styleOverrides: {
+          body: { backgroundColor: t.ground, color: t.ink },
+          // A clear ring for keyboard focus only, in the herb colour (MUI marks it Mui-focusVisible).
+          ".MuiButtonBase-root.Mui-focusVisible, a:focus-visible": { outline: `3px solid ${t.herb}`, outlineOffset: 2 },
+        },
       },
       MuiButton: {
         defaultProps: { disableElevation: true },
@@ -111,6 +112,8 @@ export function createHerbTheme(mode: PaletteMode) {
       },
       // A full-screen dialog (the recipe form on a phone) fills the screen with square corners.
       MuiDialog: { styleOverrides: { paper: { borderRadius: 28 }, paperFullScreen: { borderRadius: 0 } } },
+      // The default placeholder is the text colour at 42 %, under 3:1; ink2 reaches 4.5:1.
+      MuiInputBase: { styleOverrides: { input: { "&::placeholder": { color: t.ink2, opacity: 1 } } } },
       MuiOutlinedInput: {
         styleOverrides: { root: { borderRadius: 14, backgroundColor: t.surface } },
       },

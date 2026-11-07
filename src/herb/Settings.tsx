@@ -1,4 +1,4 @@
-import { Box, ButtonBase, Drawer, Menu, Switch } from "@mui/material";
+import { Box, ButtonBase, Drawer, Popover, Switch } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { setAppearance, setLook, type Appearance } from "../look";
 import { headingFont } from "../theme/herb";
@@ -95,21 +95,28 @@ interface SettingsProps {
   onClose: () => void;
 }
 
-// A sheet from the bottom on a phone, a menu under the settings button on a desktop.
+// A sheet from the bottom on a phone, a panel under the settings button on a desktop. The panel is
+// a Popover, not a Menu: a Menu closes on Tab, and its content is not menu items.
 export function Settings({ desktop, anchor, appearance, onClose }: SettingsProps) {
   const t = useTheme().herb;
   if (desktop) {
     return (
-      <Menu
+      <Popover
         anchorEl={anchor}
         open={Boolean(anchor)}
         onClose={onClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{ paper: { sx: { mt: 1, width: 340, p: 2.25, display: "flex", flexDirection: "column", gap: 2, bgcolor: t.surface } }, list: { sx: { p: 0, display: "flex", flexDirection: "column", gap: 2 } } }}
+        slotProps={{
+          paper: {
+            component: "section",
+            "aria-label": "Settings",
+            sx: { mt: 1, width: 340, p: 2.25, display: "flex", flexDirection: "column", gap: 2, bgcolor: t.surface, borderRadius: "18px", border: `1px solid ${t.line}` },
+          },
+        }}
       >
         <Content appearance={appearance} />
-      </Menu>
+      </Popover>
     );
   }
   return (

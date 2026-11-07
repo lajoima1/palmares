@@ -2,6 +2,7 @@ import { Box, Button, ButtonBase, Drawer } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { headingFont } from "../theme/herb";
 import { noFilters, tagLabel, toggleTag, type Filters } from "./filters";
+import { tapArea } from "./tapArea";
 
 const LEVELS = ["Any", "Easy", "Medium", "Hard"];
 
@@ -64,6 +65,7 @@ function TagChoice({ filters, onChange, tags }: FilterControlsProps) {
             aria-pressed={on}
             onClick={() => onChange(toggleTag(filters, tag))}
             sx={{
+              ...tapArea(40),
               height: 40,
               px: 1.75,
               borderRadius: 999,
@@ -127,6 +129,7 @@ export function FiltersColumn({ filters, onChange, tags, total }: FilterControls
       aria-pressed={on}
       onClick={onClick}
       sx={{
+        ...tapArea(40),
         height: 40,
         px: 1.5,
         borderRadius: "12px",
@@ -157,6 +160,7 @@ export function FiltersColumn({ filters, onChange, tags, total }: FilterControls
                 aria-pressed={on}
                 onClick={() => onChange({ ...filters, difficulty: value })}
                 sx={{
+                  ...tapArea(36),
                   height: 36,
                   px: 1.75,
                   borderRadius: 999,

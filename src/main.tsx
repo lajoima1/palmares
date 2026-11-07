@@ -1,6 +1,5 @@
 import { StrictMode, type ComponentType } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
 import { getLook } from './look'
 
 function render(App: ComponentType) {

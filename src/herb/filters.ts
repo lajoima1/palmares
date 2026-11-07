@@ -41,12 +41,6 @@ export function tagCounts(recipes: Recipe[]): { tag: string; count: number }[] {
     .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 }
 
-export function difficultyCounts(recipes: Recipe[]): Record<string, number> {
-  const counts: Record<string, number> = { Easy: 0, Medium: 0, Hard: 0 };
-  for (const r of recipes) if (r.difficulty in counts) counts[r.difficulty] += 1;
-  return counts;
-}
-
 export function toggleTag(filters: Filters, tag: string): Filters {
   const tags = filters.tags.includes(tag) ? filters.tags.filter((t) => t !== tag) : [...filters.tags, tag];
   return { ...filters, tags };
@@ -60,3 +54,6 @@ export function withTag(filters: Filters, tag: string): Filters {
 export function tagLabel(tag: string): string {
   return tag.charAt(0).toUpperCase() + tag.slice(1);
 }
+
+// The id of the list's search field, for the focus after a filter is removed.
+export const LIST_SEARCH_ID = "herb-search";

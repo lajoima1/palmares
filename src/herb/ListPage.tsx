@@ -1,14 +1,16 @@
+import { useEffect, useRef } from "react";
 import { Box, ButtonBase, IconButton, InputBase } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { Recipe } from "../types/Recipe";
 import { headingFont } from "../theme/herb";
 import { ActiveFilters } from "./ActiveFilters";
 import { FiltersColumn } from "./FiltersPanel";
-import { filterCount, isFiltered, noFilters, tagLabel, toggleTag, withTag, type Filters } from "./filters";
+import { LIST_SEARCH_ID, filterCount, isFiltered, noFilters, tagLabel, toggleTag, withTag, type Filters } from "./filters";
 import { FilterIcon, Mark, SearchIcon, SlidersIcon } from "./icons";
 import { LoadError, LoadingGrid, NothingMatches } from "./ListStates";
 import { RecipeCard } from "./RecipeCard";
 import { RecipeTile } from "./RecipeTile";
+import { tapArea } from "./tapArea";
 
 export type LoadStatus = "loading" | "error" | "ready";
 
@@ -23,6 +25,9 @@ interface ListPageProps {
   onRetry: () => void;
   onOpenFilters: () => void;
   onOpenSettings: (anchor: HTMLElement) => void;
+  // Goes up by one when a search on a recipe page moves to the list: the list search takes the focus.
+  focusSearch: number;
+  visible: boolean;
 }
 
 function SettingsButton({ onOpen }: { onOpen: (anchor: HTMLElement) => void }) {
@@ -38,8 +43,27 @@ function SettingsButton({ onOpen }: { onOpen: (anchor: HTMLElement) => void }) {
   );
 }
 
-function SearchField({ value, onChange, placeholder, height }: { value: string; onChange: (v: string) => void; placeholder: string; height: number }) {
+interface SearchFieldProps {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  height: number;
+  id?: string;
+  focusToken?: number;
+  visible?: boolean;
+}
+
+function SearchField({ value, onChange, placeholder, height, id, focusToken = 0, visible = true }: SearchFieldProps) {
   const t = useTheme().herb;
+  const input = useRef<HTMLInputElement>(null);
+  const handled = useRef(0);
+  useEffect(() => {
+    const el = input.current;
+    if (!el || !visible || focusToken === handled.current) return;
+    handled.current = focusToken;
+    el.focus();
+    el.setSelectionRange(el.value.length, el.value.length);
+  }, [focusToken, visible]);
   return (
     <Box
       component="label"
@@ -54,7 +78,7 @@ function SearchField({ value, onChange, placeholder, height }: { value: string; 
         gap: 1.25,
         px: 2.25,
         boxSizing: "border-box",
-        "&:focus-within": { borderColor: t.herb },
+        "&:focus-within": { borderColor: t.herb, boxShadow: `0 0 0 3px ${t.herbTint}` },
       }}
     >
       <SearchIcon color={t.ink2} />
@@ -63,7 +87,8 @@ function SearchField({ value, onChange, placeholder, height }: { value: string; 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        inputProps={{ "aria-label": "Search recipes" }}
+        inputRef={input}
+        inputProps={{ "aria-label": "Search recipes", id }}
         sx={{ flexGrow: 1, fontSize: 16, color: t.ink }}
       />
     </Box>
@@ -137,6 +162,7 @@ function PhoneList(props: ListPageProps) {
           onChange={(query) => onFilters({ ...filters, query })}
           placeholder={recipes.length ? `Search ${recipes.length} recipes` : "Search recipes"}
           height={52}
+          id={LIST_SEARCH_ID}
         />
         <IconButton
           aria-label={badge ? `Filters, ${badge} on` : "Filters"}
@@ -175,10 +201,11 @@ function PhoneList(props: ListPageProps) {
           const on = tag === "" ? filters.tags.length === 0 : filters.tags.includes(tag);
           return (
             <ButtonBase
-              key={tag || "all"}
+              key={tag === "" ? "all-tags" : `tag:${tag}`}
               aria-pressed={on}
               onClick={() => onFilters(tag === "" ? { ...filters, tags: [] } : toggleTag(filters, tag))}
               sx={{
+                ...tapArea(36),
                 flexShrink: 0,
                 height: 36,
                 px: 2,
@@ -207,7 +234,17 @@ function PhoneList(props: ListPageProps) {
 
 // The top bar of a desktop page: the mark, the search and the settings button. On a recipe page,
 // the mark and a search go back to the list.
-export function DesktopHeader({ query, onQuery, onOpenSettings, onHome }: { query: string; onQuery: (q: string) => void; onOpenSettings: (anchor: HTMLElement) => void; onHome?: () => void }) {
+interface DesktopHeaderProps {
+  query: string;
+  onQuery: (q: string) => void;
+  onOpenSettings: (anchor: HTMLElement) => void;
+  onHome?: () => void;
+  searchId?: string;
+  focusToken?: number;
+  visible?: boolean;
+}
+
+export function DesktopHeader({ query, onQuery, onOpenSettings, onHome, searchId, focusToken, visible }: DesktopHeaderProps) {
   const t = useTheme().herb;
   const brand = (
     <>
@@ -228,7 +265,15 @@ export function DesktopHeader({ query, onQuery, onOpenSettings, onHome }: { quer
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>{brand}</Box>
         )}
         <Box sx={{ flex: "1 1 320px", maxWidth: 560, mx: "auto", display: "flex" }}>
-          <SearchField value={query} onChange={onQuery} placeholder="Search by name, ingredient or description" height={48} />
+          <SearchField
+            value={query}
+            onChange={onQuery}
+            placeholder="Search by name, ingredient or description"
+            height={48}
+            id={searchId}
+            focusToken={focusToken}
+            visible={visible}
+          />
         </Box>
         <SettingsButton onOpen={onOpenSettings} />
       </Box>
@@ -241,7 +286,14 @@ function DesktopList(props: ListPageProps) {
   const { recipes, tags, filters, onFilters, onOpenSettings, status } = props;
   return (
     <Box sx={{ pb: 8 }}>
-      <DesktopHeader query={filters.query} onQuery={(query) => onFilters({ ...filters, query })} onOpenSettings={onOpenSettings} />
+      <DesktopHeader
+        query={filters.query}
+        onQuery={(query) => onFilters({ ...filters, query })}
+        onOpenSettings={onOpenSettings}
+        searchId={LIST_SEARCH_ID}
+        focusToken={props.focusSearch}
+        visible={props.visible}
+      />
 
       <Box sx={{ maxWidth: 1240, mx: "auto", px: 4, pt: 5, pb: 3 }}>
         <Box component="h1" sx={{ m: 0, fontFamily: headingFont, fontWeight: 800, fontSize: 48, lineHeight: 1.05, letterSpacing: "-0.025em" }}>

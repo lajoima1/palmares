@@ -19,7 +19,8 @@ function write(key: string, value: string): void {
   try {
     localStorage.setItem(key, value);
   } catch {
-    // The choice then lasts only until the page reloads.
+    // Storage is blocked (some private windows): the choice is not kept, so the look switch does
+    // nothing and the appearance lasts until the page reloads.
   }
 }
 

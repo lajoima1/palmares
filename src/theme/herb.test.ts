@@ -26,7 +26,8 @@ const textPairs: [keyof HerbTokens, keyof HerbTokens][] = [
   ["herb", "herbTint"],
   ["onHerb", "herb"],
   ["saffronInk", "saffronTint"],
-  ["errorInk", "errorTint"],
+  ["error", "surface"],
+  ["ink2", "herbTint"],
   ["ground", "ink"],
 ];
 

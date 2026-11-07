@@ -10,7 +10,7 @@ import { FiltersSheet } from "./FiltersPanel";
 import { DesktopHeader, ListPage, type LoadStatus } from "./ListPage";
 import { LoadError } from "./ListStates";
 import { NotFound } from "./NotFound";
-import { RecipePage, RecipeSkeleton } from "./RecipePage";
+import { RecipeBackBar, RecipePage, RecipeSkeleton } from "./RecipePage";
 import { Settings } from "./Settings";
 import { openList, useRoute } from "./router";
 
@@ -35,6 +35,9 @@ function Shell({ appearance }: { appearance: Appearance }) {
   const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(null);
   const started = useRef(false);
   const listScroll = useRef(0);
+  // A search on a desktop recipe page moves to the list once; the list search then takes the focus.
+  const leaving = useRef(false);
+  const [searchFocus, setSearchFocus] = useState(0);
 
   const load = useCallback(() => {
     setStatus("loading");
@@ -73,6 +76,7 @@ function Shell({ appearance }: { appearance: Appearance }) {
 
   useLayoutEffect(() => {
     window.scrollTo(0, route.page === "list" ? listScroll.current : 0);
+    if (route.page === "list") leaving.current = false;
   }, [route]);
 
   const tags = useMemo(() => tagCounts(recipes), [recipes]);
@@ -92,7 +96,10 @@ function Shell({ appearance }: { appearance: Appearance }) {
   };
   const searchFromRecipe = (query: string) => {
     setFilters((f) => ({ ...f, query }));
+    if (leaving.current) return;
+    leaving.current = true;
     listScroll.current = 0;
+    setSearchFocus((n) => n + 1);
     openList();
   };
 
@@ -101,21 +108,25 @@ function Shell({ appearance }: { appearance: Appearance }) {
     page = <NotFound onList={() => openList()} />;
   } else if (route.page === "recipe") {
     const header = desktop ? (
-      <DesktopHeader query="" onQuery={searchFromRecipe} onOpenSettings={openSettings} onHome={() => openList()} />
+      <DesktopHeader query={filters.query} onQuery={searchFromRecipe} onOpenSettings={openSettings} onHome={() => openList()} />
     ) : undefined;
     if (recipe) {
       page = <RecipePage recipe={recipe} desktop={desktop} onBack={() => openList()} onTag={showTag} header={header} />;
     } else if (status === "error") {
       page = (
-        <Box sx={{ p: 2.5, pt: 6 }}>
-          <LoadError onRetry={load} />
-        </Box>
+        <>
+          {header}
+          <RecipeBackBar desktop={desktop} onBack={() => openList()} />
+          <Box sx={{ p: 2.5, pt: 4 }}>
+            <LoadError onRetry={load} />
+          </Box>
+        </>
       );
     } else {
       page = (
         <>
           {header}
-          <RecipeSkeleton desktop={desktop} />
+          <RecipeSkeleton desktop={desktop} onBack={() => openList()} />
         </>
       );
     }
@@ -136,6 +147,8 @@ function Shell({ appearance }: { appearance: Appearance }) {
           onRetry={load}
           onOpenFilters={() => setFiltersOpen(true)}
           onOpenSettings={openSettings}
+          focusSearch={searchFocus}
+          visible={!page}
         />
       </Box>
       {page}

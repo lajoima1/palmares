@@ -11,6 +11,7 @@ import { PhotoTile } from "./PhotoTile";
 import { DifficultyDot } from "./parts";
 import { shortTime } from "./time";
 import { useWakeLock } from "./useWakeLock";
+import { tapArea } from "./tapArea";
 
 interface RecipePageProps {
   recipe: Recipe;
@@ -38,7 +39,7 @@ function Chips({ recipe, onTag }: { recipe: Recipe; onTag: (tag: string) => void
         <ButtonBase
           key={tag}
           onClick={() => onTag(tag)}
-          sx={{ height: 32, px: 1.5, borderRadius: 999, fontSize: 13, fontWeight: 600, color: t.herb, bgcolor: t.herbTint }}
+          sx={{ ...tapArea(32), height: 32, px: 1.5, borderRadius: 999, fontSize: 13, fontWeight: 600, color: t.herb, bgcolor: t.herbTint }}
         >
           {tagLabel(tag)}
         </ButtonBase>
@@ -253,22 +254,57 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
   );
 }
 
+// The way back to the list on a recipe page that has no recipe to show (loading, load error).
+export function RecipeBackBar({ desktop, onBack }: { desktop: boolean; onBack: () => void }) {
+  const t = useTheme().herb;
+  if (desktop) {
+    return (
+      <Box sx={{ maxWidth: 1240, mx: "auto", px: 4, pt: 3 }}>
+        <ButtonBase onClick={onBack} sx={{ height: 44, gap: 0.75, fontSize: 15, fontWeight: 600, color: t.herb }}>
+          <BackIcon size={18} color={t.herb} strokeWidth={2.2} />
+          All recipes
+        </ButtonBase>
+      </Box>
+    );
+  }
+  return (
+    <Box sx={{ p: "20px 20px 0" }}>
+      <IconButton aria-label="Back to recipes" onClick={onBack} sx={{ width: 44, height: 44, border: `1px solid ${t.line}`, bgcolor: t.surface, "&:hover": { bgcolor: t.surface } }}>
+        <BackIcon color={t.ink} strokeWidth={2.2} />
+      </IconButton>
+    </Box>
+  );
+}
+
 // The recipe page while recipes.db loads: the photo area and grey lines in the page layout.
-export function RecipeSkeleton({ desktop }: { desktop: boolean }) {
+export function RecipeSkeleton({ desktop, onBack }: { desktop: boolean; onBack: () => void }) {
   const t = useTheme().herb;
   const bar = (width: string, height: number) => <Box sx={{ width, height, borderRadius: 1, bgcolor: t.skeleton }} />;
   return (
-    <Box role="status" aria-label="Loading the recipe" sx={desktop ? { maxWidth: 1240, mx: "auto", px: 4, pt: 10, display: "flex", gap: 5 } : {}}>
-      <Box sx={desktop ? { flex: "1 1 460px", maxWidth: 620, aspectRatio: "4 / 3", borderRadius: "28px", bgcolor: t.herbTint } : { height: 340, bgcolor: t.herbTint }} />
-      <Box sx={{ flex: "1 1 420px", p: desktop ? 0 : "24px 20px", display: "flex", flexDirection: "column", gap: 1.75 }}>
-        {bar("40%", 28)}
-        {bar("85%", 34)}
-        {bar("100%", 14)}
-        {bar("90%", 14)}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1, mt: 1 }}>
-          {[0, 1, 2, 3].map((i) => (
-            <Box key={i} sx={{ height: 62, borderRadius: "16px", bgcolor: t.skeleton }} />
-          ))}
+    <Box sx={{ position: "relative" }}>
+      {desktop ? (
+        <RecipeBackBar desktop onBack={onBack} />
+      ) : (
+        <IconButton
+          aria-label="Back to recipes"
+          onClick={onBack}
+          sx={{ position: "absolute", zIndex: 1, top: 20, left: 20, width: 44, height: 44, bgcolor: "rgba(255,255,255,0.92)", "&:hover": { bgcolor: "#FFFFFF" } }}
+        >
+          <BackIcon color="#16201B" strokeWidth={2.2} />
+        </IconButton>
+      )}
+      <Box role="status" aria-label="Loading the recipe" sx={desktop ? { maxWidth: 1240, mx: "auto", px: 4, pt: 3, display: "flex", gap: 5 } : {}}>
+        <Box sx={desktop ? { flex: "1 1 460px", maxWidth: 620, aspectRatio: "4 / 3", borderRadius: "28px", bgcolor: t.herbTint } : { height: 340, bgcolor: t.herbTint }} />
+        <Box sx={{ flex: "1 1 420px", p: desktop ? 0 : "24px 20px", display: "flex", flexDirection: "column", gap: 1.75 }}>
+          {bar("40%", 28)}
+          {bar("85%", 34)}
+          {bar("100%", 14)}
+          {bar("90%", 14)}
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1, mt: 1 }}>
+            {[0, 1, 2, 3].map((i) => (
+              <Box key={i} sx={{ height: 62, borderRadius: "16px", bgcolor: t.skeleton }} />
+            ))}
+          </Box>
         </Box>
       </Box>
     </Box>

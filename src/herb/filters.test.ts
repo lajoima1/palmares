@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Recipe } from "../types/Recipe";
 import {
-  difficultyCounts,
   filterCount,
   filterRecipes,
   isFiltered,
@@ -68,10 +67,6 @@ describe("counts and tag changes", () => {
       { tag: "pasta", count: 1 },
       { tag: "weeknight", count: 1 },
     ]);
-  });
-
-  it("counts difficulties, Hard included", () => {
-    expect(difficultyCounts(recipes)).toEqual({ Easy: 2, Medium: 1, Hard: 0 });
   });
 
   it("counts the active filters of the filters button", () => {
