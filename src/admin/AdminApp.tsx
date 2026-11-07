@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
-  AppBar,
   Box,
   Button,
   CircularProgress,
@@ -11,11 +10,10 @@ import {
   MenuItem,
   Snackbar,
   ThemeProvider,
-  Toolbar,
-  Typography,
 } from "@mui/material";
-import ArrowBack from "@mui/icons-material/ArrowBack";
-import MoreVert from "@mui/icons-material/MoreVert";
+import Menu2 from "@mui/icons-material/Menu";
+import { headingFont } from "../theme/herb";
+import { Mark } from "../herb/icons";
 import { api, whenSignedOut, type RecipeList as RecipeListData, type SaveResult, type SessionInfo } from "./api";
 import { Passkeys } from "./Passkeys";
 import { RecipeForm, type SaveKind } from "./RecipeForm";
@@ -47,7 +45,8 @@ function tokenWarning(tokenExpires: string | undefined): { severity: "warning" |
 }
 
 export default function AdminApp() {
-  const { theme, isDarkMode } = useAdminTheme();
+  const theme = useAdminTheme();
+  const t = theme.herb;
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [view, setView] = useState<View>("recipes");
@@ -122,44 +121,53 @@ export default function AdminApp() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppBar
-        position="sticky"
-        elevation={0}
-        sx={{
-          backgroundColor: "primary.main",
-          backgroundImage: "none",
-          borderBottom: `1px solid ${isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
-          color: "white",
-          "& .MuiTypography-root, & .MuiSvgIcon-root": { color: "white" },
-        }}
-      >
-        <Toolbar>
-          <Box component="img" src={`${import.meta.env.BASE_URL}squared-garlic-64x64.webp`} alt="" sx={{ width: 32, height: 32, mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }} noWrap>
-            Palmarès admin
-          </Typography>
-          <Button href={import.meta.env.BASE_URL} color="inherit" startIcon={<ArrowBack />} sx={{ display: { xs: "none", sm: "inline-flex" } }}>
+      <Box component="header" sx={{ maxWidth: 900, mx: "auto", display: "flex", alignItems: "center", gap: 1.25, px: 2.5, pt: 2.5, pb: 1 }}>
+        <Mark size={36} />
+        <Box component="span" sx={{ fontFamily: headingFont, fontWeight: 800, fontSize: 22 }}>
+          Palmarès
+        </Box>
+        <Box
+          component="span"
+          sx={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: t.saffronInk, bgcolor: t.saffronTint, px: 1, py: 0.5, borderRadius: "6px" }}
+        >
+          Admin
+        </Box>
+        <Box sx={{ flexGrow: 1 }} />
+        {!session?.signedIn && (
+          <Button href={import.meta.env.BASE_URL} sx={{ fontWeight: 600, px: 1 }}>
             Back to recipes
           </Button>
-          <IconButton href={import.meta.env.BASE_URL} aria-label="Back to recipes" sx={{ display: { xs: "inline-flex", sm: "none" } }}>
-            <ArrowBack />
-          </IconButton>
-          {session?.signedIn && (
-            <>
-              <IconButton aria-label="Menu" onClick={(e) => setMenuAnchor(e.currentTarget)} edge="end">
-                <MoreVert />
-              </IconButton>
-              <Menu anchorEl={menuAnchor} open={menuAnchor !== null} onClose={() => setMenuAnchor(null)}>
-                <MenuItem onClick={() => show("recipes")}>Recipes</MenuItem>
-                <MenuItem onClick={() => show("passkeys")}>Passkeys</MenuItem>
-                <MenuItem onClick={signOut}>Sign out</MenuItem>
-              </Menu>
-            </>
-          )}
-        </Toolbar>
-      </AppBar>
+        )}
+        {session?.signedIn && (
+          <>
+            <IconButton
+              aria-label="Menu"
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+              sx={{ border: `1px solid ${t.line}`, bgcolor: t.surface, "&:hover": { bgcolor: t.surface } }}
+            >
+              <Menu2 />
+            </IconButton>
+            <Menu
+              anchorEl={menuAnchor}
+              open={menuAnchor !== null}
+              onClose={() => setMenuAnchor(null)}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <MenuItem component="a" href={import.meta.env.BASE_URL}>
+                Back to recipes
+              </MenuItem>
+              <MenuItem onClick={() => show("recipes")}>Recipes</MenuItem>
+              <MenuItem onClick={() => show("passkeys")}>Passkeys</MenuItem>
+              <MenuItem onClick={signOut} sx={{ color: t.error }}>
+                Sign out
+              </MenuItem>
+            </Menu>
+          </>
+        )}
+      </Box>
 
-      <Box component="main" sx={{ maxWidth: 900, mx: "auto", px: 2, py: 3 }}>
+      <Box component="main" sx={{ maxWidth: 900, mx: "auto", px: 2.5, py: 2 }}>
         {loadError && (
           <Alert
             severity="error"
@@ -202,12 +210,11 @@ export default function AdminApp() {
         onClose={(_, reason) => reason !== "clickaway" && live.status !== "building" && setLastSave(null)}
         autoHideDuration={live.status === "building" ? null : 8000}
       >
-        {/* The Parchment theme puts a cream gradient on each Paper. It would cover the filled colour. */}
         <Alert
           severity={live.status === "live" ? "success" : "info"}
           variant="filled"
           onClose={() => setLastSave(null)}
-          sx={{ backgroundImage: "none" }}
+          sx={{ bgcolor: t.ink, color: t.ground, borderRadius: "18px", "& .MuiAlert-icon": { color: t.herbTint } }}
         >
           “{lastSave?.name}” {lastSave?.kind}. {live.status !== "idle" && LIVE_TEXT[live.status]}.
         </Alert>
@@ -218,7 +225,12 @@ export default function AdminApp() {
         autoHideDuration={5000}
         onClose={() => setUnchanged(false)}
       >
-        <Alert severity="info" variant="filled" onClose={() => setUnchanged(false)} sx={{ backgroundImage: "none" }}>
+        <Alert
+          severity="info"
+          variant="filled"
+          onClose={() => setUnchanged(false)}
+          sx={{ bgcolor: t.ink, color: t.ground, borderRadius: "18px", "& .MuiAlert-icon": { color: t.herbTint } }}
+        >
           Nothing changed, so nothing was saved.
         </Alert>
       </Snackbar>

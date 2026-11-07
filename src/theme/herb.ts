@@ -87,7 +87,7 @@ export function createHerbTheme(mode: PaletteMode) {
       h2: { fontFamily: headingFont, fontWeight: 800, letterSpacing: "-0.02em" },
       h3: { fontFamily: headingFont, fontWeight: 800, letterSpacing: "-0.02em" },
       h4: { fontFamily: headingFont, fontWeight: 800, letterSpacing: "-0.02em" },
-      h5: { fontFamily: headingFont, fontWeight: 700 },
+      h5: { fontFamily: headingFont, fontWeight: 800, fontSize: "1.75rem", letterSpacing: "-0.01em" },
       h6: { fontFamily: headingFont, fontWeight: 700 },
       button: { textTransform: "none", fontWeight: 600 },
     },
@@ -109,7 +109,8 @@ export function createHerbTheme(mode: PaletteMode) {
       MuiDrawer: {
         styleOverrides: { paperAnchorBottom: { borderRadius: "28px 28px 0 0" } },
       },
-      MuiDialog: { styleOverrides: { paper: { borderRadius: 28 } } },
+      // A full-screen dialog (the recipe form on a phone) fills the screen with square corners.
+      MuiDialog: { styleOverrides: { paper: { borderRadius: 28 }, paperFullScreen: { borderRadius: 0 } } },
       MuiOutlinedInput: {
         styleOverrides: { root: { borderRadius: 14, backgroundColor: t.surface } },
       },
