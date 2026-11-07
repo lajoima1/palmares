@@ -25,8 +25,10 @@ interface ListPageProps {
   onRetry: () => void;
   onOpenFilters: () => void;
   onOpenSettings: (anchor: HTMLElement) => void;
-  // Goes up by one when a search on a recipe page moves to the list: the list search takes the focus.
-  focusSearch: number;
+  // True after a search on a recipe page moves to the list: the list search takes the focus once
+  // the list shows, then calls onSearchFocused.
+  focusSearch: boolean;
+  onSearchFocused: () => void;
   visible: boolean;
 }
 
@@ -49,21 +51,20 @@ interface SearchFieldProps {
   placeholder: string;
   height: number;
   id?: string;
-  focusToken?: number;
-  visible?: boolean;
+  focus?: boolean;
+  onFocused?: () => void;
 }
 
-function SearchField({ value, onChange, placeholder, height, id, focusToken = 0, visible = true }: SearchFieldProps) {
+function SearchField({ value, onChange, placeholder, height, id, focus = false, onFocused }: SearchFieldProps) {
   const t = useTheme().herb;
   const input = useRef<HTMLInputElement>(null);
-  const handled = useRef(0);
   useEffect(() => {
     const el = input.current;
-    if (!el || !visible || focusToken === handled.current) return;
-    handled.current = focusToken;
+    if (!el || !focus) return;
     el.focus();
     el.setSelectionRange(el.value.length, el.value.length);
-  }, [focusToken, visible]);
+    onFocused?.();
+  }, [focus, onFocused]);
   return (
     <Box
       component="label"
@@ -181,7 +182,7 @@ function PhoneList(props: ListPageProps) {
                 height: 20,
                 borderRadius: 999,
                 bgcolor: t.saffron,
-                color: "#16201B",
+                color: t.onSaffron,
                 fontSize: 12,
                 fontWeight: 700,
                 display: "flex",
@@ -196,7 +197,8 @@ function PhoneList(props: ListPageProps) {
         </IconButton>
       </Box>
 
-      <Box sx={{ display: "flex", gap: 1, px: 2.5, pt: 2, pb: 0.5, overflowX: "auto", scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
+      {/* The row scrolls sideways; pb leaves room for the 44 px tap area of the chips (tapArea). */}
+      <Box sx={{ display: "flex", gap: 1, px: 2.5, pt: 2, pb: 0.75, overflowX: "auto", scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
         {[{ tag: "", count: recipes.length }, ...tags].map(({ tag }) => {
           const on = tag === "" ? filters.tags.length === 0 : filters.tags.includes(tag);
           return (
@@ -240,11 +242,11 @@ interface DesktopHeaderProps {
   onOpenSettings: (anchor: HTMLElement) => void;
   onHome?: () => void;
   searchId?: string;
-  focusToken?: number;
-  visible?: boolean;
+  focusSearch?: boolean;
+  onSearchFocused?: () => void;
 }
 
-export function DesktopHeader({ query, onQuery, onOpenSettings, onHome, searchId, focusToken, visible }: DesktopHeaderProps) {
+export function DesktopHeader({ query, onQuery, onOpenSettings, onHome, searchId, focusSearch, onSearchFocused }: DesktopHeaderProps) {
   const t = useTheme().herb;
   const brand = (
     <>
@@ -271,8 +273,8 @@ export function DesktopHeader({ query, onQuery, onOpenSettings, onHome, searchId
             placeholder="Search by name, ingredient or description"
             height={48}
             id={searchId}
-            focusToken={focusToken}
-            visible={visible}
+            focus={focusSearch}
+            onFocused={onSearchFocused}
           />
         </Box>
         <SettingsButton onOpen={onOpenSettings} />
@@ -291,8 +293,8 @@ function DesktopList(props: ListPageProps) {
         onQuery={(query) => onFilters({ ...filters, query })}
         onOpenSettings={onOpenSettings}
         searchId={LIST_SEARCH_ID}
-        focusToken={props.focusSearch}
-        visible={props.visible}
+        focusSearch={props.focusSearch && props.visible}
+        onSearchFocused={props.onSearchFocused}
       />
 
       <Box sx={{ maxWidth: 1240, mx: "auto", px: 4, pt: 5, pb: 3 }}>

@@ -19,7 +19,7 @@ export default function HerbApp() {
   const theme = useMemo(() => createHerbTheme(mode), [mode]);
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       <Shell appearance={appearance} />
     </ThemeProvider>
   );
@@ -37,7 +37,7 @@ function Shell({ appearance }: { appearance: Appearance }) {
   const listScroll = useRef(0);
   // A search on a desktop recipe page moves to the list once; the list search then takes the focus.
   const leaving = useRef(false);
-  const [searchFocus, setSearchFocus] = useState(0);
+  const [searchFocus, setSearchFocus] = useState(false);
 
   const load = useCallback(() => {
     setStatus("loading");
@@ -94,12 +94,13 @@ function Shell({ appearance }: { appearance: Appearance }) {
     listScroll.current = 0;
     openList();
   };
+  const clearSearchFocus = useCallback(() => setSearchFocus(false), []);
   const searchFromRecipe = (query: string) => {
     setFilters((f) => ({ ...f, query }));
     if (leaving.current) return;
     leaving.current = true;
     listScroll.current = 0;
-    setSearchFocus((n) => n + 1);
+    setSearchFocus(true);
     openList();
   };
 
@@ -148,6 +149,7 @@ function Shell({ appearance }: { appearance: Appearance }) {
           onOpenFilters={() => setFiltersOpen(true)}
           onOpenSettings={openSettings}
           focusSearch={searchFocus}
+          onSearchFocused={clearSearchFocus}
           visible={!page}
         />
       </Box>

@@ -29,6 +29,7 @@ const textPairs: [keyof HerbTokens, keyof HerbTokens][] = [
   ["error", "surface"],
   ["ink2", "herbTint"],
   ["ground", "ink"],
+  ["onSaffron", "saffron"],
 ];
 
 describe("herb colours", () => {

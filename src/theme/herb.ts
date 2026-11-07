@@ -13,6 +13,7 @@ export const herbTokens = {
     onHerb: "#FFFFFF",
     herbTint: "#E3EFE7",
     saffron: "#E7A33E",
+    onSaffron: "#16201B",
     saffronTint: "#FBF0DC",
     saffronInk: "#6B4508",
     error: "#B5452A",
@@ -32,6 +33,7 @@ export const herbTokens = {
     onHerb: "#0F1412",
     herbTint: "#1F3329",
     saffron: "#F0B65A",
+    onSaffron: "#16201B",
     saffronTint: "#2E2615",
     saffronInk: "#F3D9A8",
     error: "#F08A6A",
@@ -72,7 +74,7 @@ export function createHerbTheme(mode: PaletteMode) {
     palette: {
       mode,
       primary: { main: t.herb, contrastText: t.onHerb },
-      secondary: { main: t.saffron, contrastText: t.ink },
+      secondary: { main: t.saffron, contrastText: t.onSaffron },
       error: { main: t.error },
       background: { default: t.ground, paper: t.surface },
       text: { primary: t.ink, secondary: t.ink2 },
@@ -102,6 +104,13 @@ export function createHerbTheme(mode: PaletteMode) {
         styleOverrides: { root: { borderRadius: 999, minHeight: 44, paddingInline: 18 } },
       },
       MuiIconButton: { styleOverrides: { root: { minWidth: 44, minHeight: 44 } } },
+      // The switch clips its own focus ring, so the ring goes around the whole switch.
+      MuiSwitch: {
+        styleOverrides: {
+          root: { borderRadius: 999, "&:has(.Mui-focusVisible)": { outline: `3px solid ${t.herb}`, outlineOffset: 0 } },
+          switchBase: { "&.Mui-focusVisible": { outline: "none" } },
+        },
+      },
       MuiChip: { styleOverrides: { root: { borderRadius: 999, fontWeight: 500 } } },
       MuiPaper: { styleOverrides: { root: { backgroundImage: "none" } } },
       MuiCard: {

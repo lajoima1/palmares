@@ -185,10 +185,7 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
       <Box sx={{ pb: 9 }}>
         {header}
         <Box sx={{ maxWidth: 1240, mx: "auto", px: 4, pt: 3, display: "flex", flexDirection: "column", gap: 4 }}>
-          <ButtonBase onClick={onBack} sx={{ alignSelf: "flex-start", height: 44, gap: 0.75, fontSize: 15, fontWeight: 600, color: t.herb }}>
-            <BackIcon size={18} color={t.herb} strokeWidth={2.2} />
-            All recipes
-          </ButtonBase>
+          <AllRecipesButton onBack={onBack} />
           <Box component="section" sx={{ display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center" }}>
             <Box sx={{ flex: "1 1 460px", minWidth: 0, maxWidth: 620 }}>
               <PhotoTile src={recipe.image_url} name={recipe.name} alt={recipe.name} aspectRatio="4 / 3" radius="28px" letterSize={140} />
@@ -224,13 +221,7 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
     <Box sx={{ pb: 6 }}>
       <Box sx={{ position: "relative" }}>
         <PhotoTile src={recipe.image_url} name={recipe.name} alt={recipe.name} height={340} letterHeight={240} radius={0} letterSize={120} />
-        <IconButton
-          aria-label="Back to recipes"
-          onClick={onBack}
-          sx={{ position: "absolute", top: 20, left: 20, width: 44, height: 44, bgcolor: "rgba(255,255,255,0.92)", "&:hover": { bgcolor: "#FFFFFF" } }}
-        >
-          <BackIcon color="#16201B" strokeWidth={2.2} />
-        </IconButton>
+        <PhotoBackButton onBack={onBack} />
       </Box>
       <Box component="main" sx={{ position: "relative", mt: "-28px", borderRadius: "28px 28px 0 0", bgcolor: t.ground, p: "24px 20px 0", display: "flex", flexDirection: "column", gap: 3 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -254,16 +245,37 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
   );
 }
 
+// The way back to the list on a desktop recipe page.
+function AllRecipesButton({ onBack }: { onBack: () => void }) {
+  const t = useTheme().herb;
+  return (
+    <ButtonBase onClick={onBack} sx={{ alignSelf: "flex-start", height: 44, gap: 0.75, fontSize: 15, fontWeight: 600, color: t.herb }}>
+      <BackIcon size={18} color={t.herb} strokeWidth={2.2} />
+      All recipes
+    </ButtonBase>
+  );
+}
+
+// The way back to the list on a phone, over the photo at the top of the page.
+function PhotoBackButton({ onBack }: { onBack: () => void }) {
+  return (
+    <IconButton
+      aria-label="Back to recipes"
+      onClick={onBack}
+      sx={{ position: "absolute", zIndex: 1, top: 20, left: 20, width: 44, height: 44, bgcolor: "rgba(255,255,255,0.92)", "&:hover": { bgcolor: "#FFFFFF" } }}
+    >
+      <BackIcon color="#16201B" strokeWidth={2.2} />
+    </IconButton>
+  );
+}
+
 // The way back to the list on a recipe page that has no recipe to show (loading, load error).
 export function RecipeBackBar({ desktop, onBack }: { desktop: boolean; onBack: () => void }) {
   const t = useTheme().herb;
   if (desktop) {
     return (
       <Box sx={{ maxWidth: 1240, mx: "auto", px: 4, pt: 3 }}>
-        <ButtonBase onClick={onBack} sx={{ height: 44, gap: 0.75, fontSize: 15, fontWeight: 600, color: t.herb }}>
-          <BackIcon size={18} color={t.herb} strokeWidth={2.2} />
-          All recipes
-        </ButtonBase>
+        <AllRecipesButton onBack={onBack} />
       </Box>
     );
   }
@@ -285,13 +297,7 @@ export function RecipeSkeleton({ desktop, onBack }: { desktop: boolean; onBack: 
       {desktop ? (
         <RecipeBackBar desktop onBack={onBack} />
       ) : (
-        <IconButton
-          aria-label="Back to recipes"
-          onClick={onBack}
-          sx={{ position: "absolute", zIndex: 1, top: 20, left: 20, width: 44, height: 44, bgcolor: "rgba(255,255,255,0.92)", "&:hover": { bgcolor: "#FFFFFF" } }}
-        >
-          <BackIcon color="#16201B" strokeWidth={2.2} />
-        </IconButton>
+        <PhotoBackButton onBack={onBack} />
       )}
       <Box role="status" aria-label="Loading the recipe" sx={desktop ? { maxWidth: 1240, mx: "auto", px: 4, pt: 3, display: "flex", gap: 5 } : {}}>
         <Box sx={desktop ? { flex: "1 1 460px", maxWidth: 620, aspectRatio: "4 / 3", borderRadius: "28px", bgcolor: t.herbTint } : { height: 340, bgcolor: t.herbTint }} />

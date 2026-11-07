@@ -110,6 +110,7 @@ export function Settings({ desktop, anchor, appearance, onClose }: SettingsProps
         slotProps={{
           paper: {
             component: "section",
+            role: "dialog",
             "aria-label": "Settings",
             sx: { mt: 1, width: 340, p: 2.25, display: "flex", flexDirection: "column", gap: 2, bgcolor: t.surface, borderRadius: "18px", border: `1px solid ${t.line}` },
           },

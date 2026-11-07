@@ -9,7 +9,8 @@ import { tapArea } from "./tapArea";
 export function ActiveFilters({ filters, onChange }: { filters: Filters; onChange: (f: Filters) => void }) {
   const t = useTheme().herb;
   const box = useRef<HTMLDivElement>(null);
-  // After a remove, the focus goes to the chip now in the same place, else to the search field.
+  // After a remove by keyboard (a click with detail 0), the focus goes to the chip now in the same
+  // place, else to the search field. A tap does not move the focus, so no phone keyboard opens.
   const refocus = (index: number) =>
     requestAnimationFrame(() => {
       const chips = box.current?.querySelectorAll<HTMLButtonElement>("[data-filter-chip]");
@@ -42,9 +43,9 @@ export function ActiveFilters({ filters, onChange }: { filters: Filters; onChang
         <ButtonBase
           key={item.key}
           data-filter-chip=""
-          onClick={() => {
+          onClick={(e) => {
             item.remove();
-            refocus(index);
+            if (e.detail === 0) refocus(index);
           }}
           aria-label={`Remove filter ${item.label}`}
           sx={{ ...tapArea(32), height: 32, pl: 1.5, pr: 1, borderRadius: 999, bgcolor: t.surface, color: t.ink, fontSize: 13, gap: 0.5 }}
@@ -54,9 +55,9 @@ export function ActiveFilters({ filters, onChange }: { filters: Filters; onChang
         </ButtonBase>
       ))}
       <ButtonBase
-        onClick={() => {
+        onClick={(e) => {
           onChange(noFilters);
-          refocus(0);
+          if (e.detail === 0) refocus(0);
         }}
         sx={{ ...tapArea(32), ml: "auto", fontSize: 14, fontWeight: 600, color: t.herb, px: 0.5, minHeight: 32 }}
       >

@@ -120,7 +120,7 @@ export default function AdminApp() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       <Box component="header" sx={{ maxWidth: 900, mx: "auto", display: "flex", alignItems: "center", gap: 1.25, px: 2.5, pt: 2.5, pb: 1 }}>
         <Mark size={36} />
         <Box component="span" sx={{ fontFamily: headingFont, fontWeight: 800, fontSize: 22 }}>

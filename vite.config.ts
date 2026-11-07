@@ -9,8 +9,8 @@ const workers = Boolean(process.env.WORKERS_CI);
 // https://vite.dev/config/
 export default defineConfig(({ command, isPreview }) => {
   // The Cloudflare build and `npm run dev` have both looks. The GitHub Pages build has only the
-  // old look, and its bundle holds no code of the new one. `npm run preview` serves the last
-  // `npm run build`, so it takes the base of the GitHub Pages build.
+  // old look, and its bundle holds no code of the new one. `npm run preview` uses the base of the
+  // build with the same WORKERS_CI: run both with it, or both without it.
   const looks = workers || (command === "serve" && !isPreview);
 
   return {

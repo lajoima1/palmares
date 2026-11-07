@@ -108,7 +108,7 @@ export function FiltersSheet({ open, onClose, filters, onChange, tags, resultCou
           <SectionLabel>Difficulty</SectionLabel>
           <DifficultyChoice filters={filters} onChange={onChange} />
         </Box>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25, overflowY: "auto", minHeight: 0, flex: "1 1 auto" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25, overflowY: "auto", minHeight: 0, flex: "1 1 auto", pb: 0.5 }}>
           <SectionLabel>Tags</SectionLabel>
           <TagChoice filters={filters} onChange={onChange} tags={tags} />
         </Box>
