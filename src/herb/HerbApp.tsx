@@ -3,7 +3,7 @@ import { Box, CssBaseline, ThemeProvider, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { Recipe } from "../types/Recipe";
 import { loadAllRecipesFromDb } from "../utils/recipeDatabase";
-import { setLook, useAppearanceMode } from "../look";
+import { useAppearanceMode, type Appearance } from "../look";
 import { createHerbTheme } from "../theme/herb";
 import { filterRecipes, noFilters, tagCounts, withTag, type Filters } from "./filters";
 import { FiltersSheet } from "./FiltersPanel";
@@ -11,26 +11,28 @@ import { DesktopHeader, ListPage, type LoadStatus } from "./ListPage";
 import { LoadError } from "./ListStates";
 import { NotFound } from "./NotFound";
 import { RecipePage, RecipeSkeleton } from "./RecipePage";
+import { Settings } from "./Settings";
 import { openList, useRoute } from "./router";
 
 export default function HerbApp() {
-  const { mode } = useAppearanceMode();
+  const { appearance, mode } = useAppearanceMode();
   const theme = useMemo(() => createHerbTheme(mode), [mode]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Shell />
+      <Shell appearance={appearance} />
     </ThemeProvider>
   );
 }
 
-function Shell() {
+function Shell({ appearance }: { appearance: Appearance }) {
   const desktop = useMediaQuery(useTheme().breakpoints.up("md"));
   const route = useRoute();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [filters, setFilters] = useState<Filters>(noFilters);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(null);
   const started = useRef(false);
   const listScroll = useRef(0);
 
@@ -81,7 +83,7 @@ function Shell() {
     document.title = recipe ? `${recipe.name} · Palmarès` : "Palmarès";
   }, [recipe]);
 
-  const openSettings = () => setLook("old");
+  const openSettings = (anchor: HTMLElement) => setSettingsAnchor(anchor);
   // A tag on a recipe page opens the list with that tag added.
   const showTag = (tag: string) => {
     setFilters((f) => withTag(f, tag));
@@ -137,6 +139,7 @@ function Shell() {
         />
       </Box>
       {page}
+      <Settings desktop={desktop} anchor={settingsAnchor} appearance={appearance} onClose={() => setSettingsAnchor(null)} />
       {!desktop && (
         <FiltersSheet
           open={filtersOpen && !page}
