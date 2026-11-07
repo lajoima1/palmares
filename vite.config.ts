@@ -17,9 +17,9 @@ export default defineConfig(({ command, isPreview }) => {
     plugins: [
       react(),
       {
-        name: "looks-flag",
+        name: "herb-blocks",
         // index.html marks the new look's loader, fonts and icons with <!--herb--> … <!--/herb-->.
-        // The GitHub Pages build drops these blocks, so its page holds nothing of the new look.
+        // The GitHub Pages build drops these blocks, so its page shows only the old loader.
         transformIndexHtml: (html: string) =>
           looks ? html : html.replace(/<!--herb-->[\s\S]*?<!--\/herb-->/g, ""),
       },

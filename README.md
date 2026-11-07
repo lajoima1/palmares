@@ -101,9 +101,9 @@ Each device remembers its look (`look` in `localStorage`) and its appearance (`a
 system, light or dark). `src/main.tsx` loads the code of one look only.
 
 The GitHub Pages copy has only the old look, with `#/<slug>` links. `vite.config.ts` sets
-`__LOOKS__` to `false` for that build, so its bundle has no code of the new look. The same build removes the
-`<!--herb-->` blocks of `index.html`: the loader, fonts and icons of the new look. `npm run dev`
-shows the new look at http://localhost:5173/.
+`__LOOKS__` to `false` for that build, so its bundle has no code of the new look. The same build
+removes the `<!--herb-->` blocks of `index.html`: the loader, fonts and icons of the new look.
+`npm run dev` shows the new look at http://localhost:5173/.
 
 ## Admin page
 
