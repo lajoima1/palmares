@@ -21,13 +21,6 @@ function Svg({ size = 20, color = "currentColor", strokeWidth = 2, children }: I
   );
 }
 
-export const LeafIcon = (p: IconProps) => (
-  <Svg {...p}>
-    <path d="M5 21c0-9 5-15 14-16-1 9-6 14-14 16z" />
-    <path d="M5 21l8-8" />
-  </Svg>
-);
-
 export const SlidersIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M4 7h10" />
@@ -118,7 +111,8 @@ export const BookIcon = (p: IconProps) => (
   </Svg>
 );
 
-// The brand mark: a leaf on a herb square.
+// The brand mark: a solid leaf on a herb square. The favicon (public/icon.svg) and the loader in
+// index.html draw the same leaf; change them together.
 export function Mark({ size = 40 }: { size?: number }) {
   const t = useTheme().herb;
   return (
@@ -134,7 +128,11 @@ export function Mark({ size = 40 }: { size?: number }) {
         flexShrink: 0,
       }}
     >
-      <LeafIcon size={Math.round(size * 0.55)} color={t.onHerb} />
+      <svg width={Math.round(size * 0.64)} height={Math.round(size * 0.64)} viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 20C4 11 10 5 20 5c0 10-6 15.5-15 15z" fill={t.onHerb} />
+        <path d="M8.5 16.5l6.5-6.5" stroke={t.herb} strokeWidth={1.6} strokeLinecap="round" />
+        <path d="M5.6 19.4l-2.2 2.2" stroke={t.onHerb} strokeWidth={1.8} strokeLinecap="round" />
+      </svg>
     </Box>
   );
 }
