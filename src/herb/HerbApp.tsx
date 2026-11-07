@@ -95,6 +95,10 @@ function Shell({ appearance }: { appearance: Appearance }) {
     openList();
   };
   const clearSearchFocus = useCallback(() => setSearchFocus(false), []);
+  // Only the desktop list takes the search focus; a phone layout drops the request.
+  useEffect(() => {
+    if (!desktop) setSearchFocus(false);
+  }, [desktop]);
   const searchFromRecipe = (query: string) => {
     setFilters((f) => ({ ...f, query }));
     if (leaving.current) return;

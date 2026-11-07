@@ -122,7 +122,7 @@ export function Settings({ desktop, anchor, appearance, onClose }: SettingsProps
   }
   return (
     <Drawer anchor="bottom" open={Boolean(anchor)} onClose={onClose} slotProps={{ paper: { sx: { bgcolor: t.surface } } }}>
-      <Box component="section" aria-label="Settings" sx={{ p: "12px 20px 28px", display: "flex", flexDirection: "column", gap: 2.25 }}>
+      <Box component="section" role="dialog" aria-label="Settings" sx={{ p: "12px 20px 28px", display: "flex", flexDirection: "column", gap: 2.25 }}>
         <Box sx={{ width: 40, height: 5, borderRadius: 3, bgcolor: t.line, alignSelf: "center" }} aria-hidden="true" />
         <Box component="h2" sx={{ m: 0, fontFamily: headingFont, fontWeight: 700, fontSize: 24 }}>
           Settings
