@@ -118,7 +118,7 @@
     </div>
   </div>
 
-  <div id="root" style="width: 100vw"></div>
+  <div id="root" style="width: 100%"></div>
 
   <script type="module" src="/src/main.tsx"></script>
 
@@ -126,6 +126,23 @@
     // Set dynamic spinner color based on user's theme preference
     function setSpinnerColor() {
       try {
+        // vite.config.ts writes true here where the new look exists, false in the GitHub Pages build.
+        var looks = __LOOKS__;
+        if (looks && localStorage.getItem('look') !== 'old') {
+          var appearance = localStorage.getItem('appearance');
+          var dark = appearance === 'dark' ||
+            (appearance !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var herb = document.createElement('style');
+          herb.textContent = dark
+            ? '#initial-loader{background-color:#0F1412 !important;color:#E8EEEA !important}' +
+              '.spinner{border:4px solid #2A3530 !important;border-left-color:#7CC9A0 !important}' +
+              '.loading-title{color:#E8EEEA !important}.loading-subtitle{color:#A7B4AD !important}'
+            : '#initial-loader{background-color:#F4F5F2 !important;color:#16201B !important}' +
+              '.spinner{border:4px solid #E1E5E0 !important;border-left-color:#2E6A4C !important}' +
+              '.loading-title{color:#16201B !important}.loading-subtitle{color:#4A5650 !important}';
+          document.head.appendChild(herb);
+          return;
+        }
         const colorThemes = [
           { name: "Parchment", primary: "#8B4513", secondary: "#D2691E" },
           { name: "Classic Red", primary: "#d32f2f", secondary: "#ff9800" },

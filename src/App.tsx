@@ -29,6 +29,13 @@ import { createAppTheme, colorThemes, type ColorTheme } from "./theme/themes";
 // A curated collection of beloved family recipes, passed
 // down through generations and tested in our kitchen with love.
 
+// On Cloudflare a shared recipe link is /recipe/<slug>. This look opens a recipe from #/<slug>,
+// so turn the address into that form before the first render.
+const recipePath = window.location.pathname.match(/^\/recipe\/([^/]+)\/?$/);
+if (__LOOKS__ && recipePath) {
+  window.history.replaceState(null, "", `${import.meta.env.BASE_URL}#/${recipePath[1]}`);
+}
+
 function App() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);

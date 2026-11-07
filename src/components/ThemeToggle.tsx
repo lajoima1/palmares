@@ -15,6 +15,7 @@ import Brightness7 from "@mui/icons-material/Brightness7";
 import Palette from "@mui/icons-material/Palette";
 import Check from "@mui/icons-material/Check";
 import { colorThemes, type ColorTheme } from "../theme/themes";
+import { setLook } from "../look";
 
 interface ThemeToggleProps {
   isDarkMode: boolean;
@@ -121,6 +122,16 @@ export function ThemeToggle({
             )}
           </MenuItem>
         ))}
+        {__LOOKS__ && <Divider />}
+        {__LOOKS__ && (
+          <MenuItem onClick={() => setLook("new")} sx={{ py: 1.5, px: 2 }}>
+            <ListItemText
+              primary="Use the new look"
+              secondary="Switch back on this device."
+              slotProps={{ primary: { variant: "body2", fontWeight: 600 } }}
+            />
+          </MenuItem>
+        )}
       </Menu>
     </Box>
   );
