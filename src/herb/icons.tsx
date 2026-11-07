@@ -21,14 +21,11 @@ function Svg({ size = 20, color = "currentColor", strokeWidth = 2, children }: I
   );
 }
 
-export const SlidersIcon = (p: IconProps) => (
+// The gear of Lucide (ISC licence), the usual sign for settings.
+export const GearIcon = (p: IconProps) => (
   <Svg {...p}>
-    <path d="M4 7h10" />
-    <path d="M18 7h2" />
-    <circle cx="16" cy="7" r="2" />
-    <path d="M4 17h4" />
-    <path d="M12 17h8" />
-    <circle cx="10" cy="17" r="2" />
+    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+    <circle cx="12" cy="12" r="3" />
   </Svg>
 );
 

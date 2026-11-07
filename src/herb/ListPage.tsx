@@ -6,7 +6,7 @@ import { headingFont } from "../theme/herb";
 import { ActiveFilters } from "./ActiveFilters";
 import { FiltersColumn } from "./FiltersPanel";
 import { LIST_SEARCH_ID, filterCount, isFiltered, noFilters, tagLabel, toggleTag, withTag, type Filters } from "./filters";
-import { FilterIcon, Mark, SearchIcon, SlidersIcon } from "./icons";
+import { FilterIcon, GearIcon, Mark, SearchIcon } from "./icons";
 import { LoadError, LoadingGrid, NothingMatches } from "./ListStates";
 import { RecipeCard } from "./RecipeCard";
 import { RecipeTile } from "./RecipeTile";
@@ -40,7 +40,7 @@ function SettingsButton({ onOpen }: { onOpen: (anchor: HTMLElement) => void }) {
       onClick={(e) => onOpen(e.currentTarget)}
       sx={{ width: 44, height: 44, border: `1px solid ${t.line}`, bgcolor: t.surface, flexShrink: 0, "&:hover": { bgcolor: t.surface } }}
     >
-      <SlidersIcon color={t.ink} />
+      <GearIcon color={t.ink} />
     </IconButton>
   );
 }
