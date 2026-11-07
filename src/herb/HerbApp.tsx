@@ -1,29 +1,80 @@
-import { useMemo } from "react";
-import { Box, CssBaseline, IconButton, ThemeProvider, Typography } from "@mui/material";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CssBaseline, ThemeProvider, useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import type { Recipe } from "../types/Recipe";
+import { loadAllRecipesFromDb } from "../utils/recipeDatabase";
 import { setLook, useAppearanceMode } from "../look";
 import { createHerbTheme } from "../theme/herb";
-import { Mark } from "./icons";
+import { filterRecipes, noFilters, tagCounts, type Filters } from "./filters";
+import { FiltersSheet } from "./FiltersPanel";
+import { ListPage, type LoadStatus } from "./ListPage";
 
 export default function HerbApp() {
   const { mode } = useAppearanceMode();
   const theme = useMemo(() => createHerbTheme(mode), [mode]);
-  const t = theme.herb;
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box component="header" sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2.5, pt: 2.5 }}>
-        <Mark />
-        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Typography variant="h4" component="div" sx={{ fontSize: 26, lineHeight: 1 }}>
-            Palmarès
-          </Typography>
-          <Typography sx={{ fontSize: 13, color: t.ink2, mt: 0.5 }}>Les recettes de la famille</Typography>
-        </Box>
-        <IconButton aria-label="Old look" onClick={() => setLook("old")} sx={{ border: `1px solid ${t.line}` }}>
-          <Typography sx={{ fontSize: 12 }}>Old</Typography>
-        </IconButton>
-      </Box>
+      <Shell />
     </ThemeProvider>
+  );
+}
+
+function Shell() {
+  const desktop = useMediaQuery(useTheme().breakpoints.up("md"));
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [status, setStatus] = useState<LoadStatus>("loading");
+  const [filters, setFilters] = useState<Filters>(noFilters);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const started = useRef(false);
+
+  const load = useCallback(() => {
+    setStatus("loading");
+    loadAllRecipesFromDb()
+      .then((loaded) => {
+        setRecipes(loaded as Recipe[]);
+        setStatus("ready");
+      })
+      .catch((err) => {
+        console.error("Error loading recipes:", err);
+        setStatus("error");
+      });
+  }, []);
+
+  useEffect(() => {
+    // StrictMode runs effects twice in development; load recipes.db once.
+    if (started.current) return;
+    started.current = true;
+    load();
+  }, [load]);
+
+  const tags = useMemo(() => tagCounts(recipes), [recipes]);
+  const shown = useMemo(() => filterRecipes(recipes, filters), [recipes, filters]);
+
+  return (
+    <>
+      <ListPage
+        desktop={desktop}
+        status={status}
+        recipes={recipes}
+        shown={shown}
+        tags={tags}
+        filters={filters}
+        onFilters={setFilters}
+        onRetry={load}
+        onOpenFilters={() => setFiltersOpen(true)}
+        onOpenSettings={() => setLook("old")}
+      />
+      {!desktop && (
+        <FiltersSheet
+          open={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
+          filters={filters}
+          onChange={setFilters}
+          tags={tags}
+          resultCount={shown.length}
+        />
+      )}
+    </>
   );
 }

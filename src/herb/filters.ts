@@ -55,3 +55,8 @@ export function toggleTag(filters: Filters, tag: string): Filters {
 export function withTag(filters: Filters, tag: string): Filters {
   return filters.tags.includes(tag) ? filters : { ...filters, tags: [...filters.tags, tag] };
 }
+
+// Tags are stored in lower case ("made by mom"); the new look shows the first letter in capitals.
+export function tagLabel(tag: string): string {
+  return tag.charAt(0).toUpperCase() + tag.slice(1);
+}

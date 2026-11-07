@@ -93,7 +93,8 @@ export function createHerbTheme(mode: PaletteMode) {
     },
     components: {
       MuiCssBaseline: {
-        styleOverrides: { body: { backgroundColor: t.ground, color: t.ink } },
+        // index.css centres the body with flex for the old look; the new look flows from the top.
+        styleOverrides: { body: { backgroundColor: t.ground, color: t.ink, display: "block" } },
       },
       MuiButton: {
         defaultProps: { disableElevation: true },
