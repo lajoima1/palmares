@@ -8,7 +8,7 @@ const MAX_BODY = 3 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
 const MAX_TEXT = 20_000;
 // The slug comes from the name and is a folder name. Some file systems refuse more than 255 bytes.
-const MAX_NAME = 100;
+export const MAX_NAME = 100;
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DIFFICULTIES = ["", "Easy", "Medium", "Hard"];
 const ONE_LINE = ["name", "description", "servings", "prep_time", "cook_time", "total_time", "difficulty"] as const;
@@ -25,7 +25,7 @@ function checkSlug(slug: string): string {
   return slug;
 }
 
-function readFields(value: unknown): RecipeFields {
+export function readFields(value: unknown): RecipeFields {
   if (typeof value !== "object" || value === null) throw new HttpError(400, "The recipe fields are missing.");
   const input = value as Record<string, unknown>;
   const fields = {} as RecipeFields;
@@ -58,7 +58,7 @@ function readFields(value: unknown): RecipeFields {
 }
 
 // The text that the build reads must give back the values that the owner typed.
-function recipeText(fields: RecipeFields): string {
+export function recipeText(fields: RecipeFields): string {
   const text = serializeRecipe(fields);
   if (text.length > MAX_TEXT) throw new HttpError(400, `The recipe is longer than ${MAX_TEXT} characters.`);
   if (JSON.stringify(parseRecipeText(text)) !== JSON.stringify(fields)) {

@@ -1,10 +1,11 @@
-// Reads recipes with the real service, as the admin page does, and prints the answer, the time and
+// Reads recipes with the real service, as the admin page does, and prints the fields, the time and
 // the cost. Usage: npm run try:read -- [--model <id>] [--json <mode>] [--agree] <photo or link>…
 // It needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (see README, "Recipe auto-fill").
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { parseRecipeText } from "../src/utils/recipeText.ts";
-import { askModel, MODEL, ModelError, type JsonMode, type RunModel } from "../worker/model.ts";
+import { askModel, MODEL, ModelError, type JsonMode, type RunModel, type Source } from "../worker/model.ts";
+import { cleanAnswer, pageText, readPage } from "../worker/read.ts";
 
 // Neurons per million input and output tokens, from the Workers AI pricing page (2026-11-07).
 // The free plan gives 10,000 neurons a day.
@@ -97,9 +98,12 @@ for (const source of sources) {
   usage = undefined;
   const start = Date.now();
   try {
-    if (/^https?:/.test(source)) throw new Error("Links come with the page code of worker/read.ts.");
-    const answer = await askModel(run, { image: photo(source) }, tags, { model, json });
-    console.log(JSON.stringify(answer, null, 2));
+    const input: Source = /^https?:/.test(source)
+      ? { text: pageText((await readPage(source)).html) }
+      : { image: photo(source) };
+    const answer = await askModel(run, input, tags, { model, json });
+    // The form gets the cleaned fields. The raw answer shows what the cleaning dropped.
+    console.log(JSON.stringify(cleanAnswer(answer, tags) ?? { noRecipe: answer }, null, 2));
   } catch (e) {
     console.log("error:", e instanceof ModelError ? `${e.kind} (${e.cause instanceof Error ? e.cause.message : ""})` : e instanceof Error ? e.message : e);
   }
