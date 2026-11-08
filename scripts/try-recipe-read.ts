@@ -1,5 +1,5 @@
 // Reads recipes with the real service, as the admin page does, and prints the fields, the time and
-// the cost. Usage: npm run try:read -- [--model <id>] [--json <mode>] [--agree] <photo or link>…
+// the cost. Usage: npm run try:read -- [--model <id>] [--json <mode>] [--agree] <photo, link or .txt>…
 // It needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (see README, "Recipe auto-fill").
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
@@ -98,9 +98,12 @@ for (const source of sources) {
   usage = undefined;
   const start = Date.now();
   try {
+    // A .txt file stands for a text that the owner pasted.
     const input: Source = /^https?:/.test(source)
       ? { text: pageText((await readPage(source)).html) }
-      : { image: photo(source) };
+      : source.endsWith(".txt")
+        ? { text: readFileSync(source, "utf8").trim().slice(0, 24_000) }
+        : { image: photo(source) };
     const answer = await askModel(run, input, tags, { model, json });
     // The form gets the cleaned fields. The raw answer shows what the cleaning dropped.
     console.log(JSON.stringify(cleanAnswer(answer, tags) ?? { noRecipe: answer }, null, 2));

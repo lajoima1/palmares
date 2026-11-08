@@ -45,13 +45,13 @@ export interface SaveResult {
   changed?: boolean;
 }
 
-// What the model read. `source` is "photo" or the host of the link, like "ricardocuisine.com".
+// What the model read. `source` is "photo", "text" or the host of the link, like "ricardocuisine.com".
 export interface ReadResult {
   fields: RecipeFields;
   source: string;
 }
 
-export type ReadSource = { image: string } | { url: string };
+export type ReadSource = { image: string } | { url: string } | { text: string };
 
 function isRecipeFields(value: unknown): value is RecipeFields {
   if (typeof value !== "object" || value === null) return false;

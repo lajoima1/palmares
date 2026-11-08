@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Alert, Box, Button, LinearProgress, Stack, TextField, Typography } from "@mui/material";
 import CheckRounded from "@mui/icons-material/CheckRounded";
+import ContentPasteRounded from "@mui/icons-material/ContentPasteRounded";
 import LinkRounded from "@mui/icons-material/LinkRounded";
 import PhotoCameraOutlined from "@mui/icons-material/PhotoCameraOutlined";
 import type { RecipeFields } from "../utils/recipeText";
@@ -9,20 +10,27 @@ import { PhotoError, readingPhoto } from "./photo";
 
 interface ImportFieldProps {
   tags: string[];
-  // "photo" or the host of the link, after a fill that the form kept. null: nothing filled.
+  // "photo", "text" or the host of the link, after a fill that the form kept. null: nothing filled.
   filledFrom: string | null;
   onFilled: (fields: RecipeFields, source: string) => void;
   onAgain: () => void;
   onBusy: (busy: boolean) => void;
 }
 
-type State = "rest" | "link" | "reading";
+type State = "rest" | "link" | "text" | "reading";
+
+function filledLabel(source: string): string {
+  if (source === "photo") return "Filled from a photo";
+  if (source === "text") return "Filled from text";
+  return `Filled from ${source}`;
+}
 
 export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: ImportFieldProps) {
   const input = useRef<HTMLInputElement>(null);
   const reading = useRef<AbortController | null>(null);
   const [state, setState] = useState<State>("rest");
   const [link, setLink] = useState("");
+  const [pasted, setPasted] = useState("");
   const [error, setError] = useState<string | null>(null);
   const again = useRef<HTMLButtonElement>(null);
 
@@ -44,6 +52,7 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
       const result = await api.readRecipe(await source(), tags, controller.signal);
       onFilled(result.fields, result.source);
       setLink("");
+      setPasted("");
       setState("rest");
     } catch (e) {
       if (controller.signal.aborted) return;
@@ -80,6 +89,22 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
     read(async () => ({ url }));
   }
 
+  function submitText(event: FormEvent) {
+    event.preventDefault();
+    const text = pasted.trim();
+    if (text) read(async () => ({ text }));
+  }
+
+  function back() {
+    setError(null);
+    setState("rest");
+  }
+
+  function open(next: "link" | "text") {
+    setError(null);
+    setState(next);
+  }
+
   function cancel() {
     reading.current?.abort();
     reading.current = null;
@@ -97,7 +122,7 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
         <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
           <CheckRounded color="primary" />
           <Typography role="status" noWrap sx={{ flexGrow: 1, minWidth: 0, fontWeight: 600 }}>
-            {filledFrom === "photo" ? "Filled from a photo" : `Filled from ${filledFrom}`}
+            {filledLabel(filledFrom)}
           </Typography>
           <Button ref={again} onClick={onAgain} sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
             Fill again
@@ -144,16 +169,32 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
               slotProps={{ htmlInput: { inputMode: "url", autoCapitalize: "none", autoCorrect: "off" } }}
             />
             <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
-              <Button
-                color="inherit"
-                onClick={() => {
-                  setError(null);
-                  setState("rest");
-                }}
-              >
+              <Button color="inherit" onClick={back}>
                 Cancel
               </Button>
               <Button type="submit" variant="contained" disabled={!link.trim()}>
+                Fill
+              </Button>
+            </Stack>
+          </Stack>
+        )}
+        {state === "text" && (
+          <Stack component="form" spacing={1.5} onSubmit={submitText} noValidate>
+            <TextField
+              label="Recipe text"
+              multiline
+              minRows={5}
+              maxRows={12}
+              value={pasted}
+              onChange={(e) => setPasted(e.target.value)}
+              autoFocus
+              helperText="On the recipe page, select all, copy, and paste here."
+            />
+            <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
+              <Button color="inherit" onClick={back}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="contained" disabled={!pasted.trim()}>
                 Fill
               </Button>
             </Stack>
@@ -176,12 +217,18 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
               color="inherit"
               fullWidth
               startIcon={<LinkRounded />}
-              onClick={() => {
-                setError(null);
-                setState("link");
-              }}
+              onClick={() => open("link")}
             >
               Paste a link
+            </Button>
+            <Button
+              variant="outlined"
+              color="inherit"
+              fullWidth
+              startIcon={<ContentPasteRounded />}
+              onClick={() => open("text")}
+            >
+              Paste text
             </Button>
           </Stack>
         )}

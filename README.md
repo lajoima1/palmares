@@ -155,8 +155,9 @@ For the Vite dev server, run `npx wrangler dev --env local` and `WORKERS_CI=1 np
 
 ### Recipe auto-fill
 
-"Fill from a photo or link" at the top of Add recipe reads one photo or one link and fills the
-form. The owner checks the fields and saves. The Worker sends the photo, or the text of the page,
+"Fill from a photo or link" at the top of Add recipe reads one photo, one link or one pasted text,
+and fills the form. The owner checks the fields and saves. Some sites refuse a request from the
+Worker (Budget Bytes answers 403): copy the text of the page and use "Paste text". The Worker sends the photo, or the text of the page,
 to a vision model of Cloudflare Workers AI through the `AI` binding. `worker/model.ts` holds the
 model, the prompt and the call. There is no key: the binding uses the Cloudflare account.
 
