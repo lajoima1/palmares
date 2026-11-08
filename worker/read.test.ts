@@ -130,9 +130,9 @@ describe("readPage", () => {
     await expect(readPage("https://example.com/r")).rejects.toMatchObject({ status: 422 });
   });
 
-  it("stops at 3 MB", async () => {
-    page("a".repeat(4 * 1024 * 1024));
-    expect((await readPage("https://www.example.com/r")).html).toHaveLength(3 * 1024 * 1024);
+  it("stops at 1 MB", async () => {
+    page("a".repeat(2 * 1024 * 1024));
+    expect((await readPage("https://www.example.com/r")).html).toHaveLength(1024 * 1024);
   });
 
   it("decodes with the charset of the page and gives the host", async () => {

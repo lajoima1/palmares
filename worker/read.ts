@@ -2,8 +2,9 @@ import { linesToItems, type ListKind, type RecipeFields } from "../src/utils/rec
 import { HttpError } from "./http.ts";
 import { MAX_NAME, readFields, recipeText } from "./recipes.ts";
 
-// A recipe page is often 0.5 to 1.5 MB of HTML. The rest of a larger page is not read.
-const MAX_PAGE = 3 * 1024 * 1024;
+// The recipe data is near the top of a page. The text code takes about 4 ms of CPU for 1 MB, and
+// the free plan gives a request 10 ms.
+const MAX_PAGE = 1024 * 1024;
 // About 6,000 tokens, or 150 neurons with Llama 4 Scout. A longer text uses more of the day.
 const MAX_TEXT = 24_000;
 // Some recipe sites refuse a request with no browser name.

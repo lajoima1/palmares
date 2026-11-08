@@ -2,7 +2,7 @@
 // this file only.
 import type { RecipeFields } from "../src/utils/recipeText.ts";
 
-export const MODEL = "@cf/meta/llama-4-scout-17b-16e-instruct";
+export const MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 
 // Production passes the AI binding, scripts/try-recipe-read.ts the REST API, the tests a fake.
 export type RunModel = (model: string, input: Record<string, unknown>) => Promise<unknown>;
@@ -115,7 +115,7 @@ function rules(tags: string[]): string {
     "- Copy the ingredients and the steps as the source writes them. Never invent an ingredient or a step. Fix only clear reading errors.",
     "- One ingredient per item. One step per item. Do not number the steps. Do not start an item with a dash.",
     '- A group of ingredients starts with a heading item, like "## Pour la sauce:" in French or "## For the sauce:" in English.',
-    '- Times are like "15 minutes" or "1 heure 15 minutes" in French, and "15 minutes" or "1 hour 15 minutes" in English.',
+    '- Times are like "15 minutes" or "1 heure 15 minutes" in French, and "15 minutes" or "1 hour 15 minutes" in English. In a French recipe, write "heure", never "hour".',
     '- Servings are like "6 portions" in French and "6 servings" in English.',
     "- If the source gives no prep time, cook time or total time, estimate it. The total time is the prep time plus the cook time.",
     '- difficulty is "Easy", "Medium" or "Hard". Estimate it if the source does not give it.',
@@ -123,7 +123,7 @@ function rules(tags: string[]): string {
       ? `- tags: choose 2 to 5 tags, only from this list: ${JSON.stringify(tags)}. Never make a new tag.`
       : "- tags: return an empty list.",
     "- description: one short sentence in the language of the source. Use the description of the source if it has one.",
-    "- notes: tips, variants, storage and side recipes of the source, one per item. An empty list if there are none.",
+    "- notes: the tips, variants, storage advice and side recipes that the source gives, one per item. Never write a note that the source does not have. An empty list if there are none.",
     "- found is false if the source holds no recipe. Then all the other fields are empty.",
     "Return only the JSON object, with no other text.",
     "Two recipes of the site, to show the form of each field:",
