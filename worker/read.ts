@@ -1,6 +1,8 @@
 import { linesToItems, type ListKind, type RecipeFields } from "../src/utils/recipeText.ts";
-import { HttpError } from "./http.ts";
+import { HttpError, json, readJson } from "./http.ts";
+import { askModel, ModelError, type Source } from "./model.ts";
 import { MAX_NAME, readFields, recipeText } from "./recipes.ts";
+import type { Context } from "./router.ts";
 
 // The recipe data is near the top of a page. The text code takes about 4 ms of CPU for 1 MB, and
 // the free plan gives a request 10 ms.
@@ -219,4 +221,74 @@ export function cleanAnswer(raw: unknown, tags: string[]): RecipeFields | null {
   } catch {
     return null;
   }
+}
+
+// Like a save: a photo of 1.5 MB is 2 MB in base64.
+const MAX_BODY = 3 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
+// The site has about 40 tags today.
+const MAX_TAGS = 300;
+const MAX_TAG_LENGTH = 50;
+const NO_RECIPE = "No recipe was found. Try a sharper photo, or type the recipe.";
+const MODEL_ERRORS: Record<ModelError["kind"], [number, string]> = {
+  daily: [429, "The free limit of the day is reached. Try again tomorrow, or type the recipe."],
+  busy: [429, "The service is busy. Try again in a minute."],
+  failed: [502, "The service failed. Try again."],
+  unreadable: [502, "The service failed. Try again."],
+};
+
+interface ReadBody {
+  image?: unknown;
+  url?: unknown;
+  tags?: unknown;
+}
+
+function readTags(value: unknown): string[] {
+  if (value === undefined) return [];
+  if (
+    !Array.isArray(value) ||
+    value.length > MAX_TAGS ||
+    value.some((t) => typeof t !== "string" || t.length > MAX_TAG_LENGTH)
+  ) {
+    throw new HttpError(400, "The tag list is not valid.");
+  }
+  return value;
+}
+
+// A JPEG in base64 starts with "/9j/".
+function readPhoto(value: unknown): string {
+  if (typeof value !== "string" || !value.startsWith("/9j/") || !/^[A-Za-z0-9+/]+={0,2}$/.test(value)) {
+    throw new HttpError(400, "The photo must be a JPEG.");
+  }
+  if (value.length * 0.75 > MAX_IMAGE_BYTES) throw new HttpError(413, "The photo is too large.");
+  return value;
+}
+
+// Each error becomes an HttpError, so the router logs nothing: a parse error can quote the answer.
+export async function readHandler({ request, env }: Context): Promise<Response> {
+  const body = await readJson<ReadBody>(request, MAX_BODY);
+  const tags = readTags(body.tags);
+  if ((body.image === undefined) === (body.url === undefined)) {
+    throw new HttpError(400, "Send one photo or one link.");
+  }
+  let source: Source;
+  let from = "photo";
+  if (body.image !== undefined) {
+    source = { image: readPhoto(body.image) };
+  } else {
+    if (typeof body.url !== "string") throw new HttpError(400, "This link is not valid.");
+    const page = await readPage(body.url);
+    source = { text: pageText(page.html) };
+    from = page.host;
+  }
+  let fields: RecipeFields | null;
+  try {
+    // A bare env.AI.run loses its `this`.
+    fields = cleanAnswer(await askModel((model, input) => env.AI.run(model, input), source, tags), tags);
+  } catch (e) {
+    const [status, message] = MODEL_ERRORS[e instanceof ModelError ? e.kind : "failed"];
+    throw new HttpError(status, message);
+  }
+  if (!fields) throw new HttpError(422, NO_RECIPE);
+  return json({ fields, source: from });
 }

@@ -3,6 +3,9 @@ export interface Env {
   COMMIT?: string;
   // Passkeys and users. See worker/passkeys.ts for the keys.
   AUTH: KVNamespace;
+  // Workers AI, which reads a recipe from a photo or a page. The type of the binding (Ai) lists
+  // the inputs of each model; worker/model.ts builds its input itself.
+  AI: { run(model: string, input: Record<string, unknown>): Promise<unknown> };
 
   // Secrets: Worker secrets in Cloudflare, `.dev.vars` in a local run.
   GITHUB_TOKEN: string;

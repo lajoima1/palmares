@@ -1,5 +1,9 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MODEL, type RunModel } from "./model.ts";
 import { cleanAnswer, pageText, readPage } from "./read.ts";
+import { handleApi } from "./router.ts";
+import { createSession } from "./session.ts";
+import { apiRequest, cookieHeader, ORIGIN, testEnv } from "./testEnv.ts";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -138,5 +142,110 @@ describe("readPage", () => {
   it("decodes with the charset of the page and gives the host", async () => {
     page(new Uint8Array([0x63, 0x72, 0xe8, 0x6d, 0x65]), { headers: { "Content-Type": "text/html; charset=ISO-8859-1" } });
     expect(await readPage("https://www.ricardocuisine.com/r")).toEqual({ html: "crème", host: "ricardocuisine.com" });
+  });
+});
+
+describe("POST /api/recipes/read", () => {
+  // The start of a JPEG file in base64.
+  const PHOTO = "/9j/4AAQSkZJRgABAQ==";
+  let env: ReturnType<typeof testEnv>;
+  let cookie: string;
+  let run: ReturnType<typeof vi.fn<RunModel>>;
+
+  beforeEach(async () => {
+    env = testEnv();
+    run = vi.fn<RunModel>(async () => ({ response: JSON.stringify(answer()) }));
+    env.AI.run = run;
+    await env.AUTH.put("passkey:pk1", JSON.stringify({ id: "pk1", userId: "u1" }));
+    cookie = cookieHeader(await createSession(env, { userId: "u1", passkeyId: "pk1" }));
+  });
+
+  function call(body: unknown, headers: Record<string, string> = { Origin: ORIGIN }, withCookie = true) {
+    return handleApi(
+      apiRequest("/api/recipes/read", {
+        method: "POST",
+        cookie: withCookie ? cookie : undefined,
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+      env,
+    );
+  }
+
+  it("reads a photo and answers the fields only", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const res = await call({ image: PHOTO, tags: TAGS });
+    expect(res.status).toBe(200);
+    const body = await res.json<Record<string, unknown>>();
+    expect(Object.keys(body).sort()).toEqual(["fields", "source"]);
+    expect(body.source).toBe("photo");
+    expect((body.fields as { name: string }).name).toBe("Potage aux carottes");
+    expect(run).toHaveBeenCalledWith(MODEL, expect.objectContaining({ messages: expect.any(Array) }));
+    expect(JSON.stringify(run.mock.calls[0][1])).toContain(`data:image/jpeg;base64,${PHOTO}`);
+    // No GitHub call: nothing is saved.
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("reads a link and gives its host", async () => {
+    page(`<script type="application/ld+json">{"@type":"Recipe","name":"Macaroni","image":"https://x/p.jpg"}</script>`);
+    const res = await call({ url: "https://www.example.com/r", tags: TAGS });
+    expect(res.status).toBe(200);
+    expect((await res.json<{ source: string }>()).source).toBe("example.com");
+    const sent = JSON.stringify(run.mock.calls[0][1]);
+    expect(sent).toContain("Macaroni");
+    expect(sent).not.toContain("p.jpg");
+  });
+
+  it("needs one photo or one link", async () => {
+    expect((await call({ image: PHOTO, url: "https://example.com" })).status).toBe(400);
+    expect((await call({ tags: TAGS })).status).toBe(400);
+  });
+
+  it("refuses a photo that is not a JPEG, or too large", async () => {
+    expect((await call({ image: "UklGRhAAAABXRUJQ" })).status).toBe(400);
+    expect((await call({ image: "/9j/" + "A".repeat(2.1 * 1024 * 1024) })).status).toBe(413);
+  });
+
+  it("refuses a bad tag list", async () => {
+    expect((await call({ image: PHOTO, tags: "soup" })).status).toBe(400);
+    expect((await call({ image: PHOTO, tags: [1] })).status).toBe(400);
+    expect((await call({ image: PHOTO, tags: Array(301).fill("a") })).status).toBe(400);
+  });
+
+  it("needs a session and the admin origin", async () => {
+    expect((await call({ image: PHOTO }, { Origin: ORIGIN }, false)).status).toBe(401);
+    expect((await call({ image: PHOTO }, { Origin: "https://evil.example" })).status).toBe(403);
+  });
+
+  it("says when no recipe was found", async () => {
+    run.mockResolvedValue({ response: JSON.stringify(answer({ found: false })) });
+    const res = await call({ image: PHOTO });
+    expect(res.status).toBe(422);
+    expect((await res.json<{ error: string }>()).error).toMatch(/No recipe/);
+  });
+
+  it("maps the errors of the service and logs nothing", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    run.mockRejectedValueOnce(new Error("3036: You have used up your daily free allocation of 10,000 neurons."));
+    let res = await call({ image: PHOTO });
+    expect(res.status).toBe(429);
+    expect((await res.json<{ error: string }>()).error).toMatch(/tomorrow/);
+
+    run.mockRejectedValueOnce(new Error("3040: Capacity temporarily exceeded, please try again."));
+    res = await call({ image: PHOTO });
+    expect(res.status).toBe(429);
+    expect((await res.json<{ error: string }>()).error).toMatch(/busy/);
+
+    run.mockRejectedValueOnce(new Error("AiError: You have used up your daily free allocation of 10,000 neurons."));
+    expect((await call({ image: PHOTO })).status).toBe(429);
+
+    run.mockRejectedValueOnce(new Error("3007: Request timeout"));
+    expect((await call({ image: PHOTO })).status).toBe(502);
+
+    run.mockResolvedValueOnce({ response: "Sorry, { not json" });
+    expect((await call({ image: PHOTO })).status).toBe(502);
+    expect(log).not.toHaveBeenCalled();
+    log.mockRestore();
   });
 });

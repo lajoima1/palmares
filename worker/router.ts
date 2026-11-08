@@ -11,6 +11,7 @@ import {
   setupOptions,
   setupVerify,
 } from "./passkeys.ts";
+import { readHandler } from "./read.ts";
 import { createHandler, deleteHandler, getHandler, imageHandler, listHandler, updateHandler } from "./recipes.ts";
 import { clearSession, readSession, type Session } from "./session.ts";
 
@@ -61,6 +62,7 @@ const routes: Route[] = [
   { method: "DELETE", path: /^\/api\/passkeys\/([^/]+)$/, session: true, handle: removePasskey },
   { method: "GET", path: /^\/api\/recipes$/, session: true, handle: listHandler },
   { method: "POST", path: /^\/api\/recipes$/, session: true, handle: createHandler },
+  { method: "POST", path: /^\/api\/recipes\/read$/, session: true, handle: readHandler },
   { method: "GET", path: /^\/api\/recipes\/([^/]+)$/, session: true, handle: getHandler },
   { method: "PUT", path: /^\/api\/recipes\/([^/]+)$/, session: true, handle: updateHandler },
   { method: "DELETE", path: /^\/api\/recipes\/([^/]+)$/, session: true, handle: deleteHandler },

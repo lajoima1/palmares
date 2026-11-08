@@ -82,7 +82,7 @@ commit is live.
 To test the Worker on your computer:
 
 ```bash
-WORKERS_CI=1 npm run build && npx wrangler dev
+WORKERS_CI=1 npm run build && npx wrangler dev --env local
 ```
 
 Then open http://localhost:8787.
@@ -146,10 +146,10 @@ When the token ends, make a new one, replace the `GITHUB_TOKEN` secret, and chan
 2. Put a token in `GITHUB_TOKEN`, and random values in `SESSION_SECRET` and `SETUP_CODE`.
    `GITHUB_BRANCH=admin-test` sends local saves to a test branch. The Worker refuses a local save
    to `main`.
-3. Run `WORKERS_CI=1 npm run build && npx wrangler dev`, then open http://localhost:8787/admin/.
-   Use `localhost`, not `127.0.0.1`: passkeys need it.
+3. Run `WORKERS_CI=1 npm run build && npx wrangler dev --env local`, then open
+   http://localhost:8787/admin/. Use `localhost`, not `127.0.0.1`: passkeys need it.
 
-For the Vite dev server, run `npx wrangler dev` and `WORKERS_CI=1 npm run dev` together, set
+For the Vite dev server, run `npx wrangler dev --env local` and `WORKERS_CI=1 npm run dev` together, set
 `ORIGIN=http://localhost:5173` in `.dev.vars`, and open http://localhost:5173/admin/. Vite sends
 `/api` to the Worker on port 8787.
 
@@ -180,8 +180,10 @@ Local access to Workers AI, one of two ways:
 2. **`npx wrangler login`.** It opens the browser and stores an OAuth token on this computer. That
    token can change most of the Cloudflare account, so prefer the API token.
 
-`wrangler dev` calls the real service for the `AI` binding. Each local read uses the daily
-allowance. `npm test` never calls the service.
+Workers AI has no local mode. The `local` environment of `wrangler.jsonc` has no `AI` binding, so
+`wrangler dev --env local` needs no sign-in, and a read there shows "The service failed". A plain
+`wrangler dev` needs a sign-in that can open a remote session (`wrangler login`), and each read
+uses the daily allowance. `npm test` never calls the service.
 
 ## Project Structure
 

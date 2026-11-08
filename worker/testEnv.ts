@@ -1,4 +1,5 @@
 import type { Env } from "./env.ts";
+import type { RunModel } from "./model.ts";
 
 // A Map-based stand-in for Workers KV, with the calls that the Worker makes.
 export class FakeKV {
@@ -32,9 +33,11 @@ export class FakeKV {
 
 export const ORIGIN = "https://palmares.example";
 
-export function testEnv(overrides: Partial<Env> = {}): Env & { AUTH: FakeKV } {
+// A test sets AI.run to answer as the model would.
+export function testEnv(overrides: Partial<Env> = {}): Env & { AUTH: FakeKV; AI: { run: RunModel } } {
   return {
     AUTH: new FakeKV(),
+    AI: { run: async () => ({ response: "{}" }) },
     GITHUB_TOKEN: "test-token",
     SESSION_SECRET: "test-secret-that-is-long-enough-1234567890",
     SETUP_CODE: "open-sesame-setup-code",
@@ -43,7 +46,7 @@ export function testEnv(overrides: Partial<Env> = {}): Env & { AUTH: FakeKV } {
     GITHUB_REPO: "owner/repo",
     GITHUB_BRANCH: "admin-test",
     ...overrides,
-  } as unknown as Env & { AUTH: FakeKV };
+  } as unknown as Env & { AUTH: FakeKV; AI: { run: RunModel } };
 }
 
 // Turns the Set-Cookie values of a response into a Cookie header for the next request.

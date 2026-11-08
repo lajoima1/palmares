@@ -167,12 +167,12 @@ function parseAnswer(response: unknown): unknown {
   }
 }
 
-// Workers AI puts its error code in the message, like "3036: You have used up your daily free
-// allocation of 10,000 neurons."
+// The REST API gives the code ("3036: You have used up your daily free allocation of 10,000
+// neurons."). The docs do not give the message of the binding, so the text also counts.
 function errorKind(e: unknown): ModelErrorKind {
   const message = e instanceof Error ? e.message : String(e);
-  if (/\b3036\b/.test(message)) return "daily";
-  if (/\b3040\b/.test(message)) return "busy";
+  if (/\b3036\b|daily free allocation/i.test(message)) return "daily";
+  if (/\b3040\b|capacity temporarily exceeded/i.test(message)) return "busy";
   return "failed";
 }
 
