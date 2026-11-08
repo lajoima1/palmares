@@ -7,7 +7,7 @@ import type { Context } from "./router.ts";
 // The recipe data is near the top of a page. The text code takes about 4 ms of CPU for 1 MB, and
 // the free plan gives a request 10 ms.
 const MAX_PAGE = 1024 * 1024;
-// About 6,000 tokens, or 150 neurons with Llama 4 Scout. A longer text uses more of the day.
+// About 6,000 tokens, or about 200 neurons. A longer text uses more of the daily allowance.
 const MAX_TEXT = 24_000;
 // Some recipe sites refuse a request with no browser name.
 const BROWSER =
@@ -52,8 +52,12 @@ async function readCapped(body: ReadableStream<Uint8Array>): Promise<Uint8Array>
   return all;
 }
 
+// The charset of the header, else of a <meta> tag near the top, else UTF-8.
 function decode(bytes: Uint8Array, contentType: string | null): string {
-  const charset = contentType?.match(/charset=["']?([\w-]+)/i)?.[1];
+  // A <meta> tag is ASCII, so UTF-8 reads it in any page.
+  const head = new TextDecoder().decode(bytes.subarray(0, 4096));
+  const charset =
+    contentType?.match(/charset=["']?([\w-]+)/i)?.[1] ?? head.match(/<meta[^>]+charset=["']?([\w-]+)/i)?.[1];
   try {
     return new TextDecoder(charset ?? "utf-8").decode(bytes);
   } catch {
@@ -87,9 +91,10 @@ export async function readPage(link: string): Promise<Page> {
   return { html, host: url.hostname.replace(/^www\./, "") };
 }
 
+// "Recipe", "schema:Recipe" or "https://schema.org/Recipe", alone or in a list.
 function isRecipe(node: Record<string, unknown>): boolean {
-  const type = node["@type"];
-  return type === "Recipe" || (Array.isArray(type) && type.includes("Recipe"));
+  const types = Array.isArray(node["@type"]) ? node["@type"] : [node["@type"]];
+  return types.some((t) => typeof t === "string" && /(^|[/:])Recipe$/.test(t));
 }
 
 function searchRecipe(node: unknown, depth = 0): Record<string, unknown> | null {
@@ -103,7 +108,7 @@ function searchRecipe(node: unknown, depth = 0): Record<string, unknown> | null 
   }
   const record = node as Record<string, unknown>;
   if (isRecipe(record)) return record;
-  return searchRecipe(record["@graph"], depth + 1);
+  return searchRecipe(record["@graph"], depth + 1) ?? searchRecipe(record.mainEntity, depth + 1);
 }
 
 function recipeData(html: string): Record<string, unknown> | null {
@@ -159,7 +164,9 @@ function visibleText(html: string): string {
   return decodeEntities(
     html
       .replace(/<!--[\s\S]*?-->/g, " ")
-      .replace(/<(script|style|noscript|svg|template|nav|header|footer|aside|form)\b[\s\S]*?<\/\1\s*>/gi, " ")
+      // Not <header> or <form>: a blog puts the recipe name in <header>, and some sites put the
+      // whole page in one <form>.
+      .replace(/<(script|style|noscript|svg|template|nav|footer|aside)\b[\s\S]*?<\/\1\s*>/gi, " ")
       .replace(/<(br|\/p|\/div|\/li|\/h\d|\/tr|\/section|\/article)\b[^>]*>/gi, "\n")
       .replace(/<[^>]*>/g, " "),
   )
@@ -266,7 +273,8 @@ function readPhoto(value: unknown): string {
 
 // Each error becomes an HttpError, so the router logs nothing: a parse error can quote the answer.
 export async function readHandler({ request, env }: Context): Promise<Response> {
-  const body = await readJson<ReadBody>(request, MAX_BODY);
+  const body = await readJson<ReadBody | null>(request, MAX_BODY);
+  if (typeof body !== "object" || body === null) throw new HttpError(400, "Send one photo or one link.");
   const tags = readTags(body.tags);
   if ((body.image === undefined) === (body.url === undefined)) {
     throw new HttpError(400, "Send one photo or one link.");

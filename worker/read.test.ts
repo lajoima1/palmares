@@ -98,6 +98,19 @@ describe("pageText", () => {
     expect(JSON.parse(pageText(html))).toEqual({ name: "Macaroni", recipeIngredient: ["1 lb"] });
   });
 
+  it("finds a recipe under mainEntity, or with a full type name", () => {
+    expect(JSON.parse(pageText(ld({ "@type": "WebPage", mainEntity: { "@type": "schema:Recipe", name: "Tarte" } })))).toEqual({
+      name: "Tarte",
+    });
+    expect(JSON.parse(pageText(ld({ "@type": "https://schema.org/Recipe", name: "Pain" })))).toEqual({ name: "Pain" });
+  });
+
+  it("keeps the text of <header> and <form>", () => {
+    expect(pageText(`<form id="page"><article><header><h1>Pâté chinois</h1></header><p>3 patates</p></article></form>`)).toBe(
+      "Pâté chinois\n3 patates",
+    );
+  });
+
   it("skips a broken block", () => {
     const html = `<script type="application/ld+json">{broken</script>${ld([{ "@type": "Recipe", name: "Soupe" }])}`;
     expect(JSON.parse(pageText(html))).toEqual({ name: "Soupe" });
@@ -137,6 +150,13 @@ describe("readPage", () => {
   it("stops at 1 MB", async () => {
     page("a".repeat(2 * 1024 * 1024));
     expect((await readPage("https://www.example.com/r")).html).toHaveLength(1024 * 1024);
+  });
+
+  it("takes the charset of a <meta> tag if the header has none", async () => {
+    page(new Uint8Array([...new TextEncoder().encode('<meta charset="iso-8859-1">'), 0xe9]), {
+      headers: { "Content-Type": "text/html" },
+    });
+    expect((await readPage("https://example.com/r")).html).toBe('<meta charset="iso-8859-1">é');
   });
 
   it("decodes with the charset of the page and gives the host", async () => {
@@ -195,6 +215,14 @@ describe("POST /api/recipes/read", () => {
     const sent = JSON.stringify(run.mock.calls[0][1]);
     expect(sent).toContain("Macaroni");
     expect(sent).not.toContain("p.jpg");
+  });
+
+  it("refuses a body that is not an object", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect((await call(null)).status).toBe(400);
+    expect((await call([1])).status).toBe(400);
+    expect(log).not.toHaveBeenCalled();
+    log.mockRestore();
   });
 
   it("needs one photo or one link", async () => {
