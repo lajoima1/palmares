@@ -138,7 +138,7 @@ export function buildInput(source: Source, tags: string[], json: JsonMode = JSON
           { type: "text", text: "Read the recipe in this photo." },
           { type: "image_url", image_url: { url: `data:image/jpeg;base64,${source.image}` } },
         ]
-      : `Read the recipe in this text of a web page:\n\n${source.text}`;
+      : `Read the recipe in this text:\n\n${source.text}`;
   const input: Record<string, unknown> = {
     messages: [
       { role: "system", content: rules(tags) },

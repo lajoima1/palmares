@@ -135,7 +135,7 @@ describe("readPage", () => {
 
   it("gives the screenshot message if the site refuses", async () => {
     page("no", { status: 403 });
-    await expect(readPage("https://example.com/r")).rejects.toMatchObject({ status: 422, message: expect.stringMatching(/screenshot/) });
+    await expect(readPage("https://example.com/r")).rejects.toMatchObject({ status: 422, message: expect.stringMatching(/Paste the text/) });
     page("challenge", { status: 200, headers: { "cf-mitigated": "challenge" } });
     await expect(readPage("https://example.com/r")).rejects.toMatchObject({ status: 422 });
   });
@@ -230,8 +230,28 @@ describe("POST /api/recipes/read", () => {
     log.mockRestore();
   });
 
-  it("needs one photo or one link", async () => {
+  it("reads a pasted text, cut at 24,000 characters", async () => {
+    const res = await call({ text: `  Pâté chinois\n${"a".repeat(30_000)}  `, tags: TAGS });
+    expect(res.status).toBe(200);
+    expect((await res.json<{ source: string }>()).source).toBe("text");
+    const sent = JSON.stringify(run.mock.calls[0][1]);
+    expect(sent).toContain("Pâté chinois");
+    expect(sent).not.toContain("a".repeat(24_000));
+  });
+
+  it("refuses an empty or too long text, and says when it holds no recipe", async () => {
+    expect((await call({ text: "   " })).status).toBe(400);
+    expect((await call({ text: 3 })).status).toBe(400);
+    expect((await call({ text: "a".repeat(100_001) })).status).toBe(413);
+    run.mockResolvedValue({ response: JSON.stringify(answer({ found: false })) });
+    const res = await call({ text: "Contact us" });
+    expect(res.status).toBe(422);
+    expect((await res.json<{ error: string }>()).error).toMatch(/in this text/);
+  });
+
+  it("needs one photo, link or text", async () => {
     expect((await call({ image: PHOTO, url: "https://example.com" })).status).toBe(400);
+    expect((await call({ url: "https://example.com", text: "Soupe" })).status).toBe(400);
     expect((await call({ tags: TAGS })).status).toBe(400);
   });
 

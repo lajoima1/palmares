@@ -12,7 +12,7 @@ const MAX_TEXT = 24_000;
 // Some recipe sites refuse a request with no browser name.
 const BROWSER =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
-const REFUSED = "This site refused the request. Take a screenshot and use the photo instead.";
+const REFUSED = "This site refused the request. Paste the text of the page, or use a screenshot.";
 const NOT_OPENED = "This link could not be opened. Check the link, or use a screenshot.";
 const RECIPE_KEYS = [
   "name",
@@ -239,6 +239,9 @@ const MAX_TAGS = 300;
 const MAX_TAG_LENGTH = 50;
 const NO_RECIPE = "No recipe was found. Try a sharper photo, or type the recipe.";
 const NO_RECIPE_ON_PAGE = "No recipe was found on this page. Try a screenshot, or type the recipe.";
+const NO_RECIPE_IN_TEXT = "No recipe was found in this text. Try a screenshot, or type the recipe.";
+// A whole recipe page, copied with "select all", is often 10,000 to 30,000 characters.
+const MAX_PASTED = 100_000;
 const MODEL_ERRORS: Record<ModelError["kind"], [number, string]> = {
   daily: [429, "The free limit of the day is reached. Try again tomorrow, or type the recipe."],
   busy: [429, "The service is busy. Try again in a minute."],
@@ -249,7 +252,16 @@ const MODEL_ERRORS: Record<ModelError["kind"], [number, string]> = {
 interface ReadBody {
   image?: unknown;
   url?: unknown;
+  text?: unknown;
   tags?: unknown;
+}
+
+function readPasted(value: unknown): string {
+  if (typeof value !== "string") throw new HttpError(400, "The text is not valid.");
+  if (value.length > MAX_PASTED) throw new HttpError(413, "The text is too long. Copy only the recipe.");
+  const text = value.trim();
+  if (!text) throw new HttpError(400, "Paste the text of a recipe first.");
+  return text.slice(0, MAX_TEXT);
 }
 
 function readTags(value: unknown): string[] {
@@ -276,15 +288,18 @@ function readPhoto(value: unknown): string {
 // Each error becomes an HttpError, so the router logs nothing: a parse error can quote the answer.
 export async function readHandler({ request, env }: Context): Promise<Response> {
   const body = await readJson<ReadBody | null>(request, MAX_BODY);
-  if (typeof body !== "object" || body === null) throw new HttpError(400, "Send one photo or one link.");
+  if (typeof body !== "object" || body === null) throw new HttpError(400, "Send one photo, link or text.");
   const tags = readTags(body.tags);
-  if ((body.image === undefined) === (body.url === undefined)) {
-    throw new HttpError(400, "Send one photo or one link.");
+  if ([body.image, body.url, body.text].filter((v) => v !== undefined).length !== 1) {
+    throw new HttpError(400, "Send one photo, link or text.");
   }
   let source: Source;
   let from = "photo";
   if (body.image !== undefined) {
     source = { image: readPhoto(body.image) };
+  } else if (body.text !== undefined) {
+    source = { text: readPasted(body.text) };
+    from = "text";
   } else {
     if (typeof body.url !== "string") throw new HttpError(400, "This link is not valid.");
     const page = await readPage(body.url);
@@ -299,6 +314,8 @@ export async function readHandler({ request, env }: Context): Promise<Response> 
     const [status, message] = MODEL_ERRORS[e instanceof ModelError ? e.kind : "failed"];
     throw new HttpError(status, message);
   }
-  if (!fields) throw new HttpError(422, from === "photo" ? NO_RECIPE : NO_RECIPE_ON_PAGE);
+  if (!fields) {
+    throw new HttpError(422, from === "photo" ? NO_RECIPE : from === "text" ? NO_RECIPE_IN_TEXT : NO_RECIPE_ON_PAGE);
+  }
   return json({ fields, source: from });
 }
