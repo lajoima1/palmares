@@ -45,6 +45,14 @@ export interface SaveResult {
   changed?: boolean;
 }
 
+// What the model read. `source` is "photo" or the host of the link, like "ricardocuisine.com".
+export interface ReadResult {
+  fields: RecipeFields;
+  source: string;
+}
+
+export type ReadSource = { image: string } | { url: string };
+
 // A base64 webp to save, null to remove the photo, undefined to keep it.
 export type PhotoChange = string | null | undefined;
 
@@ -64,15 +72,18 @@ export function whenSignedOut(callback: () => void): void {
   onSignedOut = callback;
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+async function request<T>(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`/api${path}`, {
       method,
       headers: body === undefined ? {} : { "Content-Type": "application/json" },
       body: body === undefined ? undefined : JSON.stringify(body),
+      signal,
     });
-  } catch {
+  } catch (e) {
+    // A cancel is not a network error. The caller ignores it.
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
     throw new ApiError(0, "No connection. Check the network and try again.");
   }
   const data = await res.json().catch(() => null);
@@ -102,6 +113,8 @@ export const api = {
   updateRecipe: (slug: string, fields: RecipeFields, baseOid: string, image: PhotoChange) =>
     request<SaveResult>("PUT", `/recipes/${slug}`, { fields, baseOid, image }),
   deleteRecipe: (slug: string, baseOid: string) => request<SaveResult>("DELETE", `/recipes/${slug}`, { baseOid }),
+  readRecipe: (source: ReadSource, tags: string[], signal: AbortSignal) =>
+    request<ReadResult>("POST", "/recipes/read", { ...source, tags }, signal),
 };
 
 // The site serves this photo once the recipe is live. Before that, only the Worker has it.

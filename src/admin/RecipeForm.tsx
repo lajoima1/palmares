@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { emptyRecipe, linesToItems, oneLine, type RecipeFields } from "../utils/recipeText";
 import { api, ApiError, type PhotoChange, type SaveResult } from "./api";
+import { ImportField } from "./ImportField";
 import { PhotoField } from "./PhotoField";
 import { servedCommit } from "./useLiveStatus";
 
@@ -61,6 +62,8 @@ interface FormState {
   lists: Record<ListKey, string>;
 }
 
+const EMPTY_FORM = JSON.stringify(toForm(emptyRecipe()));
+
 function toForm(fields: RecipeFields): FormState {
   return {
     fields,
@@ -92,16 +95,23 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [importBusy, setImportBusy] = useState(false);
+  // The source of the last fill that the form kept, like "photo". It shows the check alert.
+  const [filledFrom, setFilledFrom] = useState<string | null>(null);
+  // A fill that waits for "Replace what you typed?".
+  const [pending, setPending] = useState<{ fields: RecipeFields; source: string } | null>(null);
   // The form as it was loaded, to tell if the owner changed something.
   const [loaded, setLoaded] = useState<string | null>(slug ? null : JSON.stringify(toForm(emptyRecipe())));
   const alerts = useRef<HTMLDivElement>(null);
   const closing = useRef(false);
   const dirty = form !== null && (JSON.stringify(form) !== loaded || image !== undefined);
   const dirtyNow = useRef(dirty);
+  const formNow = useRef(form);
   const busyNow = useRef(busy);
   const onCloseNow = useRef(onClose);
   useEffect(() => {
     dirtyNow.current = dirty;
+    formNow.current = form;
     busyNow.current = busy;
     onCloseNow.current = onClose;
   });
@@ -166,6 +176,18 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
   useEffect(() => {
     load();
   }, [load]);
+
+  // The owner can type while the read runs, so the test reads the form of now.
+  function filled(fields: RecipeFields, source: string) {
+    if (JSON.stringify(formNow.current) !== EMPTY_FORM) setPending({ fields, source });
+    else fill(fields, source);
+  }
+
+  function fill(fields: RecipeFields, source: string) {
+    setPending(null);
+    setForm(toForm(fields));
+    setFilledFrom(source);
+  }
 
   const setField = (key: keyof RecipeFields, value: string | string[]) =>
     setForm((f) => f && { ...f, fields: { ...f.fields, [key]: value } });
@@ -259,6 +281,23 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
               </Alert>
             )}
             {error && <Alert severity="error">{error}</Alert>}
+            {!slug && (
+              <ImportField
+                tags={tagOptions}
+                filledFrom={filledFrom}
+                onFilled={filled}
+                onAgain={() => setFilledFrom(null)}
+                onBusy={setImportBusy}
+              />
+            )}
+            {filledFrom !== null && (
+              <Alert
+                severity="info"
+                sx={(t) => ({ bgcolor: t.herb.herbTint, color: t.herb.ink, "& .MuiAlert-icon": { color: t.herb.herb } })}
+              >
+                Check each field. Times, difficulty and tags can be suggestions.
+              </Alert>
+            )}
             <PhotoField
               currentUrl={slug && hasImage ? `/api/recipes/${slug}/image` : null}
               change={image}
@@ -328,7 +367,11 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
         <Button color="inherit" onClick={requestClose} disabled={busy}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={save} disabled={busy || photoBusy || !form || !oneLine(name) || conflict}>
+        <Button
+          variant="contained"
+          onClick={save}
+          disabled={busy || photoBusy || importBusy || !form || !oneLine(name) || conflict}
+        >
           {busy ? "Saving…" : "Save"}
         </Button>
       </DialogActions>
@@ -345,6 +388,21 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
           </Button>
           <Button color="error" variant="contained" onClick={remove}>
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={pending !== null} onClose={() => setPending(null)}>
+        <DialogTitle>Replace what you typed?</DialogTitle>
+        <DialogContentText sx={{ px: 3 }}>
+          The form fills with the recipe that was read. The text that you typed is lost.
+        </DialogContentText>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setPending(null)}>
+            Keep my text
+          </Button>
+          <Button variant="contained" onClick={() => pending && fill(pending.fields, pending.source)}>
+            Replace
           </Button>
         </DialogActions>
       </Dialog>
