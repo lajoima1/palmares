@@ -5,7 +5,7 @@ prep_time: 15 minutes
 cook_time: 25 minutes
 total_time: 40 minutes
 difficulty: Easy
-tags: baby-food
+tags: Baby food
 
 ingredients:
 - 2 very ripe bananas, mashed
