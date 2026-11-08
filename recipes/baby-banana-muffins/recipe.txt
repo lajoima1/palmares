@@ -1,0 +1,30 @@
+name: Baby Banana Muffins
+description: Soft muffins made only with one egg spread across 12 muffins for an egg trial.
+servings: 12 servings
+prep_time: 15 minutes
+cook_time: 25 minutes
+total_time: 40 minutes
+difficulty: Easy
+tags: baby-food
+
+ingredients:
+- 2 very ripe bananas, mashed
+- 1 large egg
+- 60 ml olive oil
+- 120 ml breast milk, formula, or water
+- 1 1/2 cup wheat flour
+- 1 tsp baking powder
+
+instructions:
+1. Preheat the oven to 175°C (350°F) and line a 12-cup muffin tin with paper liners or grease it with a little olive oil.
+2. In a large bowl, whisk 2 very ripe bananas, mashed, 1 large egg, 60 ml olive oil and 120 ml breast milk, formula, or water until the egg is completely blended in.
+3. In another bowl, stir together 1 1/2 cup wheat flour and 1 tsp baking powder.
+4. Fold the dry ingredients into the wet ones just until no dry flour remains. Divide the batter evenly among the 12 cups so each muffin holds about the same amount of egg.
+5. Bake 25 to 30 minutes, until golden and a toothpick in the centre comes out clean.
+6. Cool completely. Serve in small soft pieces, or mash with a little breast milk or formula.
+
+notes:
+- Use very ripe, spotty bananas for the best flavour.
+- Every ingredient except egg and baking powder is something she already eats.
+- Each muffin has about 1/12 of an egg, so you can portion out whatever starting amount your doctor suggests.
+- Freezes well for up to 3 months.
