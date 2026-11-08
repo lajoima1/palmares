@@ -56,8 +56,9 @@ async function readCapped(body: ReadableStream<Uint8Array>): Promise<Uint8Array>
 function decode(bytes: Uint8Array, contentType: string | null): string {
   // A <meta> tag is ASCII, so UTF-8 reads it in any page.
   const head = new TextDecoder().decode(bytes.subarray(0, 4096));
-  const charset =
-    contentType?.match(/charset=["']?([\w-]+)/i)?.[1] ?? head.match(/<meta[^>]+charset=["']?([\w-]+)/i)?.[1];
+  // A page that reached this text code is not UTF-16, whatever its <meta> says (HTML spec).
+  const meta = head.match(/<meta[^>]+charset=["']?([\w-]+)/i)?.[1]?.replace(/^utf-16.*/i, "utf-8");
+  const charset = contentType?.match(/charset=["']?([\w-]+)/i)?.[1] ?? meta;
   try {
     return new TextDecoder(charset ?? "utf-8").decode(bytes);
   } catch {
@@ -166,7 +167,7 @@ function visibleText(html: string): string {
       .replace(/<!--[\s\S]*?-->/g, " ")
       // Not <header> or <form>: a blog puts the recipe name in <header>, and some sites put the
       // whole page in one <form>.
-      .replace(/<(script|style|noscript|svg|template|nav|footer|aside)\b[\s\S]*?<\/\1\s*>/gi, " ")
+      .replace(/<(script|style|noscript|svg|template|nav|footer|aside|select)\b[\s\S]*?<\/\1\s*>/gi, " ")
       .replace(/<(br|\/p|\/div|\/li|\/h\d|\/tr|\/section|\/article)\b[^>]*>/gi, "\n")
       .replace(/<[^>]*>/g, " "),
   )

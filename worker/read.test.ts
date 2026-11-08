@@ -106,7 +106,7 @@ describe("pageText", () => {
   });
 
   it("keeps the text of <header> and <form>", () => {
-    expect(pageText(`<form id="page"><article><header><h1>Pâté chinois</h1></header><p>3 patates</p></article></form>`)).toBe(
+    expect(pageText(`<form id="page"><article><header><h1>Pâté chinois</h1></header><select><option>Menu</option></select><p>3 patates</p></article></form>`)).toBe(
       "Pâté chinois\n3 patates",
     );
   });
@@ -157,6 +157,11 @@ describe("readPage", () => {
       headers: { "Content-Type": "text/html" },
     });
     expect((await readPage("https://example.com/r")).html).toBe('<meta charset="iso-8859-1">é');
+  });
+
+  it("reads a page that says utf-16 in <meta> as UTF-8", async () => {
+    page('<meta charset="utf-16"><p>crème</p>', { headers: { "Content-Type": "text/html" } });
+    expect((await readPage("https://example.com/r")).html).toContain("crème");
   });
 
   it("decodes with the charset of the page and gives the host", async () => {
