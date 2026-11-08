@@ -237,6 +237,7 @@ const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
 const MAX_TAGS = 300;
 const MAX_TAG_LENGTH = 50;
 const NO_RECIPE = "No recipe was found. Try a sharper photo, or type the recipe.";
+const NO_RECIPE_ON_PAGE = "No recipe was found on this page. Try a screenshot, or type the recipe.";
 const MODEL_ERRORS: Record<ModelError["kind"], [number, string]> = {
   daily: [429, "The free limit of the day is reached. Try again tomorrow, or type the recipe."],
   busy: [429, "The service is busy. Try again in a minute."],
@@ -297,6 +298,6 @@ export async function readHandler({ request, env }: Context): Promise<Response> 
     const [status, message] = MODEL_ERRORS[e instanceof ModelError ? e.kind : "failed"];
     throw new HttpError(status, message);
   }
-  if (!fields) throw new HttpError(422, NO_RECIPE);
+  if (!fields) throw new HttpError(422, from === "photo" ? NO_RECIPE : NO_RECIPE_ON_PAGE);
   return json({ fields, source: from });
 }

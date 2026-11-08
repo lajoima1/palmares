@@ -253,6 +253,14 @@ describe("POST /api/recipes/read", () => {
     expect((await res.json<{ error: string }>()).error).toMatch(/No recipe/);
   });
 
+  it("says no recipe was found on a page, with no word about a photo", async () => {
+    page("<p>Contact us</p>");
+    run.mockResolvedValue({ response: JSON.stringify(answer({ found: false })) });
+    const res = await call({ url: "https://example.com/contact" });
+    expect(res.status).toBe(422);
+    expect((await res.json<{ error: string }>()).error).toMatch(/on this page.*screenshot/);
+  });
+
   it("maps the errors of the service and logs nothing", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     run.mockRejectedValueOnce(new Error("3036: You have used up your daily free allocation of 10,000 neurons."));

@@ -53,6 +53,17 @@ export interface ReadResult {
 
 export type ReadSource = { image: string } | { url: string };
 
+function isRecipeFields(value: unknown): value is RecipeFields {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const text = ["name", "description", "servings", "prep_time", "cook_time", "total_time", "difficulty"];
+  const lists = ["tags", "ingredients", "instructions", "notes"];
+  return (
+    text.every((k) => typeof v[k] === "string") &&
+    lists.every((k) => Array.isArray(v[k]) && (v[k] as unknown[]).every((item) => typeof item === "string"))
+  );
+}
+
 // A base64 webp to save, null to remove the photo, undefined to keep it.
 export type PhotoChange = string | null | undefined;
 
@@ -88,7 +99,7 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
   }
   const data = await res.json().catch(() => null);
   if (res.status === 401 && !path.startsWith("/login/")) onSignedOut();
-  if (!res.ok) throw new ApiError(res.status, data?.error ?? `The request failed (${res.status}).`);
+  if (!res.ok) throw new ApiError(res.status, data?.error ?? `The request failed (${res.status}). Try again.`);
   return data as T;
 }
 
@@ -113,8 +124,14 @@ export const api = {
   updateRecipe: (slug: string, fields: RecipeFields, baseOid: string, image: PhotoChange) =>
     request<SaveResult>("PUT", `/recipes/${slug}`, { fields, baseOid, image }),
   deleteRecipe: (slug: string, baseOid: string) => request<SaveResult>("DELETE", `/recipes/${slug}`, { baseOid }),
-  readRecipe: (source: ReadSource, tags: string[], signal: AbortSignal) =>
-    request<ReadResult>("POST", "/recipes/read", { ...source, tags }, signal),
+  readRecipe: async (source: ReadSource, tags: string[], signal: AbortSignal): Promise<ReadResult> => {
+    const result = await request<Partial<ReadResult> | null>("POST", "/recipes/read", { ...source, tags }, signal);
+    // A broken answer must not reach the form: a missing list would stop the page.
+    if (!isRecipeFields(result?.fields) || typeof result.source !== "string") {
+      throw new ApiError(502, "The service failed. Try again.");
+    }
+    return { fields: result.fields, source: result.source };
+  },
 };
 
 // The site serves this photo once the recipe is live. Before that, only the Worker has it.

@@ -24,9 +24,15 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
   const [state, setState] = useState<State>("rest");
   const [link, setLink] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const again = useRef<HTMLButtonElement>(null);
 
   // A read that is still running when the form closes stops here.
   useEffect(() => () => reading.current?.abort(), []);
+
+  // The block that had the focus is gone after a fill. The focus goes to its next control.
+  useEffect(() => {
+    if (filledFrom !== null) again.current?.focus();
+  }, [filledFrom]);
 
   async function read(source: () => Promise<ReadSource>) {
     const controller = new AbortController();
@@ -44,8 +50,11 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
       setError(e instanceof Error ? e.message : "The recipe could not be read. Try again.");
       setState("rest");
     } finally {
-      if (reading.current === controller) reading.current = null;
-      onBusy(false);
+      // A cancelled read can end during the next one. Only the current read turns Save back on.
+      if (reading.current === controller) {
+        reading.current = null;
+        onBusy(false);
+      }
     }
   }
 
@@ -74,6 +83,7 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
   function cancel() {
     reading.current?.abort();
     reading.current = null;
+    onBusy(false);
     setState("rest");
   }
 
@@ -86,10 +96,12 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
       >
         <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
           <CheckRounded color="primary" />
-          <Typography sx={{ flexGrow: 1, fontWeight: 600 }}>
+          <Typography role="status" noWrap sx={{ flexGrow: 1, minWidth: 0, fontWeight: 600 }}>
             {filledFrom === "photo" ? "Filled from a photo" : `Filled from ${filledFrom}`}
           </Typography>
-          <Button onClick={onAgain}>Fill again</Button>
+          <Button ref={again} onClick={onAgain} sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
+            Fill again
+          </Button>
         </Stack>
       </Box>
     );
@@ -132,7 +144,13 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
               slotProps={{ htmlInput: { inputMode: "url", autoCapitalize: "none", autoCorrect: "off" } }}
             />
             <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
-              <Button color="inherit" onClick={() => setState("rest")}>
+              <Button
+                color="inherit"
+                onClick={() => {
+                  setError(null);
+                  setState("rest");
+                }}
+              >
                 Cancel
               </Button>
               <Button type="submit" variant="contained" disabled={!link.trim()}>

@@ -96,12 +96,14 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [importBusy, setImportBusy] = useState(false);
-  // The source of the last fill that the form kept, like "photo". It shows the check alert.
+  // The source of the last fill that the form kept, like "photo". null after "Fill again".
   const [filledFrom, setFilledFrom] = useState<string | null>(null);
+  // The form holds values that the model read. The check alert stays until the form closes.
+  const [suggested, setSuggested] = useState(false);
   // A fill that waits for "Replace what you typed?".
   const [pending, setPending] = useState<{ fields: RecipeFields; source: string } | null>(null);
   // The form as it was loaded, to tell if the owner changed something.
-  const [loaded, setLoaded] = useState<string | null>(slug ? null : JSON.stringify(toForm(emptyRecipe())));
+  const [loaded, setLoaded] = useState<string | null>(slug ? null : EMPTY_FORM);
   const alerts = useRef<HTMLDivElement>(null);
   const closing = useRef(false);
   const dirty = form !== null && (JSON.stringify(form) !== loaded || image !== undefined);
@@ -185,8 +187,9 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
 
   function fill(fields: RecipeFields, source: string) {
     setPending(null);
-    setForm(toForm(fields));
+    setForm(toForm({ ...fields, name: fields.name.slice(0, MAX_NAME) }));
     setFilledFrom(source);
+    setSuggested(true);
   }
 
   const setField = (key: keyof RecipeFields, value: string | string[]) =>
@@ -290,7 +293,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
                 onBusy={setImportBusy}
               />
             )}
-            {filledFrom !== null && (
+            {suggested && (
               <Alert
                 severity="info"
                 sx={(t) => ({ bgcolor: t.herb.herbTint, color: t.herb.ink, "& .MuiAlert-icon": { color: t.herb.herb } })}
@@ -392,10 +395,11 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
         </DialogActions>
       </Dialog>
 
-      <Dialog open={pending !== null} onClose={() => setPending(null)}>
-        <DialogTitle>Replace what you typed?</DialogTitle>
+      {/* After "Discard your changes?", so the two never cover each other. */}
+      <Dialog open={pending !== null && !confirmDiscard} onClose={() => setPending(null)}>
+        <DialogTitle>Replace what is in the form?</DialogTitle>
         <DialogContentText sx={{ px: 3 }}>
-          The form fills with the recipe that was read. The text that you typed is lost.
+          The form fills with the recipe that was read. The text in the form now is lost.
         </DialogContentText>
         <DialogActions>
           <Button color="inherit" onClick={() => setPending(null)}>
