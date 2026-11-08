@@ -202,7 +202,7 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
         )}
         {error && state !== "reading" && <Alert severity="error">{error}</Alert>}
         {state === "rest" && (
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
             <Button
               variant="outlined"
               color="inherit"

@@ -109,7 +109,7 @@ export const SCHEMA = {
 
 function rules(tags: string[]): string {
   return [
-    "You read one recipe from a photo or from the text of a web page. You return it as JSON for a family recipe site.",
+    "You read one recipe from a photo or from a text. You return it as JSON for a family recipe site.",
     "Rules:",
     "- Keep the language of the source. Never translate. A French recipe stays in French. An English recipe stays in English.",
     "- Copy the ingredients and the steps as the source writes them. Never invent an ingredient or a step. Fix only clear reading errors.",
