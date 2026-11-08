@@ -153,6 +153,36 @@ For the Vite dev server, run `npx wrangler dev` and `WORKERS_CI=1 npm run dev` t
 `ORIGIN=http://localhost:5173` in `.dev.vars`, and open http://localhost:5173/admin/. Vite sends
 `/api` to the Worker on port 8787.
 
+### Recipe auto-fill
+
+"Fill from a photo or link" at the top of Add recipe reads one photo or one link and fills the
+form. The owner checks the fields and saves. The Worker sends the photo, or the text of the page,
+to a vision model of Cloudflare Workers AI through the `AI` binding. `worker/model.ts` holds the
+model, the prompt and the call. There is no key: the binding uses the Cloudflare account.
+
+- **Cost.** The Workers Free plan gives 10,000 neurons a day, and it cannot bill more. One read
+  costs about 100 neurons, so about 100 reads a day. The allowance starts again at 00:00 UTC.
+  After that, the page says "The free limit of the day is reached".
+- **Try a model from this computer.** `npm run try:read -- <photo or link>` reads like the admin
+  page and prints the fields, the time and the neurons. `--model <id>` tries another model. It
+  needs `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in the environment.
+
+Local access to Workers AI, one of two ways:
+
+1. **An API token (preferred).** Cloudflare → My Profile → API Tokens → Create Token → the
+   "Workers AI" template. It can use Workers AI and nothing else. Write it in
+   `cloudflare-ai.local` (git ignores `*.local`), with the account ID from the dashboard:
+   ```
+   CLOUDFLARE_ACCOUNT_ID=<account id>
+   CLOUDFLARE_API_TOKEN=<token>
+   ```
+   Load it in the shell with `set -a; . ./cloudflare-ai.local; set +a`.
+2. **`npx wrangler login`.** It opens the browser and stores an OAuth token on this computer. That
+   token can change most of the Cloudflare account, so prefer the API token.
+
+`wrangler dev` calls the real service for the `AI` binding. Each local read uses the daily
+allowance. `npm test` never calls the service.
+
 ## Project Structure
 
 ```

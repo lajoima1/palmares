@@ -47,3 +47,4 @@ work/
 .dev.vars
 .dev.vars.*
 !.dev.vars.example
+cloudflare-ai.local
