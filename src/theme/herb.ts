@@ -126,7 +126,15 @@ export function createHerbTheme(mode: PaletteMode) {
       MuiOutlinedInput: {
         styleOverrides: { root: { borderRadius: 14, backgroundColor: t.surface } },
       },
-      MuiAlert: { styleOverrides: { root: { borderRadius: 14 } } },
+      // The 44 px tap area puts an alert's close or retry button 8 px below the first line of text.
+      // The negative margins centre it on that line and keep the alert at its normal height.
+      // nowrap keeps "Try again" on one line at 375 px.
+      MuiAlert: {
+        styleOverrides: {
+          root: { borderRadius: 14 },
+          action: { paddingTop: 0, marginBlock: -4, "& .MuiButton-root": { whiteSpace: "nowrap" } },
+        },
+      },
       MuiSnackbarContent: {
         styleOverrides: { root: { borderRadius: 18, backgroundColor: t.ink, color: t.ground } },
       },
