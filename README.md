@@ -105,16 +105,23 @@ The GitHub Pages copy has only the old look, with `#/<slug>` links. `vite.config
 removes the `<!--herb-->` blocks of `index.html`: the loader, fonts and icons of the new look.
 `npm run dev` shows the new look at http://localhost:5173/.
 
-## Install the app
+## Installable app (off)
 
-On an Android phone, open `https://palmares.lajoie.workers.dev/` in Chrome. Then tap ⋮ →
-"Install app". The app opens full screen at the recipe list, with its own icon. The admin page
-opens in the same app.
+`public/manifest.webmanifest` and its icons can make the Cloudflare site an Android app. No page
+links the manifest today, so the site is not installable. A manifest has one splash colour and one
+system bar colour, so the app looked wrong in dark mode or in light mode.
 
-`public/manifest.webmanifest` holds the name, the colours and the icons. `index.html` links it in a
-`<!--herb-->` block, so the GitHub Pages copy is not installable. The app keeps no offline copy:
-it loads the recipes at each start, like the web page. Chrome updates an installed app some time
-after a change to the manifest, sometimes days later.
+To turn it on, add these lines to the `<head>` of `admin/index.html`, and inside the first
+`<!--herb-->` block of `index.html`. The herb block keeps the GitHub Pages copy not installable.
+
+```html
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#F4F5F2" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0F1412" media="(prefers-color-scheme: dark)" />
+```
+
+Then, on an Android phone, open the site in Chrome, and tap ⋮ → "Install app". The app keeps no
+offline copy. Chrome updates an installed app some time after a change to the manifest.
 
 ## Admin page
 
