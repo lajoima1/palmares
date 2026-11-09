@@ -105,6 +105,17 @@ The GitHub Pages copy has only the old look, with `#/<slug>` links. `vite.config
 removes the `<!--herb-->` blocks of `index.html`: the loader, fonts and icons of the new look.
 `npm run dev` shows the new look at http://localhost:5173/.
 
+## Install the app
+
+On an Android phone, open `https://palmares.lajoie.workers.dev/` in Chrome. Then tap ⋮ →
+"Install app". The app opens full screen at the recipe list, with its own icon. The admin page
+opens in the same app.
+
+`public/manifest.webmanifest` holds the name, the colours and the icons. `index.html` links it in a
+`<!--herb-->` block, so the GitHub Pages copy is not installable. The app keeps no offline copy:
+it loads the recipes at each start, like the web page. Chrome updates an installed app some time
+after a change to the manifest, sometimes days later.
+
 ## Admin page
 
 The owner adds, changes and deletes recipes at `https://palmares.lajoie.workers.dev/admin/`, from
@@ -239,6 +250,10 @@ The new look: `public/icon.svg` is the source.
 - `rsvg-convert -w 32 -h 32 public/icon.svg -o public/icon-32.png`
 - `sed 's/ rx="9"//' public/icon.svg | rsvg-convert -w 180 -h 180 -o public/apple-touch-icon.png`
   (square corners: the phone rounds them)
+- `rsvg-convert -w 192 -h 192 public/icon.svg -o public/icon-192.png`, and the same with 512 for
+  `public/icon-512.png` (the installed app)
+- `sed -e 's/ rx="9"//' -e 's/scale(1.12)/scale(0.9)/' public/icon.svg | rsvg-convert -w 512 -h 512 -o public/icon-maskable-512.png`
+  (Android crops this one to a circle or another shape: the smaller leaf stays inside)
 
 ## Make square
 
