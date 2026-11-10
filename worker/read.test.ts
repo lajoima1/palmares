@@ -185,7 +185,11 @@ describe("POST /api/recipes/read", () => {
     cookie = cookieHeader(await createSession(env, { userId: "u1", passkeyId: "pk1" }));
   });
 
+  // Each read names a model. A test that checks the model field sets it itself.
   function call(body: unknown, headers: Record<string, string> = { Origin: ORIGIN }, withCookie = true) {
+    if (typeof body === "object" && body !== null && !Array.isArray(body) && !("model" in body)) {
+      body = { model: MODELS[0].id, ...body };
+    }
     return handleApi(
       apiRequest("/api/recipes/read", {
         method: "POST",
@@ -197,14 +201,14 @@ describe("POST /api/recipes/read", () => {
     );
   }
 
-  it("reads a photo and answers the fields only", async () => {
+  it("reads a photo and answers the fields and the model only", async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal("fetch", fetchSpy);
     const res = await call({ image: PHOTO, tags: TAGS });
     expect(res.status).toBe(200);
     const body = await res.json<Record<string, unknown>>();
-    expect(Object.keys(body).sort()).toEqual(["fields", "source"]);
-    expect(body.source).toBe("photo");
+    expect(Object.keys(body).sort()).toEqual(["fields", "model"]);
+    expect(body.model).toBe(MODELS[0].id);
     expect((body.fields as { name: string }).name).toBe("Potage aux carottes");
     expect(run).toHaveBeenCalledWith(MODELS[0].id, expect.objectContaining({ messages: expect.any(Array) }));
     expect(JSON.stringify(run.mock.calls[0][1])).toContain(`data:image/jpeg;base64,${PHOTO}`);
@@ -212,11 +216,10 @@ describe("POST /api/recipes/read", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("reads a link and gives its host", async () => {
+  it("reads a link, with no photo of the page", async () => {
     page(`<script type="application/ld+json">{"@type":"Recipe","name":"Macaroni","image":"https://x/p.jpg"}</script>`);
     const res = await call({ url: "https://www.example.com/r", tags: TAGS });
     expect(res.status).toBe(200);
-    expect((await res.json<{ source: string }>()).source).toBe("example.com");
     const sent = JSON.stringify(run.mock.calls[0][1]);
     expect(sent).toContain("Macaroni");
     expect(sent).not.toContain("p.jpg");
@@ -233,7 +236,6 @@ describe("POST /api/recipes/read", () => {
   it("reads a pasted text, cut at 24,000 characters", async () => {
     const res = await call({ text: `  Pâté chinois\n${"a".repeat(30_000)}  `, tags: TAGS });
     expect(res.status).toBe(200);
-    expect((await res.json<{ source: string }>()).source).toBe("text");
     const sent = JSON.stringify(run.mock.calls[0][1]);
     expect(sent).toContain("Pâté chinois");
     expect(sent).not.toContain("a".repeat(24_000));
@@ -247,6 +249,33 @@ describe("POST /api/recipes/read", () => {
     const res = await call({ text: "Contact us" });
     expect(res.status).toBe(422);
     expect((await res.json<{ error: string }>()).error).toMatch(/in this text/);
+  });
+
+  it("refuses a model that is missing, unknown or not set up", async () => {
+    const google = MODELS.find((m) => m.service === "gemini")!.id;
+    for (const model of [undefined, "@cf/unknown/model", google]) {
+      const res = await call({ model, image: PHOTO });
+      expect(res.status).toBe(400);
+      expect((await res.json<{ error: string }>()).error).toBe("This model is not available.");
+    }
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("reads with the Google model if its key is set", async () => {
+    env.GEMINI_API_KEY = "AQ.test-key";
+    const google = MODELS.find((m) => m.service === "gemini")!.id;
+    const fetchSpy = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify(answer()) }] } }] }),
+        ),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    const res = await call({ model: google, text: "Potage aux carottes" });
+    expect(res.status).toBe(200);
+    expect((await res.json<{ model: string }>()).model).toBe(google);
+    expect(run).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
   it("needs one photo, link or text", async () => {
@@ -286,27 +315,37 @@ describe("POST /api/recipes/read", () => {
     expect((await res.json<{ error: string }>()).error).toMatch(/on this page.*screenshot/);
   });
 
-  it("maps the errors of the service and logs nothing", async () => {
+  it("maps the errors of the service to a kind, and logs nothing", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const read = async () => {
+      const res = await call({ image: PHOTO });
+      return [res.status, await res.json<{ error: string; kind?: string }>()] as const;
+    };
     run.mockRejectedValueOnce(new Error("3036: You have used up your daily free allocation of 10,000 neurons."));
-    let res = await call({ image: PHOTO });
-    expect(res.status).toBe(429);
-    expect((await res.json<{ error: string }>()).error).toMatch(/tomorrow/);
+    let [status, body] = await read();
+    expect([status, body.kind]).toEqual([429, "daily"]);
+    expect(body.error).toMatch(/tomorrow/);
 
     run.mockRejectedValueOnce(new Error("3040: Capacity temporarily exceeded, please try again."));
-    res = await call({ image: PHOTO });
-    expect(res.status).toBe(429);
-    expect((await res.json<{ error: string }>()).error).toMatch(/busy/);
+    [status, body] = await read();
+    expect([status, body.kind]).toEqual([429, "busy"]);
+    expect(body.error).toMatch(/busy/);
 
     run.mockRejectedValueOnce(new Error("AiError: You have used up your daily free allocation of 10,000 neurons."));
-    expect((await call({ image: PHOTO })).status).toBe(429);
+    expect((await read())[1].kind).toBe("daily");
 
     run.mockRejectedValueOnce(new Error("3007: Request timeout"));
-    expect((await call({ image: PHOTO })).status).toBe(502);
+    expect(await read()).toEqual([502, { error: "The service failed. Try again.", kind: "failed" }]);
 
     run.mockResolvedValueOnce({ response: "Sorry, { not json" });
-    expect((await call({ image: PHOTO })).status).toBe(502);
+    expect(await read()).toEqual([502, { error: "The service failed. Try again.", kind: "unreadable" }]);
     expect(log).not.toHaveBeenCalled();
     log.mockRestore();
+  });
+
+  it("gives no kind for an error that another model cannot fix", async () => {
+    run.mockResolvedValue({ response: JSON.stringify(answer({ found: false })) });
+    expect(await (await call({ image: PHOTO })).json()).toEqual({ error: expect.stringMatching(/No recipe/) });
+    expect(await (await call({ image: "UklGRhAAAABXRUJQ" })).json()).not.toHaveProperty("kind");
   });
 });

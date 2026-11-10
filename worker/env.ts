@@ -4,13 +4,16 @@ export interface Env {
   // Passkeys and users. See worker/passkeys.ts for the keys.
   AUTH: KVNamespace;
   // Workers AI, which reads a recipe from a photo or a page. The type of the binding (Ai) lists
-  // the inputs of each model; worker/model.ts builds its input itself.
-  AI: { run(model: string, input: Record<string, unknown>): Promise<unknown> };
+  // the inputs of each model; worker/model.ts builds its input itself. `wrangler dev --env local`
+  // has no binding, so the Cloudflare models are not on its list.
+  AI?: { run(model: string, input: Record<string, unknown>): Promise<unknown> };
 
   // Secrets: Worker secrets in Cloudflare, `.dev.vars` in a local run.
   GITHUB_TOKEN: string;
   SESSION_SECRET: string;
   SETUP_CODE: string;
+  // A Gemini API key of a Google project with no billing account. Empty: no Google model.
+  GEMINI_API_KEY?: string;
 
   // The only origin that can write, like "https://palmares.lajoie.workers.dev".
   ORIGIN: string;

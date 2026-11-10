@@ -11,6 +11,7 @@ import {
   setupOptions,
   setupVerify,
 } from "./passkeys.ts";
+import { modelsFor } from "./model.ts";
 import { readHandler } from "./read.ts";
 import { createHandler, deleteHandler, getHandler, imageHandler, listHandler, updateHandler } from "./recipes.ts";
 import { clearSession, readSession, type Session } from "./session.ts";
@@ -40,6 +41,7 @@ const routes: Route[] = [
         signedIn: session !== null,
         setupOpen: (await env.AUTH.get(SETUP_DONE_KEY)) === null,
         ...(session && env.TOKEN_EXPIRES ? { tokenExpires: env.TOKEN_EXPIRES } : {}),
+        ...(session ? { models: modelsFor(env).map(({ id, name, company }) => ({ id, name, company })) } : {}),
       }),
   },
   {

@@ -4,6 +4,9 @@ GITHUB_TOKEN=
 # Long random values: openssl rand -base64 32
 SESSION_SECRET=
 SETUP_CODE=
+# A Gemini API key of aistudio.google.com, in a project with no billing account. Empty: no
+# Google model, and `wrangler dev --env local` has no model at all.
+GEMINI_API_KEY=
 # Local saves go to this branch, never to main.
 GITHUB_BRANCH=admin-test
 # http://localhost:5173 behind the Vite proxy, http://localhost:8787 on wrangler dev alone.

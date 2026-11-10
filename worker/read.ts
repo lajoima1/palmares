@@ -1,6 +1,6 @@
 import { linesToItems, type ListKind, type RecipeFields } from "../src/utils/recipeText.ts";
 import { HttpError, json, readJson } from "./http.ts";
-import { askModel, ModelError, MODELS, type Source } from "./model.ts";
+import { askModel, ModelError, modelsFor, type Source } from "./model.ts";
 import { MAX_NAME, readFields, recipeText } from "./recipes.ts";
 import type { Context } from "./router.ts";
 
@@ -250,6 +250,7 @@ const MODEL_ERRORS: Record<ModelError["kind"], [number, string]> = {
 };
 
 interface ReadBody {
+  model?: unknown;
   image?: unknown;
   url?: unknown;
   text?: unknown;
@@ -290,6 +291,8 @@ export async function readHandler({ request, env }: Context): Promise<Response> 
   const body = await readJson<ReadBody | null>(request, MAX_BODY);
   if (typeof body !== "object" || body === null) throw new HttpError(400, "Send one photo, link or text.");
   const tags = readTags(body.tags);
+  const model = modelsFor(env).find((m) => m.id === body.model);
+  if (!model) throw new HttpError(400, "This model is not available.");
   if ([body.image, body.url, body.text].filter((v) => v !== undefined).length !== 1) {
     throw new HttpError(400, "Send one photo, link or text.");
   }
@@ -306,16 +309,20 @@ export async function readHandler({ request, env }: Context): Promise<Response> 
     source = { text: pageText(page.html) };
     from = page.host;
   }
+  const ai = env.AI;
   let fields: RecipeFields | null;
   try {
-    // A bare env.AI.run loses its `this`.
-    fields = cleanAnswer(await askModel(MODELS[0], { ai: (model, input) => env.AI.run(model, input) }, source, tags), tags);
+    // A bare ai.run loses its `this`.
+    const run = ai && ((id: string, input: Record<string, unknown>) => ai.run(id, input));
+    fields = cleanAnswer(await askModel(model, { ai: run, geminiKey: env.GEMINI_API_KEY }, source, tags), tags);
   } catch (e) {
-    const [status, message] = MODEL_ERRORS[e instanceof ModelError ? e.kind : "failed"];
-    throw new HttpError(status, message);
+    // The kind tells the page that another model can try the same source.
+    const kind = e instanceof ModelError ? e.kind : "failed";
+    const [status, message] = MODEL_ERRORS[kind];
+    return json({ error: message, kind }, status);
   }
   if (!fields) {
     throw new HttpError(422, from === "photo" ? NO_RECIPE : from === "text" ? NO_RECIPE_IN_TEXT : NO_RECIPE_ON_PAGE);
   }
-  return json({ fields, source: from });
+  return json({ fields, model: model.id });
 }

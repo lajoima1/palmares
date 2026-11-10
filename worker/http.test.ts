@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import worker from "./index.ts";
+import { MODELS } from "./model.ts";
 import { handleApi } from "./router.ts";
 import { checkOrigin, HttpError, readJson } from "./http.ts";
 import { createSession } from "./session.ts";
@@ -66,7 +67,25 @@ describe("router", () => {
     await env.AUTH.put("passkey:pk1", JSON.stringify({ id: "pk1", userId: "u1" }));
     const cookie = cookieHeader(await createSession(env, { userId: "u1", passkeyId: "pk1" }));
     res = await handleApi(apiRequest("/api/session", { cookie }), env);
-    expect(await res.json()).toEqual({ signedIn: true, setupOpen: false, tokenExpires: "2027-11-06" });
+    expect(await res.json()).toEqual({
+      signedIn: true,
+      setupOpen: false,
+      tokenExpires: "2027-11-06",
+      models: [{ id: MODELS[0].id, name: "Mistral Small", company: "Cloudflare" }],
+    });
+  });
+
+  it("lists the Google model only with its key, and no model with no service", async () => {
+    async function models(overrides: Parameters<typeof testEnv>[0]) {
+      const env = testEnv(overrides);
+      await env.AUTH.put("passkey:pk1", JSON.stringify({ id: "pk1", userId: "u1" }));
+      const cookie = cookieHeader(await createSession(env, { userId: "u1", passkeyId: "pk1" }));
+      const res = await handleApi(apiRequest("/api/session", { cookie }), env);
+      return (await res.json<{ models: { company: string }[] }>()).models.map((m) => m.company);
+    }
+    expect(await models({ GEMINI_API_KEY: "AQ.test-key" })).toEqual(["Cloudflare", "Google"]);
+    expect(await models({ AI: undefined, GEMINI_API_KEY: "AQ.test-key" })).toEqual(["Google"]);
+    expect(await models({ AI: undefined })).toEqual([]);
   });
 
   it("clears both cookies on sign-out", async () => {
