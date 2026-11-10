@@ -201,7 +201,13 @@ export default function AdminApp() {
         )}
       </Box>
       {editing !== undefined && signedIn && (
-        <RecipeForm slug={editing} tagOptions={list?.tags ?? []} onClose={() => setEditing(undefined)} onDone={done} />
+        <RecipeForm
+          slug={editing}
+          tagOptions={list?.tags ?? []}
+          models={session?.models ?? []}
+          onClose={() => setEditing(undefined)}
+          onDone={done}
+        />
       )}
       <Snackbar
         // A snackbar shows above a dialog. At 375 px it would cover the Save button of the form.

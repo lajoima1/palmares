@@ -10,6 +10,7 @@ import { PhotoError, readingPhoto } from "./photo";
 
 interface ImportFieldProps {
   tags: string[];
+  model: string;
   // "photo", "text" or the host of the link, after a fill that the form kept. null: nothing filled.
   filledFrom: string | null;
   onFilled: (fields: RecipeFields, source: string) => void;
@@ -25,7 +26,7 @@ function filledLabel(source: string): string {
   return `Filled from ${source}`;
 }
 
-export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: ImportFieldProps) {
+export function ImportField({ tags, model, filledFrom, onFilled, onAgain, onBusy }: ImportFieldProps) {
   const input = useRef<HTMLInputElement>(null);
   const reading = useRef<AbortController | null>(null);
   const [state, setState] = useState<State>("rest");
@@ -42,15 +43,16 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
     if (filledFrom !== null) again.current?.focus();
   }, [filledFrom]);
 
-  async function read(source: () => Promise<ReadSource>) {
+  // `label` is "photo", "text" or the host of the link, for the "Filled from" line.
+  async function read(source: () => Promise<ReadSource>, label: string) {
     const controller = new AbortController();
     reading.current = controller;
     setError(null);
     setState("reading");
     onBusy(true);
     try {
-      const result = await api.readRecipe(await source(), tags, controller.signal);
-      onFilled(result.fields, result.source);
+      const result = await api.readRecipe(await source(), tags, model, controller.signal);
+      onFilled(result.fields, label);
       setLink("");
       setPasted("");
       setState("rest");
@@ -76,7 +78,7 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
       } catch (e) {
         throw e instanceof PhotoError ? e : new Error("The photo could not be processed. Try another photo.");
       }
-    });
+    }, "photo");
   }
 
   function submitLink(event: FormEvent) {
@@ -86,13 +88,13 @@ export function ImportField({ tags, filledFrom, onFilled, onAgain, onBusy }: Imp
       setError("Paste a link that starts with http:// or https://.");
       return;
     }
-    read(async () => ({ url }));
+    read(async () => ({ url }), URL.canParse(url) ? new URL(url).hostname.replace(/^www\./, "") : url);
   }
 
   function submitText(event: FormEvent) {
     event.preventDefault();
     const text = pasted.trim();
-    if (text) read(async () => ({ text }));
+    if (text) read(async () => ({ text }), "text");
   }
 
   function back() {

@@ -17,7 +17,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { emptyRecipe, linesToItems, oneLine, type RecipeFields } from "../utils/recipeText";
-import { api, ApiError, type PhotoChange, type SaveResult } from "./api";
+import { api, ApiError, type ModelChoice, type PhotoChange, type SaveResult } from "./api";
 import { ImportField } from "./ImportField";
 import { PhotoField } from "./PhotoField";
 import { servedCommit } from "./useLiveStatus";
@@ -28,6 +28,8 @@ interface RecipeFormProps {
   // null: a new recipe.
   slug: string | null;
   tagOptions: string[];
+  // The models that can read a recipe, the default first.
+  models: ModelChoice[];
   onClose: () => void;
   // `before`: the commit that the site served just before the save.
   onDone: (result: SaveResult, kind: SaveKind, name: string, before: string | undefined) => void;
@@ -81,7 +83,7 @@ function noLineBreak(value: string): string {
   return value.replace(/\s*[\r\n]+\s*/g, " ");
 }
 
-export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProps) {
+export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: RecipeFormProps) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [form, setForm] = useState<FormState | null>(slug ? null : toForm(emptyRecipe()));
@@ -287,6 +289,7 @@ export function RecipeForm({ slug, tagOptions, onClose, onDone }: RecipeFormProp
             {!slug && (
               <ImportField
                 tags={tagOptions}
+                model={models[0]?.id ?? ""}
                 filledFrom={filledFrom}
                 onFilled={filled}
                 onAgain={() => setFilledFrom(null)}
