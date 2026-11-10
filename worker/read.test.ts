@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MODEL, type RunModel } from "./model.ts";
+import { MODELS, type RunModel } from "./model.ts";
 import { cleanAnswer, pageText, readPage } from "./read.ts";
 import { handleApi } from "./router.ts";
 import { createSession } from "./session.ts";
@@ -206,7 +206,7 @@ describe("POST /api/recipes/read", () => {
     expect(Object.keys(body).sort()).toEqual(["fields", "source"]);
     expect(body.source).toBe("photo");
     expect((body.fields as { name: string }).name).toBe("Potage aux carottes");
-    expect(run).toHaveBeenCalledWith(MODEL, expect.objectContaining({ messages: expect.any(Array) }));
+    expect(run).toHaveBeenCalledWith(MODELS[0].id, expect.objectContaining({ messages: expect.any(Array) }));
     expect(JSON.stringify(run.mock.calls[0][1])).toContain(`data:image/jpeg;base64,${PHOTO}`);
     // No GitHub call: nothing is saved.
     expect(fetchSpy).not.toHaveBeenCalled();

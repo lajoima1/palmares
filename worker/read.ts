@@ -1,6 +1,6 @@
 import { linesToItems, type ListKind, type RecipeFields } from "../src/utils/recipeText.ts";
 import { HttpError, json, readJson } from "./http.ts";
-import { askModel, ModelError, type Source } from "./model.ts";
+import { askModel, ModelError, MODELS, type Source } from "./model.ts";
 import { MAX_NAME, readFields, recipeText } from "./recipes.ts";
 import type { Context } from "./router.ts";
 
@@ -309,7 +309,7 @@ export async function readHandler({ request, env }: Context): Promise<Response> 
   let fields: RecipeFields | null;
   try {
     // A bare env.AI.run loses its `this`.
-    fields = cleanAnswer(await askModel((model, input) => env.AI.run(model, input), source, tags), tags);
+    fields = cleanAnswer(await askModel(MODELS[0], { ai: (model, input) => env.AI.run(model, input) }, source, tags), tags);
   } catch (e) {
     const [status, message] = MODEL_ERRORS[e instanceof ModelError ? e.kind : "failed"];
     throw new HttpError(status, message);

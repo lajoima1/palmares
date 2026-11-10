@@ -1,15 +1,62 @@
-// The only file that knows the service that reads a recipe. A switch to another service changes
-// this file only.
+// The only file that knows the services that read a recipe: Workers AI through the AI binding,
+// and the Gemini API through fetch. A new model or service changes this file only.
 import type { RecipeFields } from "../src/utils/recipeText.ts";
-
-export const MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 
 // Production passes the AI binding, scripts/try-recipe-read.ts the REST API, the tests a fake.
 export type RunModel = (model: string, input: Record<string, unknown>) => Promise<unknown>;
 
-// How the model is asked for JSON. Workers AI does not guarantee the schema with an image.
+// How a Workers AI model is asked for JSON. Workers AI does not guarantee the schema with an image.
 export type JsonMode = "response_format" | "guided_json" | "none";
-export const JSON_MODE: JsonMode = "response_format";
+
+export interface ModelInfo {
+  id: string;
+  // The name on the admin page, like "Mistral Small".
+  name: string;
+  // The page switches to a model of another company, because the Cloudflare models share one
+  // daily allowance.
+  company: "Cloudflare" | "Google";
+  service: "workers-ai" | "gemini";
+  // The cap on the answer. A whole recipe is about 1,000 tokens; thinking counts too.
+  maxTokens: number;
+  json?: JsonMode;
+  // The lowest level that the model accepts: Flash-Lite takes "minimal", Gemini 3.8 Flash only
+  // "low". A higher level makes a read slower and uses more of the answer cap.
+  thinkingLevel?: "minimal" | "low";
+}
+
+// The order of the menu on the admin page. The first model is the default.
+export const MODELS: ModelInfo[] = [
+  {
+    id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
+    name: "Mistral Small",
+    company: "Cloudflare",
+    service: "workers-ai",
+    // The default of 256 tokens cuts a recipe in the middle.
+    maxTokens: 2048,
+    json: "response_format",
+  },
+  {
+    id: "gemini-3.5-flash-lite",
+    name: "Gemini Flash-Lite",
+    company: "Google",
+    service: "gemini",
+    maxTokens: 4096,
+    thinkingLevel: "minimal",
+  },
+];
+
+export interface Services {
+  ai?: RunModel;
+  geminiKey?: string;
+}
+
+// A model is on the list only if its service is set up.
+export function modelsFor(env: { AI?: unknown; GEMINI_API_KEY?: string }): ModelInfo[] {
+  return MODELS.filter((m) => (m.service === "workers-ai" ? Boolean(env.AI) : Boolean(env.GEMINI_API_KEY)));
+}
+
+// A model that gives no answer in this time counts as failed, so the page can switch.
+export const TIME_LIMIT = 60_000;
 
 export type Source = { image: string } | { text: string };
 
@@ -131,26 +178,46 @@ function rules(tags: string[]): string {
   ].join("\n");
 }
 
-export function buildInput(source: Source, tags: string[], json: JsonMode = JSON_MODE): Record<string, unknown> {
+const PHOTO_PROMPT = "Read the recipe in this photo.";
+const textPrompt = (text: string) => `Read the recipe in this text:\n\n${text}`;
+
+export function buildInput(source: Source, tags: string[], model: ModelInfo): Record<string, unknown> {
   const user =
     "image" in source
       ? [
-          { type: "text", text: "Read the recipe in this photo." },
+          { type: "text", text: PHOTO_PROMPT },
           { type: "image_url", image_url: { url: `data:image/jpeg;base64,${source.image}` } },
         ]
-      : `Read the recipe in this text:\n\n${source.text}`;
+      : textPrompt(source.text);
   const input: Record<string, unknown> = {
     messages: [
       { role: "system", content: rules(tags) },
       { role: "user", content: user },
     ],
-    // The default of 256 tokens cuts a recipe in the middle.
-    max_tokens: 2048,
+    max_tokens: model.maxTokens,
     temperature: 0.1,
   };
-  if (json === "response_format") input.response_format = { type: "json_schema", json_schema: SCHEMA };
-  if (json === "guided_json") input.guided_json = SCHEMA;
+  if (model.json === "response_format") input.response_format = { type: "json_schema", json_schema: SCHEMA };
+  if (model.json === "guided_json") input.guided_json = SCHEMA;
   return input;
+}
+
+export function geminiBody(source: Source, tags: string[], model: ModelInfo): Record<string, unknown> {
+  const parts =
+    "image" in source
+      ? [{ text: PHOTO_PROMPT }, { inlineData: { mimeType: "image/jpeg", data: source.image } }]
+      : [{ text: textPrompt(source.text) }];
+  return {
+    systemInstruction: { parts: [{ text: rules(tags) }] },
+    contents: [{ role: "user", parts }],
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: model.maxTokens,
+      responseMimeType: "application/json",
+      responseJsonSchema: SCHEMA,
+      ...(model.thinkingLevel ? { thinkingConfig: { thinkingLevel: model.thinkingLevel } } : {}),
+    },
+  };
 }
 
 // The model can wrap the JSON in text or in a code fence.
@@ -176,17 +243,80 @@ function errorKind(e: unknown): ModelErrorKind {
   return "failed";
 }
 
-export async function askModel(
-  run: RunModel,
-  source: Source,
-  tags: string[],
-  options: { model?: string; json?: JsonMode } = {},
-): Promise<unknown> {
+async function askWorkersAi(run: RunModel, model: ModelInfo, source: Source, tags: string[]): Promise<unknown> {
   let result: unknown;
   try {
-    result = await run(options.model ?? MODEL, buildInput(source, tags, options.json));
+    result = await run(model.id, buildInput(source, tags, model));
   } catch (e) {
     throw new ModelError(errorKind(e), e);
   }
   return parseAnswer((result as { response?: unknown } | null)?.response);
+}
+
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
+
+// The error docs give no body for a daily limit. A daily quota id has "PerDay" in it.
+export function geminiErrorKind(status: number, body: string): ModelErrorKind {
+  if (status === 429) return /PerDay|per day|daily/i.test(body) ? "daily" : "busy";
+  if (status === 503) return "busy";
+  return "failed";
+}
+
+interface GeminiAnswer {
+  promptFeedback?: { blockReason?: string };
+  candidates?: { finishReason?: string; content?: { parts?: { text?: unknown; thought?: boolean }[] } }[];
+}
+
+function geminiText(data: GeminiAnswer): string {
+  const candidate = data.candidates?.[0];
+  // A blocked prompt, an answer cut at maxOutputTokens, or a safety stop.
+  if (data.promptFeedback?.blockReason || candidate?.finishReason !== "STOP") throw new ModelError("unreadable");
+  const text = (candidate.content?.parts ?? [])
+    .filter((p) => !p.thought && typeof p.text === "string")
+    .map((p) => p.text)
+    .join("");
+  if (!text) throw new ModelError("unreadable");
+  return text;
+}
+
+async function askGemini(key: string, model: ModelInfo, source: Source, tags: string[]): Promise<unknown> {
+  let res: Response;
+  let body: string;
+  try {
+    // The key goes in a header, so it is never in a URL that a log can show.
+    res = await fetch(`${GEMINI_URL}${model.id}:generateContent`, {
+      method: "POST",
+      headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
+      body: JSON.stringify(geminiBody(source, tags, model)),
+      signal: AbortSignal.timeout(TIME_LIMIT),
+    });
+    body = await res.text();
+  } catch (e) {
+    throw new ModelError("failed", e);
+  }
+  if (!res.ok) throw new ModelError(geminiErrorKind(res.status, body), new Error(`${res.status}: ${body.slice(0, 500)}`));
+  let data: GeminiAnswer;
+  try {
+    data = JSON.parse(body) as GeminiAnswer;
+  } catch {
+    throw new ModelError("unreadable");
+  }
+  return parseAnswer(geminiText(data));
+}
+
+function withTimeLimit<T>(work: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const limit = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new ModelError("failed")), TIME_LIMIT);
+  });
+  return Promise.race([work, limit]).finally(() => clearTimeout(timer));
+}
+
+export function askModel(model: ModelInfo, services: Services, source: Source, tags: string[]): Promise<unknown> {
+  if (model.service === "gemini") {
+    if (!services.geminiKey) return Promise.reject(new ModelError("failed"));
+    return withTimeLimit(askGemini(services.geminiKey, model, source, tags));
+  }
+  if (!services.ai) return Promise.reject(new ModelError("failed"));
+  return withTimeLimit(askWorkersAi(services.ai, model, source, tags));
 }
