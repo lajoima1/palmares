@@ -204,7 +204,7 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
 
   // After "Other photo, link or text" the form keeps its values, so a close asks on each step.
   function requestClose() {
-    if (busy) return;
+    if (busy || photoBusy) return;
     const typed = (step === "link" && link.trim() !== "") || (step === "text" && pasted.trim() !== "");
     if (dirty || typed) setConfirmDiscard(true);
     else leave(onClose);
@@ -212,32 +212,40 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
 
   // Escape and a click outside act like Back on these steps, so a typed link or text is not lost.
   function dismiss() {
-    if (busy) return;
+    if (busy || photoBusy) return;
     if (step === "link" || step === "text" || step === "reading") history.back();
     else requestClose();
   }
 
-  // A new step takes the focus, so a screen reader reads it. A link or text field has autoFocus,
-  // and a dialog on top keeps its own focus.
+  // A new step takes the focus, so a screen reader reads it. A link or text field has autoFocus.
+  // While a dialog is on top, the focus waits; "Keep editing" alone owes no focus.
+  const focusOwed = useRef(false);
   useEffect(() => {
-    if (step === "link" || step === "text" || pending !== null || confirmDiscard) return;
+    focusOwed.current = step !== "link" && step !== "text";
+  }, [step, filledBy]);
+  useEffect(() => {
+    if (!focusOwed.current || pending !== null || confirmDiscard) return;
+    focusOwed.current = false;
     const target =
       document.querySelector<HTMLElement>('[role="dialog"] [data-step-focus]') ??
       document.getElementById("recipe-form-title");
     target?.focus();
   }, [step, filledBy, pending, confirmDiscard]);
 
-  // A file dropped on a step with no drop target would open in the tab, in place of the form.
+  // A file dropped where nothing takes it would open in the tab, in place of the form. A text drop
+  // into a field still works.
   useEffect(() => {
-    if (step === "start") return;
-    const block = (event: DragEvent) => event.preventDefault();
+    if (step === "start" && !confirmDiscard && pending === null) return;
+    const block = (event: DragEvent) => {
+      if (event.dataTransfer?.types.includes("Files")) event.preventDefault();
+    };
     window.addEventListener("dragover", block);
     window.addEventListener("drop", block);
     return () => {
       window.removeEventListener("dragover", block);
       window.removeEventListener("drop", block);
     };
-  }, [step]);
+  }, [step, confirmDiscard, pending]);
 
   // An object URL holds the photo in memory until it is revoked.
   useEffect(() => () => void (photoPreview && URL.revokeObjectURL(photoPreview.url)), [photoPreview]);
@@ -528,6 +536,7 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
           kind={filledBy.kind}
           switched={filledBy.switched}
           error={readError}
+          disabled={photoBusy}
           onReadAgain={readAgain}
           onOther={otherSource}
         />
@@ -612,7 +621,7 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
             {error && <Alert severity="error">{error}</Alert>}
             {!slug && !filledBy && models.length > 0 && (
               <Box>
-                <Button startIcon={<PhotoCameraOutlined />} onClick={() => go("start")} sx={{ ml: -1 }}>
+                <Button startIcon={<PhotoCameraOutlined />} onClick={() => go("start")} disabled={photoBusy} sx={{ ml: -1 }}>
                   Fill from a photo or link
                 </Button>
               </Box>

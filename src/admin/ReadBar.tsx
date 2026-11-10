@@ -16,12 +16,14 @@ interface ReadBarProps {
   switched: string | null;
   // The error of a failed "Read again".
   error: string | null;
+  // A new dish photo is still processing: a read would unmount the form and lose its result.
+  disabled: boolean;
   onReadAgain: (model: ModelChoice) => void;
   onOther: () => void;
 }
 
 // The bar at the top of a form that a model filled.
-export function ReadBar({ models, readBy, kind, switched, error, onReadAgain, onOther }: ReadBarProps) {
+export function ReadBar({ models, readBy, kind, switched, error, disabled, onReadAgain, onOther }: ReadBarProps) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const others = models.filter((m) => m.id !== readBy.id);
 
@@ -47,6 +49,7 @@ export function ReadBar({ models, readBy, kind, switched, error, onReadAgain, on
           aria-expanded={anchor !== null}
           endIcon={<ExpandMoreRounded />}
           onClick={(e) => setAnchor(e.currentTarget)}
+          disabled={disabled}
           sx={{ flexShrink: 0, whiteSpace: "nowrap", px: 1.5 }}
         >
           Read again
