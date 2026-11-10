@@ -37,7 +37,7 @@ function isModelError(e: unknown): e is ApiError & { kind: string } {
   return e instanceof ApiError && e.kind !== undefined;
 }
 
-export interface ReadOutcome<T> {
+interface ReadOutcome<T> {
   result: T;
   model: ModelChoice;
   // The text of the read bar if the first model failed, like "Mistral Small was busy."

@@ -45,7 +45,7 @@ export const MODELS: ModelInfo[] = [
   },
 ];
 
-export interface Services {
+interface Services {
   ai?: RunModel;
   geminiKey?: string;
 }
@@ -60,7 +60,7 @@ export const TIME_LIMIT = 60_000;
 
 export type Source = { image: string } | { text: string };
 
-export type ModelErrorKind = "daily" | "busy" | "failed" | "unreadable";
+type ModelErrorKind = "daily" | "busy" | "failed" | "unreadable";
 
 export class ModelError extends Error {
   readonly kind: ModelErrorKind;
@@ -256,7 +256,7 @@ async function askWorkersAi(run: RunModel, model: ModelInfo, source: Source, tag
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
 
 // The error docs give no body for a daily limit. A daily quota id has "PerDay" in it.
-export function geminiErrorKind(status: number, body: string): ModelErrorKind {
+function geminiErrorKind(status: number, body: string): ModelErrorKind {
   if (status === 429) return /PerDay|per day|daily/i.test(body) ? "daily" : "busy";
   if (status === 503) return "busy";
   return "failed";

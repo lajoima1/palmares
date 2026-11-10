@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Alert, Box, Button, ButtonBase, ListItemText, Menu, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import ContentPasteRounded from "@mui/icons-material/ContentPasteRounded";
 import EditOutlined from "@mui/icons-material/EditOutlined";
@@ -7,10 +7,12 @@ import LinkRounded from "@mui/icons-material/LinkRounded";
 import PhotoCameraOutlined from "@mui/icons-material/PhotoCameraOutlined";
 import type { ModelChoice } from "./api";
 
-export type StartScreen = "start" | "link" | "text";
+type StartScreen = "start" | "link" | "text";
 
 interface StartStepProps {
   screen: StartScreen;
+  // Another dialog is open over this one: a paste or a drop does nothing.
+  paused: boolean;
   models: ModelChoice[];
   model: ModelChoice;
   onModel: (model: ModelChoice) => void;
@@ -65,7 +67,8 @@ function Tile({ icon, title, hint, onClick }: { icon: ReactNode; title: string; 
       </Box>
       <Box>
         <Typography sx={{ fontSize: 17, fontWeight: 600 }}>{title}</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13 }}>
+        {/* Two lines on a computer for each tile, so the titles line up. */}
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13, minHeight: { md: "2.9em" } }}>
           {hint}
         </Typography>
       </Box>
@@ -78,6 +81,7 @@ function ModelMenu({ models, model, onModel }: Pick<StartStepProps, "models" | "
   return (
     <>
       <Button
+        aria-label={`Read with ${model.name}`}
         aria-haspopup="menu"
         aria-expanded={anchor !== null}
         endIcon={<ExpandMoreRounded />}
@@ -90,6 +94,8 @@ function ModelMenu({ models, model, onModel }: Pick<StartStepProps, "models" | "
         {models.map((m) => (
           <MenuItem
             key={m.id}
+            role="menuitemradio"
+            aria-checked={m.id === model.id}
             selected={m.id === model.id}
             onClick={() => {
               onModel(m);
@@ -107,15 +113,44 @@ function ModelMenu({ models, model, onModel }: Pick<StartStepProps, "models" | "
 
 // The start screen of Add recipe, and its link and text steps.
 export function StartStep(props: StartStepProps) {
-  const { screen, error, onPhoto, onReadLink, onOpen, onText } = props;
+  const { screen, paused, error, onPhoto, onReadLink, onOpen, onText } = props;
   const input = useRef<HTMLInputElement>(null);
   const [invalid, setInvalid] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
 
+  // A photo dropped anywhere on the page starts a read. Else the browser opens the photo in the
+  // tab, and the admin page is gone.
+  useEffect(() => {
+    if (screen !== "start" || paused) return;
+    const over = (event: globalThis.DragEvent) => {
+      event.preventDefault();
+      setDragging(true);
+    };
+    const drop = (event: globalThis.DragEvent) => {
+      event.preventDefault();
+      setDragging(false);
+      const file = [...(event.dataTransfer?.files ?? [])].find((f) => f.type.startsWith("image/"));
+      if (file) onPhoto(file);
+    };
+    const leave = (event: globalThis.DragEvent) => {
+      if (event.relatedTarget === null) setDragging(false);
+    };
+    window.addEventListener("dragover", over);
+    window.addEventListener("drop", drop);
+    window.addEventListener("dragleave", leave);
+    return () => {
+      window.removeEventListener("dragover", over);
+      window.removeEventListener("drop", drop);
+      window.removeEventListener("dragleave", leave);
+    };
+  }, [screen, paused, onPhoto]);
+
   // Ctrl+V on the start screen: a photo or a link starts a read, other text opens the text step.
   useEffect(() => {
-    if (screen !== "start") return;
+    if (screen !== "start" || paused) return;
     const onPaste = (event: ClipboardEvent) => {
+      // An open menu, like "Read with", takes the paste.
+      if (document.querySelector('[role="menu"]')) return;
       const file = [...(event.clipboardData?.files ?? [])].find((f) => f.type.startsWith("image/"));
       const pasted = event.clipboardData?.getData("text/plain").trim() ?? "";
       if (!file && !pasted) return;
@@ -129,14 +164,7 @@ export function StartStep(props: StartStepProps) {
     };
     document.addEventListener("paste", onPaste);
     return () => document.removeEventListener("paste", onPaste);
-  }, [screen, onPhoto, onReadLink, onOpen, onText]);
-
-  function drop(event: DragEvent) {
-    event.preventDefault();
-    setDragging(false);
-    const file = [...event.dataTransfer.files].find((f) => f.type.startsWith("image/"));
-    if (file) onPhoto(file);
-  }
+  }, [screen, paused, onPhoto, onReadLink, onOpen, onText]);
 
   function submitLink(event: FormEvent) {
     event.preventDefault();
@@ -208,19 +236,13 @@ export function StartStep(props: StartStepProps) {
 
   return (
     <Box
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDragging(true);
-      }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={drop}
       sx={(t) => ({
         borderRadius: "20px",
         outline: dragging ? `2px dashed ${t.herb.herb}` : "none",
         outlineOffset: 6,
       })}
     >
-      <Typography variant="h4" component="h1" sx={{ fontSize: { xs: 28, md: 32 } }}>
+      <Typography data-step-focus tabIndex={-1} variant="h4" component="h1" sx={{ fontSize: { xs: 28, md: 32 }, outline: "none" }}>
         Where is the recipe?
       </Typography>
       <Typography color="text.secondary" sx={{ mt: 0.75, mb: 3, fontSize: 15 }}>

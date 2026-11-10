@@ -316,10 +316,10 @@ export async function readHandler({ request, env }: Context): Promise<Response> 
     const run = ai && ((id: string, input: Record<string, unknown>) => ai.run(id, input));
     fields = cleanAnswer(await askModel(model, { ai: run, geminiKey: env.GEMINI_API_KEY }, source, tags), tags);
   } catch (e) {
+    if (!(e instanceof ModelError)) throw e;
     // The kind tells the page that another model can try the same source.
-    const kind = e instanceof ModelError ? e.kind : "failed";
-    const [status, message] = MODEL_ERRORS[kind];
-    return json({ error: message, kind }, status);
+    const [status, message] = MODEL_ERRORS[e.kind];
+    return json({ error: message, kind: e.kind }, status);
   }
   if (!fields) {
     throw new HttpError(422, from === "photo" ? NO_RECIPE : from === "text" ? NO_RECIPE_IN_TEXT : NO_RECIPE_ON_PAGE);

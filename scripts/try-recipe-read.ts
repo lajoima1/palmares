@@ -1,7 +1,6 @@
-// Reads recipes with the real service, as the admin page does, and prints the fields, the time and
-// the cost. Usage: npm run try:read -- [--model <id>] [--json <mode>] [--agree] <photo, link or .txt>…
-// A Cloudflare model needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN, a Gemini model needs
-// GEMINI_API_KEY (see README, "Recipe auto-fill").
+// Reads recipes with the real service, as the admin page does, and prints the fields and the cost.
+// Usage: npm run try:read -- [--model <id>] [--json <mode>] [--agree] <photo, link or .txt>…
+// The keys come from the environment: see README, "Recipe auto-fill".
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { parseRecipeText } from "../src/utils/recipeText.ts";

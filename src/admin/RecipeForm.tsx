@@ -204,9 +204,26 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
   // After "Other photo, link or text" the form keeps its values, so a close asks on each step.
   function requestClose() {
     if (busy) return;
-    if (dirty) setConfirmDiscard(true);
+    const typed = (step === "link" && link.trim() !== "") || (step === "text" && pasted.trim() !== "");
+    if (dirty || typed) setConfirmDiscard(true);
     else leave(onClose);
   }
+
+  // Escape and a click outside act like Back on these steps, so a typed link or text is not lost.
+  function dismiss() {
+    if (busy) return;
+    if (step === "link" || step === "text" || step === "reading") history.back();
+    else requestClose();
+  }
+
+  // A new step takes the focus, so a screen reader reads it. A link or text field has autoFocus.
+  useEffect(() => {
+    if (step === "link" || step === "text") return;
+    const target =
+      document.querySelector<HTMLElement>('[role="dialog"] [data-step-focus]') ??
+      document.getElementById("recipe-form-title");
+    target?.focus();
+  }, [step, filledBy]);
 
   // Back on a phone: the browser removes one entry of the dialog, then this picks the next step.
   // A step that needs the entry again pushes it again.
@@ -215,7 +232,10 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
       entries.current = Math.max(0, entries.current - 1);
       // During a save or a delete the form stays, so its result or its error shows.
       if (busy) go(step);
-      else if (step === "link" || step === "text") go("start");
+      else if (step === "link" || step === "text") {
+        setStepError(null);
+        go("start");
+      }
       else if (step === "reading") cancelRead();
       else if (dirty) {
         go(step);
@@ -424,7 +444,7 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
       fullScreen={fullScreen}
       fullWidth
       maxWidth="md"
-      onClose={requestClose}
+      onClose={dismiss}
       aria-labelledby="recipe-form-title"
       slotProps={{
         paper: {
@@ -449,7 +469,14 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
         }}
       >
         {fullScreen && closeButton}
-        <Typography id="recipe-form-title" variant="h6" component="h2" noWrap sx={{ flexGrow: 1, minWidth: 0 }}>
+        <Typography
+          id="recipe-form-title"
+          tabIndex={-1}
+          variant="h6"
+          component="h2"
+          noWrap
+          sx={{ flexGrow: 1, minWidth: 0, outline: "none" }}
+        >
           {slug ? "Change recipe" : "Add recipe"}
         </Typography>
         {slug && form && (
@@ -505,6 +532,8 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
       <DialogContent>
         {(step === "start" || step === "link" || step === "text") && model && (
           <StartStep
+            key={step}
+            paused={confirmDiscard || pending !== null}
             screen={step}
             models={models}
             model={model}
@@ -518,7 +547,10 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
               setStepError(null);
               go(next);
             }}
-            onBack={() => history.back()}
+            onBack={() => {
+              setStepError(null);
+              history.back();
+            }}
             onType={() => go("form")}
             onPhoto={readPhoto}
             onReadLink={readLink}
@@ -543,8 +575,9 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
             <CircularProgress color="inherit" aria-label="Loading the recipe" />
           </Box>
         )}
-        {onForm && form && (
-          <Stack spacing={2} sx={{ pt: 1 }}>
+        {/* Hidden, not unmounted, on the other steps: PhotoField keeps the preview of a new photo. */}
+        {form && (
+          <Stack spacing={2} sx={{ pt: 1, display: onForm ? undefined : "none" }}>
             <Box ref={alerts} sx={{ scrollMarginTop: 16, display: error || conflict ? "block" : "none" }} />
             {conflict && (
               <Alert

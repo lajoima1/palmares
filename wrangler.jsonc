@@ -22,10 +22,9 @@
     // Empty: the token has no end date, and the page shows no warning.
     "TOKEN_EXPIRES": ""
   },
-  // `wrangler dev --env local`: the same Worker with no AI binding. Workers AI has no local mode,
-  // so the AI binding would need a Cloudflare sign-in for each `wrangler dev`. A local read uses
-  // only Gemini, with GEMINI_API_KEY in .dev.vars. An environment inherits no binding and no var,
-  // so both repeat here.
+  // `wrangler dev --env local`: no AI binding, so no Cloudflare sign-in. A local read uses only
+  // Gemini, with GEMINI_API_KEY in .dev.vars. An environment inherits no binding and no var, so
+  // both repeat here.
   "env": {
     "local": {
       "kv_namespaces": [{ "binding": "AUTH", "id": "5d928eebc159415fa220962f37301add" }],

@@ -139,7 +139,14 @@ export const api = {
     request<SaveResult>("PUT", `/recipes/${slug}`, { fields, baseOid, image }),
   deleteRecipe: (slug: string, baseOid: string) => request<SaveResult>("DELETE", `/recipes/${slug}`, { baseOid }),
   readRecipe: async (source: ReadSource, tags: string[], model: string, signal: AbortSignal): Promise<ReadResult> => {
-    const result = await request<Partial<ReadResult> | null>("POST", "/recipes/read", { ...source, tags, model }, signal);
+    let result: Partial<ReadResult> | null;
+    try {
+      result = await request<Partial<ReadResult> | null>("POST", "/recipes/read", { ...source, tags, model }, signal);
+    } catch (e) {
+      // A crash or a gateway page is not JSON and has no kind. Another model can still try.
+      if (e instanceof ApiError && e.status >= 500 && !e.kind) throw new ApiError(e.status, e.message, "failed");
+      throw e;
+    }
     // A broken answer must not reach the form: a missing list would stop the page.
     if (!isRecipeFields(result?.fields) || typeof result.model !== "string") {
       throw new ApiError(502, "The service failed. Try again.", "unreadable");

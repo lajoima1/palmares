@@ -34,7 +34,7 @@ export function ReadBar({ models, readBy, kind, switched, error, onReadAgain, on
     <Box sx={(t) => ({ bgcolor: t.herb.herbTint, color: t.herb.ink })}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, py: 1, pl: { xs: 2.5, sm: 3 }, pr: 1 }}>
         <CheckRounded sx={(t) => ({ color: t.herb.herb, flexShrink: 0 })} />
-        <Box role="status" sx={{ flexGrow: 1, minWidth: 0, fontSize: 14, lineHeight: 1.4 }}>
+        <Box data-step-focus tabIndex={-1} role="status" sx={{ flexGrow: 1, minWidth: 0, fontSize: 14, lineHeight: 1.4, outline: "none" }}>
           <Typography component="span" sx={{ fontSize: "inherit", fontWeight: 600, display: { xs: "block", md: "inline" } }}>
             {readBy.name} read {READ[kind]}.
           </Typography>{" "}

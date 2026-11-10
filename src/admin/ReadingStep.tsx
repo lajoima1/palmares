@@ -46,7 +46,7 @@ export function ReadingStep({ preview, line, onCancel }: ReadingStepProps) {
       )}
       <Stack spacing={1.5} sx={{ alignItems: "center", width: "100%" }}>
         <LinearProgress aria-label="Reading the recipe" sx={{ width: 200, borderRadius: 2 }} />
-        <Typography variant="h5" component="h1" sx={{ fontSize: 24 }}>
+        <Typography data-step-focus tabIndex={-1} variant="h5" component="h1" sx={{ fontSize: 24, outline: "none" }}>
           Reading the recipe…
         </Typography>
         <Typography role="status" color="text.secondary" sx={{ fontSize: 15, maxWidth: 420 }}>
