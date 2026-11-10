@@ -23,10 +23,15 @@ import {
 import CloseRounded from "@mui/icons-material/CloseRounded";
 import DeleteOutlineRounded from "@mui/icons-material/DeleteOutlineRounded";
 import MoreVertRounded from "@mui/icons-material/MoreVertRounded";
+import PhotoCameraOutlined from "@mui/icons-material/PhotoCameraOutlined";
 import { emptyRecipe, linesToItems, oneLine, type RecipeFields } from "../utils/recipeText";
-import { api, ApiError, type ModelChoice, type PhotoChange, type SaveResult } from "./api";
-import { ImportField } from "./ImportField";
+import { api, ApiError, type ModelChoice, type PhotoChange, type ReadSource, type SaveResult } from "./api";
+import { readWithBackup } from "./models";
+import { PhotoError, readingPhoto } from "./photo";
 import { PhotoField } from "./PhotoField";
+import { ReadBar, type SourceKind } from "./ReadBar";
+import { ReadingStep } from "./ReadingStep";
+import { StartStep } from "./StartStep";
 import { servedCommit } from "./useLiveStatus";
 
 export type SaveKind = "added" | "saved" | "deleted";
@@ -81,6 +86,27 @@ const WIDE_LAYOUT = {
 
 type ListKey = (typeof LIST_FIELDS)[number]["key"];
 
+// The steps of Add recipe. Change recipe has only the form.
+type Step = "start" | "link" | "text" | "reading" | "form";
+
+// The photo, link or text that a model read. The dialog keeps it for "Read again".
+interface Source {
+  kind: SourceKind;
+  body: ReadSource;
+  // The object URL of the photo, for the reading screen.
+  preview: string | null;
+}
+
+interface FilledBy {
+  by: ModelChoice;
+  kind: SourceKind;
+  // "Mistral Small was busy." after a switch.
+  switched: string | null;
+}
+
+// The link step and the text step have a history entry of their own, so Back goes to the start.
+const entriesFor = (step: Step) => (step === "link" || step === "text" ? 2 : 1);
+
 interface FormState {
   fields: RecipeFields;
   lists: Record<ListKey, string>;
@@ -121,63 +147,97 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [moreMenu, setMoreMenu] = useState<HTMLElement | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
-  const [importBusy, setImportBusy] = useState(false);
-  // The source of the last fill that the form kept, like "photo". null after "Fill again".
-  const [filledFrom, setFilledFrom] = useState<string | null>(null);
-  // The form holds values that the model read. The check alert stays until the form closes.
-  const [suggested, setSuggested] = useState(false);
-  // A fill that waits for "Replace what you typed?".
-  const [pending, setPending] = useState<{ fields: RecipeFields; source: string } | null>(null);
+  const [step, setStep] = useState<Step>(slug || models.length === 0 ? "form" : "start");
+  // Each Add recipe starts on the first model of the list.
+  const [model, setModel] = useState<ModelChoice | undefined>(models[0]);
+  const [source, setSource] = useState<Source | null>(null);
+  const [link, setLink] = useState("");
+  const [pasted, setPasted] = useState("");
+  const [stepError, setStepError] = useState<string | null>(null);
+  const [readingLine, setReadingLine] = useState("");
+  const [readingPreview, setReadingPreview] = useState<string | null>(null);
+  // The step that Cancel or a failed read goes back to: the step of the source, or the form.
+  const [readFrom, setReadFrom] = useState<Step>("start");
+  const [filledBy, setFilledBy] = useState<FilledBy | null>(null);
+  const [readError, setReadError] = useState<string | null>(null);
+  // The form JSON after the last read. A new read replaces the form at once if it did not change.
+  const [lastRead, setLastRead] = useState<string | null>(null);
+  // A read that waits for "Replace what is in the form?".
+  const [pending, setPending] = useState<({ fields: RecipeFields } & FilledBy) | null>(null);
+  const reading = useRef<AbortController | null>(null);
+  const previews = useRef<string[]>([]);
+  // The history entries that the dialog added, 1 or 2. See entriesFor.
+  const entries = useRef(0);
   // The form as it was loaded, to tell if the owner changed something.
   const [loaded, setLoaded] = useState<string | null>(slug ? null : EMPTY_FORM);
   const alerts = useRef<HTMLDivElement>(null);
   const closing = useRef(false);
   const dirty = form !== null && (JSON.stringify(form) !== loaded || image !== undefined);
-  const dirtyNow = useRef(dirty);
   const formNow = useRef(form);
-  const busyNow = useRef(busy);
-  const onCloseNow = useRef(onClose);
+  const onBackNow = useRef<() => void>(() => {});
   useEffect(() => {
-    dirtyNow.current = dirty;
     formNow.current = form;
-    busyNow.current = busy;
-    onCloseNow.current = onClose;
   });
 
-  // On a phone, Back closes a full-screen dialog. A history entry makes Back close the form, not
-  // leave the admin page. With typed changes, Back asks first.
-  useEffect(() => {
-    if (!history.state?.recipeForm) history.pushState({ recipeForm: true }, "");
-    const onBack = () => {
-      if (closing.current) return;
-      // During a save or a delete the form stays, so its result or its error shows.
-      if (busyNow.current) {
-        history.pushState({ recipeForm: true }, "");
-        return;
-      }
-      if (dirtyNow.current) {
-        history.pushState({ recipeForm: true }, "");
-        setConfirmDiscard(true);
-      } else {
-        closing.current = true;
-        onCloseNow.current();
-      }
-    };
-    window.addEventListener("popstate", onBack);
-    return () => window.removeEventListener("popstate", onBack);
-  }, []);
+  function go(next: Step) {
+    setStep(next);
+    while (entries.current < entriesFor(next)) {
+      history.pushState({ recipeForm: true }, "");
+      entries.current += 1;
+    }
+  }
 
   function leave(then: () => void) {
     closing.current = true;
-    if (history.state?.recipeForm) history.back();
+    reading.current?.abort();
+    if (entries.current > 0) history.go(-entries.current);
+    entries.current = 0;
     then();
   }
 
+  function cancelRead() {
+    reading.current?.abort();
+    reading.current = null;
+    go(readFrom);
+  }
+
+  // After "Other photo, link or text" the form keeps its values, so a close asks on each step.
   function requestClose() {
     if (busy) return;
     if (dirty) setConfirmDiscard(true);
     else leave(onClose);
   }
+
+  // Back on a phone: the browser removes one entry of the dialog, then this picks the next step.
+  // A step that needs the entry again pushes it again.
+  useEffect(() => {
+    onBackNow.current = () => {
+      entries.current = Math.max(0, entries.current - 1);
+      // During a save or a delete the form stays, so its result or its error shows.
+      if (busy) go(step);
+      else if (step === "link" || step === "text") go("start");
+      else if (step === "reading") cancelRead();
+      else if (dirty) {
+        go(step);
+        setConfirmDiscard(true);
+      } else leave(onClose);
+    };
+  });
+
+  useEffect(() => {
+    if (!history.state?.recipeForm) history.pushState({ recipeForm: true }, "");
+    entries.current = 1;
+    const onBack = () => {
+      if (!closing.current) onBackNow.current();
+    };
+    window.addEventListener("popstate", onBack);
+    const created = previews.current;
+    return () => {
+      window.removeEventListener("popstate", onBack);
+      reading.current?.abort();
+      created.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   // A save error shows at the top of the form. At 375 px the owner is often at the bottom.
   useEffect(() => {
@@ -205,17 +265,96 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
     load();
   }, [load]);
 
-  // The owner can type while the read runs, so the test reads the form of now.
-  function filled(fields: RecipeFields, source: string) {
-    if (JSON.stringify(formNow.current) !== EMPTY_FORM) setPending({ fields, source });
-    else fill(fields, source);
+  // A new read replaces the form at once only if the owner changed nothing after the last read.
+  function filled(fields: RecipeFields, meta: FilledBy) {
+    if (JSON.stringify(formNow.current) !== (lastRead ?? EMPTY_FORM)) setPending({ fields, ...meta });
+    else fill(fields, meta);
   }
 
-  function fill(fields: RecipeFields, source: string) {
+  function fill(fields: RecipeFields, meta: FilledBy) {
+    const next = toForm({ ...fields, name: fields.name.slice(0, MAX_NAME) });
     setPending(null);
-    setForm(toForm({ ...fields, name: fields.name.slice(0, MAX_NAME) }));
-    setFilledFrom(source);
-    setSuggested(true);
+    setForm(next);
+    setLastRead(JSON.stringify(next));
+    setFilledBy(meta);
+  }
+
+  // `from` is the step that Cancel and a failed read go back to.
+  async function startRead(next: () => Promise<Source>, preview: string | null, first: ModelChoice, from: Step) {
+    reading.current?.abort();
+    const controller = new AbortController();
+    reading.current = controller;
+    setStepError(null);
+    setReadError(null);
+    setReadFrom(from);
+    setReadingPreview(preview);
+    setReadingLine(`${first.name} reads it.`);
+    go("reading");
+    try {
+      const read = await next();
+      if (controller.signal.aborted) return;
+      setSource(read);
+      const outcome = await readWithBackup(
+        models,
+        first,
+        (m) => api.readRecipe(read.body, tagOptions, m.id, controller.signal),
+        (text) => setReadingLine(text),
+      );
+      if (controller.signal.aborted) return;
+      filled(outcome.result.fields, { by: outcome.model, kind: read.kind, switched: outcome.switched });
+      go("form");
+    } catch (e) {
+      if (controller.signal.aborted) return;
+      const message = e instanceof Error ? e.message : "The recipe could not be read. Try again.";
+      if (from === "form") setReadError(message);
+      else setStepError(message);
+      go(from);
+    } finally {
+      if (reading.current === controller) reading.current = null;
+    }
+  }
+
+  function readPhoto(file: File) {
+    if (!model) return;
+    const preview = URL.createObjectURL(file);
+    previews.current.push(preview);
+    startRead(
+      async () => {
+        try {
+          return { kind: "photo", body: { image: await readingPhoto(file) }, preview };
+        } catch (e) {
+          throw e instanceof PhotoError ? e : new Error("The photo could not be processed. Try another photo.");
+        }
+      },
+      preview,
+      model,
+      "start",
+    );
+  }
+
+  function readLink(url: string) {
+    if (!model) return;
+    setLink(url);
+    startRead(async () => ({ kind: "link", body: { url }, preview: null }), null, model, "link");
+  }
+
+  function readText(text: string) {
+    if (!model) return;
+    startRead(async () => ({ kind: "text", body: { text }, preview: null }), null, model, "text");
+  }
+
+  function readAgain(next: ModelChoice) {
+    if (source) startRead(async () => source, source.preview, next, "form");
+  }
+
+  // "Other photo, link or text" drops the source, so the start screen begins again.
+  function otherSource() {
+    setSource(null);
+    setFilledBy(null);
+    setLink("");
+    setPasted("");
+    setStepError(null);
+    go("start");
   }
 
   const setField = (key: keyof RecipeFields, value: string | string[]) =>
@@ -272,6 +411,13 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
 
   const name = form?.fields.name ?? "";
 
+  const onForm = step === "form";
+  const closeButton = (
+    <IconButton aria-label="Close" onClick={requestClose} disabled={busy} sx={{ width: 44, height: 44 }}>
+      <CloseRounded />
+    </IconButton>
+  );
+
   return (
     <Dialog
       open
@@ -280,7 +426,14 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
       maxWidth="md"
       onClose={requestClose}
       aria-labelledby="recipe-form-title"
-      slotProps={{ paper: { sx: { maxWidth: { md: 960 } } } }}
+      slotProps={{
+        paper: {
+          sx: {
+            maxWidth: { md: onForm ? 960 : 800 },
+            bgcolor: onForm ? "background.paper" : "background.default",
+          },
+        },
+      }}
     >
       <Box
         component="header"
@@ -291,15 +444,11 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
           py: 1,
           pl: { xs: 1, sm: 3 },
           pr: { xs: 1.5, sm: 2 },
-          borderBottom: 1,
+          borderBottom: onForm ? 1 : 0,
           borderColor: "divider",
         }}
       >
-        {fullScreen && (
-          <IconButton aria-label="Close" onClick={requestClose} disabled={busy} sx={{ width: 44, height: 44 }}>
-            <CloseRounded />
-          </IconButton>
-        )}
+        {fullScreen && closeButton}
         <Typography id="recipe-form-title" variant="h6" component="h2" noWrap sx={{ flexGrow: 1, minWidth: 0 }}>
           {slug ? "Change recipe" : "Add recipe"}
         </Typography>
@@ -315,19 +464,29 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
             <MoreVertRounded />
           </IconButton>
         )}
-        {!fullScreen && (
+        {onForm && !fullScreen && (
           <Button color="inherit" onClick={requestClose} disabled={busy}>
             Cancel
           </Button>
         )}
-        <Button
-          variant="contained"
-          onClick={save}
-          disabled={busy || photoBusy || importBusy || !form || !oneLine(name) || conflict}
-        >
-          {busy ? "Saving…" : "Save"}
-        </Button>
+        {onForm && (
+          <Button variant="contained" onClick={save} disabled={busy || photoBusy || !form || !oneLine(name) || conflict}>
+            {busy ? "Saving…" : "Save"}
+          </Button>
+        )}
+        {!onForm && !fullScreen && closeButton}
       </Box>
+      {onForm && filledBy && (
+        <ReadBar
+          models={models}
+          readBy={filledBy.by}
+          kind={filledBy.kind}
+          switched={filledBy.switched}
+          error={readError}
+          onReadAgain={readAgain}
+          onOther={otherSource}
+        />
+      )}
       <Menu anchorEl={moreMenu} open={moreMenu !== null} onClose={() => setMoreMenu(null)}>
         <MenuItem
           onClick={() => {
@@ -344,7 +503,30 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
         </MenuItem>
       </Menu>
       <DialogContent>
-        {loadError && (
+        {(step === "start" || step === "link" || step === "text") && model && (
+          <StartStep
+            screen={step}
+            models={models}
+            model={model}
+            onModel={setModel}
+            link={link}
+            onLink={setLink}
+            text={pasted}
+            onText={setPasted}
+            error={stepError}
+            onOpen={(next) => {
+              setStepError(null);
+              go(next);
+            }}
+            onBack={() => history.back()}
+            onType={() => go("form")}
+            onPhoto={readPhoto}
+            onReadLink={readLink}
+            onReadText={readText}
+          />
+        )}
+        {step === "reading" && <ReadingStep preview={readingPreview} line={readingLine} onCancel={cancelRead} />}
+        {onForm && loadError && (
           <Alert
             severity="error"
             action={
@@ -356,12 +538,12 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
             {loadError}
           </Alert>
         )}
-        {!form && !loadError && (
+        {onForm && !form && !loadError && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
             <CircularProgress color="inherit" aria-label="Loading the recipe" />
           </Box>
         )}
-        {form && (
+        {onForm && form && (
           <Stack spacing={2} sx={{ pt: 1 }}>
             <Box ref={alerts} sx={{ scrollMarginTop: 16, display: error || conflict ? "block" : "none" }} />
             {conflict && (
@@ -378,23 +560,17 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
               </Alert>
             )}
             {error && <Alert severity="error">{error}</Alert>}
-            {!slug && (
-              <ImportField
-                tags={tagOptions}
-                model={models[0]?.id ?? ""}
-                filledFrom={filledFrom}
-                onFilled={filled}
-                onAgain={() => setFilledFrom(null)}
-                onBusy={setImportBusy}
-              />
+            {!slug && !filledBy && models.length > 0 && (
+              <Box>
+                <Button startIcon={<PhotoCameraOutlined />} onClick={() => go("start")} sx={{ ml: -1 }}>
+                  Fill from a photo or link
+                </Button>
+              </Box>
             )}
-            {suggested && (
-              <Alert
-                severity="info"
-                sx={(t) => ({ bgcolor: t.herb.herbTint, color: t.herb.ink, "& .MuiAlert-icon": { color: t.herb.herb } })}
-              >
-                Check each field. Times, difficulty and tags can be suggestions.
-              </Alert>
+            {!slug && models.length === 0 && (
+              <Typography variant="body2" color="text.secondary">
+                Auto-fill is not set up.
+              </Typography>
             )}
             <Box sx={{ display: "grid", gap: 2, ...(wide ? WIDE_LAYOUT : {}) }}>
               <Box sx={{ gridArea: wide ? "photo" : undefined }}>
@@ -485,13 +661,13 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
       <Dialog open={pending !== null && !confirmDiscard} onClose={() => setPending(null)}>
         <DialogTitle>Replace what is in the form?</DialogTitle>
         <DialogContentText sx={{ px: 3 }}>
-          The form fills with the recipe that was read. The text in the form now is lost.
+          The form fills with the recipe that {pending?.by.name} read. Your changes are lost.
         </DialogContentText>
         <DialogActions>
           <Button color="inherit" onClick={() => setPending(null)}>
             Keep my text
           </Button>
-          <Button variant="contained" onClick={() => pending && fill(pending.fields, pending.source)}>
+          <Button variant="contained" onClick={() => pending && fill(pending.fields, pending)}>
             Replace
           </Button>
         </DialogActions>

@@ -173,19 +173,52 @@ For the Vite dev server, run `npx wrangler dev --env local` and `WORKERS_CI=1 np
 
 ### Recipe auto-fill
 
-"Fill from a photo or link" at the top of Add recipe reads one photo, one link or one pasted text,
-and fills the form. The owner checks the fields and saves. Some sites refuse a request from the
-Worker (Budget Bytes answers 403): copy the text of the page and use "Paste text". The Worker
-sends the photo, the text of the page or the pasted text to a vision model of Cloudflare Workers
-AI through the `AI` binding. `worker/model.ts` holds the
-model, the prompt and the call. There is no key: the binding uses the Cloudflare account.
+Add recipe opens on "Where is the recipe?". The owner picks Photo, Link, Text or "Type it". A model
+reads the photo, the page or the pasted text, and the form opens filled. The owner checks each
+field and saves. On a computer, the owner can also drop a photo, or paste a photo or a link with
+Ctrl+V. Some sites refuse a request from the Worker (Budget Bytes answers 403). Then copy the text
+of the page and use Text.
 
-- **Cost.** The Workers Free plan gives 10,000 neurons a day, and it cannot bill more. One read
-  costs about 100 neurons, so about 100 reads a day. The allowance starts again at 00:00 UTC.
-  After that, the page says "The free limit of the day is reached".
-- **Try a model from this computer.** `npm run try:read -- <photo or link>` reads like the admin
-  page and prints the fields, the time and the neurons. `--model <id>` tries another model. It
-  needs `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in the environment.
+`worker/model.ts` holds the list of models, the prompt and the calls. Each Add recipe starts on the
+first model of the list. "Read with" picks another one.
+
+| Model | Service | Free limit |
+|---|---|---|
+| Mistral Small 3.1 | Cloudflare Workers AI, through the `AI` binding | 10,000 neurons a day, about 100 reads. The count starts again at 00:00 UTC. |
+| Gemini 3.5 Flash-Lite | Google Gemini API, with the `GEMINI_API_KEY` secret | About 500 reads a day and 10 a minute |
+
+- **The switch.** If a model fails, the page reads the same source once more with the first model
+  of the other company. A failure is the free limit of the day, a busy service, an error, an
+  answer that is not JSON, or no answer in 60 seconds. The form says which model read it, and why
+  the page switched. "Read again" in the form reads the same source with another model.
+- **A model is on the list only if its service is set up.** With no `GEMINI_API_KEY`, the list has
+  only Mistral Small.
+- **Cost.** Neither service can bill. Workers AI on the Free plan stops at its limit. The Google
+  project has no billing account, so a read past the limit fails.
+- **Data.** On the free tier, Google uses the photos and the texts to improve its products, and
+  people at Google can read them. Send only recipes: no faces, no names.
+
+#### The Gemini key
+
+1. Open https://aistudio.google.com/apikey with a personal Google account, not a work account.
+2. Accept the terms. Create a key in a project with no billing account. The key starts with `AQ.`
+   or `AIza`.
+3. If the key shows "Unrestricted", select Add restrictions → "Restrict to Gemini API only".
+4. In AI Studio → Dashboard → Projects, the tier must say Free. Never set up billing for this
+   project.
+5. Add the key as the Worker secret `GEMINI_API_KEY`: the `palmares` Worker → Settings →
+   Variables and Secrets, type Secret.
+6. For local work, add the same line to `.dev.vars`, and write it in `gemini.local` for
+   `npm run try:read`. Git ignores both files.
+
+#### Try a model from this computer
+
+`npm run try:read -- <photo, link or .txt>` reads like the admin page and prints the fields, the
+time and the cost. `--model <id>` takes a model of the list or another model to try: an id that
+starts with `@cf/` is Workers AI, another id is Gemini.
+
+- A Cloudflare model needs `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`.
+- A Gemini model needs `GEMINI_API_KEY`. Load it with `set -a; . ./gemini.local; set +a`.
 
 Local access to Workers AI, one of two ways:
 
@@ -201,9 +234,9 @@ Local access to Workers AI, one of two ways:
    token can change most of the Cloudflare account, so prefer the API token.
 
 Workers AI has no local mode. The `local` environment of `wrangler.jsonc` has no `AI` binding, so
-`wrangler dev --env local` needs no sign-in, and a read there shows "The service failed". A plain
-`wrangler dev` needs a sign-in that can open a remote session (`wrangler login`), and each read
-uses the daily allowance. `npm test` never calls the service.
+`wrangler dev --env local` needs no sign-in, and its list has only Gemini. A plain `wrangler dev`
+needs a sign-in that can open a remote session (`wrangler login`), and each read uses the daily
+allowance. `npm test` never calls a service.
 
 ## Project Structure
 
