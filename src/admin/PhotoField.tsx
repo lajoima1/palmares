@@ -1,26 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Alert, Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
 import AddPhotoAlternate from "@mui/icons-material/AddPhotoAlternate";
 import Delete from "@mui/icons-material/Delete";
 import type { PhotoChange } from "./api";
 import { PhotoError, processPhoto } from "./photo";
 
+// A new photo before the save. The form keeps it, so it stays when the form unmounts for a read.
+export interface PhotoPreview {
+  url: string;
+  size: string;
+}
+
 interface PhotoFieldProps {
   // The saved photo, or null if the recipe has none.
   currentUrl: string | null;
   change: PhotoChange;
-  onChange: (change: PhotoChange) => void;
+  preview: PhotoPreview | null;
+  onChange: (change: PhotoChange, preview: PhotoPreview | null) => void;
   onBusy: (busy: boolean) => void;
 }
 
-export function PhotoField({ currentUrl, change, onChange, onBusy }: PhotoFieldProps) {
+export function PhotoField({ currentUrl, change, preview, onChange, onBusy }: PhotoFieldProps) {
   const input = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [size, setSize] = useState<string | null>(null);
-
-  useEffect(() => () => void (preview && URL.revokeObjectURL(preview)), [preview]);
 
   async function choose(file: File | undefined) {
     if (!file) return;
@@ -29,9 +32,10 @@ export function PhotoField({ currentUrl, change, onChange, onBusy }: PhotoFieldP
     onBusy(true);
     try {
       const photo = await processPhoto(file);
-      setPreview(URL.createObjectURL(photo.blob));
-      setSize(`${photo.width} × ${photo.height}, ${Math.round(photo.blob.size / 1024)} KB`);
-      onChange(photo.base64);
+      onChange(photo.base64, {
+        url: URL.createObjectURL(photo.blob),
+        size: `${photo.width} × ${photo.height}, ${Math.round(photo.blob.size / 1024)} KB`,
+      });
     } catch (e) {
       setError(e instanceof PhotoError ? e.message : "The photo could not be processed. Try another photo.");
     } finally {
@@ -41,7 +45,7 @@ export function PhotoField({ currentUrl, change, onChange, onBusy }: PhotoFieldP
     }
   }
 
-  const shown = typeof change === "string" ? preview : change === null ? null : currentUrl;
+  const shown = typeof change === "string" ? (preview?.url ?? null) : change === null ? null : currentUrl;
 
   return (
     <Stack spacing={1}>
@@ -70,9 +74,9 @@ export function PhotoField({ currentUrl, change, onChange, onBusy }: PhotoFieldP
         )}
       </Box>
       {processing && <LinearProgress color="inherit" aria-label="Processing the photo" />}
-      {size && typeof change === "string" && (
+      {preview && typeof change === "string" && (
         <Typography variant="caption" color="text.secondary">
-          New photo: {size}
+          New photo: {preview.size}
         </Typography>
       )}
       {error && <Alert severity="error">{error}</Alert>}
@@ -82,7 +86,7 @@ export function PhotoField({ currentUrl, change, onChange, onBusy }: PhotoFieldP
           Choose photo
         </Button>
         {shown && (
-          <Button color="error" startIcon={<Delete />} onClick={() => onChange(null)} disabled={processing}>
+          <Button color="error" startIcon={<Delete />} onClick={() => onChange(null, null)} disabled={processing}>
             Remove
           </Button>
         )}

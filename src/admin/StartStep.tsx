@@ -81,7 +81,8 @@ function ModelMenu({ models, model, onModel }: Pick<StartStepProps, "models" | "
   return (
     <>
       <Button
-        aria-label={`Read with ${model.name}`}
+        id="read-with-model"
+        aria-labelledby="read-with-label read-with-model"
         aria-haspopup="menu"
         aria-expanded={anchor !== null}
         endIcon={<ExpandMoreRounded />}
@@ -270,7 +271,7 @@ export function StartStep(props: StartStepProps) {
         <Tile icon={<EditOutlined />} title="Type it" hint="An empty form" onClick={props.onType} />
       </Box>
       <Stack direction="row" spacing={0.5} sx={{ mt: 2.5, alignItems: "center", flexWrap: "wrap" }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography id="read-with-label" variant="body2" color="text.secondary">
           Read with
         </Typography>
         <ModelMenu models={props.models} model={props.model} onModel={props.onModel} />

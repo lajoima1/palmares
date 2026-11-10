@@ -286,7 +286,8 @@ function readPhoto(value: unknown): string {
   return value;
 }
 
-// Each error becomes an HttpError, so the router logs nothing: a parse error can quote the answer.
+// A model error goes back with its kind. Each other error is an HttpError, or a crash that the
+// router logs; the parse code catches its own errors, so a log never quotes the answer.
 export async function readHandler({ request, env }: Context): Promise<Response> {
   const body = await readJson<ReadBody | null>(request, MAX_BODY);
   if (typeof body !== "object" || body === null) throw new HttpError(400, "Send one photo, link or text.");

@@ -28,7 +28,7 @@ import { emptyRecipe, linesToItems, oneLine, type RecipeFields } from "../utils/
 import { api, ApiError, type ModelChoice, type PhotoChange, type ReadSource, type SaveResult } from "./api";
 import { readWithBackup } from "./models";
 import { PhotoError, readingPhoto } from "./photo";
-import { PhotoField } from "./PhotoField";
+import { PhotoField, type PhotoPreview } from "./PhotoField";
 import { ReadBar, type SourceKind } from "./ReadBar";
 import { ReadingStep } from "./ReadingStep";
 import { StartStep } from "./StartStep";
@@ -138,6 +138,7 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
   const [form, setForm] = useState<FormState | null>(slug ? null : toForm(emptyRecipe()));
   const [baseOid, setBaseOid] = useState("");
   const [image, setImage] = useState<PhotoChange>(undefined);
+  const [photoPreview, setPhotoPreview] = useState<PhotoPreview | null>(null);
   const [hasImage, setHasImage] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -216,14 +217,30 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
     else requestClose();
   }
 
-  // A new step takes the focus, so a screen reader reads it. A link or text field has autoFocus.
+  // A new step takes the focus, so a screen reader reads it. A link or text field has autoFocus,
+  // and a dialog on top keeps its own focus.
   useEffect(() => {
-    if (step === "link" || step === "text") return;
+    if (step === "link" || step === "text" || pending !== null || confirmDiscard) return;
     const target =
       document.querySelector<HTMLElement>('[role="dialog"] [data-step-focus]') ??
       document.getElementById("recipe-form-title");
     target?.focus();
-  }, [step, filledBy]);
+  }, [step, filledBy, pending, confirmDiscard]);
+
+  // A file dropped on a step with no drop target would open in the tab, in place of the form.
+  useEffect(() => {
+    if (step === "start") return;
+    const block = (event: DragEvent) => event.preventDefault();
+    window.addEventListener("dragover", block);
+    window.addEventListener("drop", block);
+    return () => {
+      window.removeEventListener("dragover", block);
+      window.removeEventListener("drop", block);
+    };
+  }, [step]);
+
+  // An object URL holds the photo in memory until it is revoked.
+  useEffect(() => () => void (photoPreview && URL.revokeObjectURL(photoPreview.url)), [photoPreview]);
 
   // Back on a phone: the browser removes one entry of the dialog, then this picks the next step.
   // A step that needs the entry again pushes it again.
@@ -276,6 +293,7 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
       setBaseOid(recipe.baseOid);
       setHasImage(recipe.hasImage);
       setImage(undefined);
+      setPhotoPreview(null);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : "The recipe could not load.");
     }
@@ -575,9 +593,8 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
             <CircularProgress color="inherit" aria-label="Loading the recipe" />
           </Box>
         )}
-        {/* Hidden, not unmounted, on the other steps: PhotoField keeps the preview of a new photo. */}
-        {form && (
-          <Stack spacing={2} sx={{ pt: 1, display: onForm ? undefined : "none" }}>
+        {onForm && form && (
+          <Stack spacing={2} sx={{ pt: 1 }}>
             <Box ref={alerts} sx={{ scrollMarginTop: 16, display: error || conflict ? "block" : "none" }} />
             {conflict && (
               <Alert
@@ -610,7 +627,11 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
                 <PhotoField
                   currentUrl={slug && hasImage ? `/api/recipes/${slug}/image` : null}
                   change={image}
-                  onChange={setImage}
+                  preview={photoPreview}
+                  onChange={(change, preview) => {
+                    setImage(change);
+                    setPhotoPreview(preview);
+                  }}
                   onBusy={setPhotoBusy}
                 />
               </Box>
@@ -708,7 +729,7 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
 
       <Dialog open={confirmDiscard} onClose={() => setConfirmDiscard(false)}>
         <DialogTitle>Discard your changes?</DialogTitle>
-        <DialogContentText sx={{ px: 3 }}>The changes in this form are not saved.</DialogContentText>
+        <DialogContentText sx={{ px: 3 }}>Your changes are not saved.</DialogContentText>
         <DialogActions>
           <Button color="inherit" onClick={() => setConfirmDiscard(false)}>
             Keep editing
