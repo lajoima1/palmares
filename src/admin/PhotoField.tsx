@@ -76,7 +76,8 @@ export function PhotoField({ currentUrl, change, onChange, onBusy }: PhotoFieldP
         </Typography>
       )}
       {error && <Alert severity="error">{error}</Alert>}
-      <Stack direction="row" spacing={1}>
+      {/* In the narrow photo column of a wide form, Remove goes to the next line. */}
+      <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", "& .MuiButton-root": { whiteSpace: "nowrap" } }}>
         <Button variant="outlined" color="inherit" startIcon={<AddPhotoAlternate />} onClick={() => input.current?.click()} disabled={processing}>
           Choose photo
         </Button>

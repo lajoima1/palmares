@@ -10,12 +10,19 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
+  ListItemIcon,
+  Menu,
   MenuItem,
   Stack,
   TextField,
+  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import CloseRounded from "@mui/icons-material/CloseRounded";
+import DeleteOutlineRounded from "@mui/icons-material/DeleteOutlineRounded";
+import MoreVertRounded from "@mui/icons-material/MoreVertRounded";
 import { emptyRecipe, linesToItems, oneLine, type RecipeFields } from "../utils/recipeText";
 import { api, ApiError, type ModelChoice, type PhotoChange, type SaveResult } from "./api";
 import { ImportField } from "./ImportField";
@@ -39,12 +46,12 @@ interface RecipeFormProps {
 export const MAX_NAME = 100;
 
 const ONE_LINE_FIELDS = [
-  { key: "name", label: "Name", required: true },
-  { key: "description", label: "Description" },
-  { key: "servings", label: "Servings", placeholder: "4 portions" },
-  { key: "prep_time", label: "Prep time", placeholder: "15 minutes" },
-  { key: "cook_time", label: "Cook time", placeholder: "1 heure" },
-  { key: "total_time", label: "Total time", placeholder: "1 heure 15 minutes" },
+  { key: "name", label: "Name", required: true, area: "name" },
+  { key: "description", label: "Description", area: "desc" },
+  { key: "servings", label: "Servings", placeholder: "4 portions", area: "serv" },
+  { key: "prep_time", label: "Prep time", placeholder: "15 minutes", area: "prep" },
+  { key: "cook_time", label: "Cook time", placeholder: "1 heure", area: "cook" },
+  { key: "total_time", label: "Total time", placeholder: "1 heure 15 minutes", area: "total" },
 ] as const;
 
 const LIST_FIELDS = [
@@ -52,10 +59,25 @@ const LIST_FIELDS = [
     key: "ingredients",
     label: "Ingredients — one per line",
     help: "A line like “## Pour la sauce:” shows as a heading.",
+    area: "ing",
   },
-  { key: "instructions", label: "Steps — one per line", help: "The page numbers the steps." },
-  { key: "notes", label: "Notes — one per line", help: undefined },
+  { key: "instructions", label: "Steps — one per line", help: "The page numbers the steps.", area: "steps" },
+  { key: "notes", label: "Notes — one per line", help: undefined, area: "notes" },
 ] as const;
+
+// From the md width (900 px), the form uses the width of the dialog. A phone keeps one column, in
+// the same order.
+const WIDE_LAYOUT = {
+  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+  gridTemplateAreas: `
+    "photo name name name"
+    "photo desc desc desc"
+    "photo serv serv serv"
+    "prep cook total diff"
+    "tags tags tags tags"
+    "ing ing steps steps"
+    "notes notes notes notes"`,
+};
 
 type ListKey = (typeof LIST_FIELDS)[number]["key"];
 
@@ -86,6 +108,7 @@ function noLineBreak(value: string): string {
 export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: RecipeFormProps) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const wide = useMediaQuery(theme.breakpoints.up("md"));
   const [form, setForm] = useState<FormState | null>(slug ? null : toForm(emptyRecipe()));
   const [baseOid, setBaseOid] = useState("");
   const [image, setImage] = useState<PhotoChange>(undefined);
@@ -96,6 +119,7 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
   const [conflict, setConflict] = useState(false);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [moreMenu, setMoreMenu] = useState<HTMLElement | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [importBusy, setImportBusy] = useState(false);
   // The source of the last fill that the form kept, like "photo". null after "Fill again".
@@ -249,9 +273,77 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
   const name = form?.fields.name ?? "";
 
   return (
-    <Dialog open fullScreen={fullScreen} fullWidth maxWidth="md" onClose={requestClose}>
-      <DialogTitle>{slug ? "Change recipe" : "Add recipe"}</DialogTitle>
-      <DialogContent dividers>
+    <Dialog
+      open
+      fullScreen={fullScreen}
+      fullWidth
+      maxWidth="md"
+      onClose={requestClose}
+      aria-labelledby="recipe-form-title"
+      slotProps={{ paper: { sx: { maxWidth: { md: 960 } } } }}
+    >
+      <Box
+        component="header"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          py: 1,
+          pl: { xs: 1, sm: 3 },
+          pr: { xs: 1.5, sm: 2 },
+          borderBottom: 1,
+          borderColor: "divider",
+        }}
+      >
+        {fullScreen && (
+          <IconButton aria-label="Close" onClick={requestClose} disabled={busy} sx={{ width: 44, height: 44 }}>
+            <CloseRounded />
+          </IconButton>
+        )}
+        <Typography id="recipe-form-title" variant="h6" component="h2" noWrap sx={{ flexGrow: 1, minWidth: 0 }}>
+          {slug ? "Change recipe" : "Add recipe"}
+        </Typography>
+        {slug && form && (
+          <IconButton
+            aria-label="More"
+            aria-haspopup="menu"
+            aria-expanded={moreMenu !== null}
+            onClick={(e) => setMoreMenu(e.currentTarget)}
+            disabled={busy}
+            sx={{ width: 44, height: 44 }}
+          >
+            <MoreVertRounded />
+          </IconButton>
+        )}
+        {!fullScreen && (
+          <Button color="inherit" onClick={requestClose} disabled={busy}>
+            Cancel
+          </Button>
+        )}
+        <Button
+          variant="contained"
+          onClick={save}
+          disabled={busy || photoBusy || importBusy || !form || !oneLine(name) || conflict}
+        >
+          {busy ? "Saving…" : "Save"}
+        </Button>
+      </Box>
+      <Menu anchorEl={moreMenu} open={moreMenu !== null} onClose={() => setMoreMenu(null)}>
+        <MenuItem
+          onClick={() => {
+            setMoreMenu(null);
+            setConfirmDelete(true);
+          }}
+          // MUI makes a menu item 36 px high from the sm width. A tap target is 44 px at least.
+          sx={{ color: "error.main", minHeight: { xs: 48, sm: 48 } }}
+        >
+          <ListItemIcon sx={{ color: "inherit" }}>
+            <DeleteOutlineRounded />
+          </ListItemIcon>
+          Delete recipe…
+        </MenuItem>
+      </Menu>
+      <DialogContent>
         {loadError && (
           <Alert
             severity="error"
@@ -304,83 +396,74 @@ export function RecipeForm({ slug, tagOptions, models, onClose, onDone }: Recipe
                 Check each field. Times, difficulty and tags can be suggestions.
               </Alert>
             )}
-            <PhotoField
-              currentUrl={slug && hasImage ? `/api/recipes/${slug}/image` : null}
-              change={image}
-              onChange={setImage}
-              onBusy={setPhotoBusy}
-            />
-            {ONE_LINE_FIELDS.map((f) => (
-              <TextField
-                key={f.key}
-                label={f.label}
-                required={"required" in f}
-                placeholder={"placeholder" in f ? f.placeholder : undefined}
-                value={form.fields[f.key]}
-                onChange={(e) => setField(f.key, noLineBreak(e.target.value))}
-                multiline={f.key === "description"}
-                helperText={!slug && f.key === "name" ? "The name also makes the address of the recipe." : undefined}
-                slotProps={f.key === "name" ? { htmlInput: { maxLength: MAX_NAME } } : undefined}
-              />
-            ))}
-            <TextField
-              select
-              label="Difficulty"
-              value={form.fields.difficulty}
-              onChange={(e) => setField("difficulty", e.target.value)}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {["Easy", "Medium", "Hard"].map((d) => (
-                <MenuItem key={d} value={d}>
-                  {d}
-                </MenuItem>
+            <Box sx={{ display: "grid", gap: 2, ...(wide ? WIDE_LAYOUT : {}) }}>
+              <Box sx={{ gridArea: wide ? "photo" : undefined }}>
+                <PhotoField
+                  currentUrl={slug && hasImage ? `/api/recipes/${slug}/image` : null}
+                  change={image}
+                  onChange={setImage}
+                  onBusy={setPhotoBusy}
+                />
+              </Box>
+              {ONE_LINE_FIELDS.map((f) => (
+                <TextField
+                  key={f.key}
+                  sx={{ gridArea: wide ? f.area : undefined }}
+                  label={f.label}
+                  required={"required" in f}
+                  placeholder={"placeholder" in f ? f.placeholder : undefined}
+                  value={form.fields[f.key]}
+                  onChange={(e) => setField(f.key, noLineBreak(e.target.value))}
+                  multiline={f.key === "description"}
+                  helperText={!slug && f.key === "name" ? "The name also makes the address of the recipe." : undefined}
+                  slotProps={f.key === "name" ? { htmlInput: { maxLength: MAX_NAME } } : undefined}
+                />
               ))}
-            </TextField>
-            <Autocomplete
-              multiple
-              freeSolo
-              options={tagOptions}
-              value={form.fields.tags}
-              onChange={(_, tags) =>
-                setField("tags", [...new Set(tags.flatMap((t) => t.split(",")).map(oneLine).filter(Boolean))])
-              }
-              renderInput={(params) => (
-                <TextField {...params} label="Tags" helperText="Choose a tag, or type a new one and press Enter." />
-              )}
-            />
-            {LIST_FIELDS.map((f) => (
               <TextField
-                key={f.key}
-                label={f.label}
-                multiline
-                minRows={f.key === "notes" ? 2 : 4}
-                value={form.lists[f.key]}
-                onChange={(e) => setForm((s) => s && { ...s, lists: { ...s.lists, [f.key]: e.target.value } })}
-                helperText={f.help}
+                select
+                sx={{ gridArea: wide ? "diff" : undefined }}
+                label="Difficulty"
+                value={form.fields.difficulty}
+                onChange={(e) => setField("difficulty", e.target.value)}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {["Easy", "Medium", "Hard"].map((d) => (
+                  <MenuItem key={d} value={d}>
+                    {d}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <Autocomplete
+                multiple
+                freeSolo
+                sx={{ gridArea: wide ? "tags" : undefined }}
+                options={tagOptions}
+                value={form.fields.tags}
+                onChange={(_, tags) =>
+                  setField("tags", [...new Set(tags.flatMap((t) => t.split(",")).map(oneLine).filter(Boolean))])
+                }
+                renderInput={(params) => (
+                  <TextField {...params} label="Tags" helperText="Choose a tag, or type a new one and press Enter." />
+                )}
               />
-            ))}
+              {LIST_FIELDS.map((f) => (
+                <TextField
+                  key={f.key}
+                  sx={{ gridArea: wide ? f.area : undefined }}
+                  label={f.label}
+                  multiline
+                  minRows={f.key === "notes" ? 2 : wide ? 8 : 4}
+                  value={form.lists[f.key]}
+                  onChange={(e) => setForm((s) => s && { ...s, lists: { ...s.lists, [f.key]: e.target.value } })}
+                  helperText={f.help}
+                />
+              ))}
+            </Box>
           </Stack>
         )}
       </DialogContent>
-      <DialogActions sx={{ px: 3, py: 2, flexWrap: "wrap", gap: 1 }}>
-        {slug && form && (
-          <Button color="error" onClick={() => setConfirmDelete(true)} disabled={busy} sx={{ mr: "auto" }}>
-            Delete
-          </Button>
-        )}
-        <Button color="inherit" onClick={requestClose} disabled={busy}>
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          onClick={save}
-          disabled={busy || photoBusy || importBusy || !form || !oneLine(name) || conflict}
-        >
-          {busy ? "Saving…" : "Save"}
-        </Button>
-      </DialogActions>
 
       <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)}>
         <DialogTitle>Delete this recipe?</DialogTitle>
