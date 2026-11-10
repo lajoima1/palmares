@@ -1,0 +1,19 @@
+name: Potage aux carottes (test) test
+description: Un potage aux carottes simple et rapide.
+servings: 4 portions
+prep_time: 10 minutes
+cook_time: 28 minutes
+total_time: 38 minutes
+difficulty: Easy
+tags:
+
+ingredients:
+- 1 oignon
+- 900 g de carottes
+- 1 litre de bouillon
+
+instructions:
+1. Cuire l'oignon 3 minutes.
+2. Ajouter les carottes et le bouillon.
+3. Mijoter 25 minutes.
+4. Réduire en purée.
