@@ -1,0 +1,24 @@
+name: Macaroni chinois
+description: Un macaroni salé au boeuf et céleri. Recette approximative.
+servings: 6 portions
+prep_time: 20 minutes
+cook_time: 25 minutes
+total_time: 45 minutes
+difficulty: Easy
+tags: beef, pasta, main, weeknight, made by mom
+
+ingredients:
+- 340 g (3/4 lb) de macaronis
+- 2 branches de céleri, coupées en dés
+- 1 petit oignon, haché finement
+- 30 ml (2 c. à soupe) d’huile végétale
+- 450 g (1 lb) de boeuf haché mi-maigre
+- 125 ml (½ tasse) de bouillon de bœuf concentré
+- 60 ml (¼ tasse) de sauce soya réduite en sodium
+
+instructions:
+1. Dans une grande casserole d’eau bouillante au bouillon de boeuf et sauce soya, cuire les pâtes al dente. Égoutter et rincer rapidement sous l’eau froide.
+2. Dans la même casserole, cuire les légumes dans l’huile de 5 à 10 minutes. Ajouter la viande et cuire en l’émiettant à la cuillère de bois jusqu’à ce qu’elle soit bien dorée. Ajouter le reste des ingrédients et les macaronis. Remuer jusqu’à ce que les macaronis aient absorbé le liquide. Rectifier l’assaisonnement.
+
+notes:
+- Pour les enfants, réduire la quantité de sauce soya.
