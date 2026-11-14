@@ -169,7 +169,10 @@ function rules(tags: string[]): string {
     tags.length
       ? `- tags: choose 2 to 5 tags, only from this list: ${JSON.stringify(tags)}. Never make a new tag.`
       : "- tags: return an empty list.",
-    "- description: one short sentence in the language of the source. Use the description of the source if it has one.",
+    "- description: one sentence of 10 to 25 words. Use the description of the source if it says more than the name.",
+    "  Write it in the language of the ingredients and the steps: a French recipe gets a French description, never an English one.",
+    "  Else write one from the ingredients and the steps: what the dish is, its main ingredients or flavours, and how it is cooked or served.",
+    '  Never repeat the name, and never use empty words like "delicious" or "délicieux".',
     "- notes: the tips, variants, storage advice and side recipes that the source gives, one per item. Never write a note that the source does not have. An empty list if there are none.",
     "- found is false if the source holds no recipe. Then all the other fields are empty.",
     "Return only the JSON object, with no other text.",
