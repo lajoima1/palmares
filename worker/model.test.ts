@@ -66,6 +66,8 @@ describe("the rules", () => {
     expect(rules).toContain("Each ingredient starts with its amount");
     expect(rules).toContain('ends with "total"');
     expect(rules).toContain('Write a fraction with a slash');
+    expect(rules).toContain("the preparation comes after a comma");
+    expect(rules).toContain("replace that word with the short name of the ingredient");
   });
 });
 
@@ -89,7 +91,9 @@ describe("geminiBody", () => {
 
   it("sends a text as one part", () => {
     const body = geminiBody({ text: "Soupe" }, TAGS, gemini) as { contents: { parts: unknown[] }[] };
-    expect(body.contents[0].parts).toEqual([{ text: "Read the recipe in this text:\n\nSoupe" }]);
+    expect(body.contents[0].parts).toEqual([
+      { text: "Read the recipe in this text. Write it in the language of the text; never translate it.\n\nSoupe" },
+    ]);
   });
 });
 

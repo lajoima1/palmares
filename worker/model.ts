@@ -163,6 +163,8 @@ function rules(tags: string[]): string {
     "- One ingredient per item. One step per item. Do not number the steps. Do not start an item with a dash.",
     '- Each ingredient starts with its amount: "750 ml (3 tasses) de bouillon de poulet", never "Bouillon de poulet 750 ml (3 tasses)".',
     '- Write a fraction with a slash and a space after the whole number: "1 1/2 tasse", "3/4 c. à thé". Never "1.5 tasse", "1½" or "½". Metric amounts keep their decimals: "7,5 ml".',
+    '- In an ingredient, the name of the ingredient comes right after the amount and the unit, and the preparation comes after a comma: "2 gousses d’ail, émincées" in French, "2 garlic cloves, minced" in English.',
+    '- Keep each step as the source writes it. Only if a step calls an ingredient by a vague word, replace that word with the short name of the ingredient: "la soupe" becomes "la crème de poulet" if the ingredient is "crème de poulet condensée"; "the sauce" becomes "the tomato sauce". Never copy an amount, a unit or a whole ingredient line into a step. Keep the language of the source.',
     '- After boîte, paquet, pot, sachet, can, jar or package, the size in parentheses ends with "total": "1 boîte (284 ml total) de tomates en dés", "1 paquet (300 g total) de légumes".',
     '- A group of ingredients starts with a heading item, like "## Pour la sauce:" in French or "## For the sauce:" in English.',
     '- Times are like "15 minutes" or "1 heure 15 minutes" in French, and "15 minutes" or "1 hour 15 minutes" in English. In a French recipe, write "heure", never "hour".',
@@ -184,8 +186,11 @@ function rules(tags: string[]): string {
   ].join("\n");
 }
 
-const PHOTO_PROMPT = "Read the recipe in this photo.";
-const textPrompt = (text: string) => `Read the recipe in this text:\n\n${text}`;
+// Mistral translated an English text into French in one read of three with the rule only in the
+// system prompt; the user message repeats it next to the source.
+const PHOTO_PROMPT = "Read the recipe in this photo. Write it in the language of the photo; never translate it.";
+const textPrompt = (text: string) =>
+  `Read the recipe in this text. Write it in the language of the text; never translate it.\n\n${text}`;
 
 export function buildInput(source: Source, tags: string[], model: ModelInfo): Record<string, unknown> {
   const user =
