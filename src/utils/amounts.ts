@@ -24,7 +24,7 @@ const CONTAINER = /\b(?:boîtes?|boites?|cans?|pots?|paquets?|sachets?|jars?|pac
 // A size in parentheses: "(284 ml)", "(≈425 g / 15 oz)", "(~450 g)".
 const SIZE = /\(\s*(?:≈|~|\d|environ\b|about\b)[^)]*\)/gi;
 // A length in parentheses, like the width of a tortilla, never scales.
-export const LENGTH = /\b(?:cm|mm|po|pouces?|inch(?:es)?|in)\b|"/i;
+export const LENGTH = /\d\s*(?:cm|mm|po|pouces?|inch(?:es)?|in)\b|\d\s*"/i;
 
 export interface Amount {
   // "Environ ", "About " or "≈", as written.

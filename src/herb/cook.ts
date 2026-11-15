@@ -8,8 +8,8 @@ const TIME = new RegExp(
   [
     // "2 h 30", "1 h 1/2". The minutes have one or two digits, so "1 h 350 °F" is only 1 h.
     `(\\d+)\\s*h\\s*(\\d{1,2}|1\\/2)(?![\\d/°])`,
-    // "1 heure 15 minutes", "8 heures et 10 minutes".
-    `(\\d+)\\s*${HOURS}\\s*(?:et\\s*)?(\\d{1,2})\\s*${MINUTES}\\b`,
+    // "1 heure 15 minutes", "1 heure 30", "2 heures et 1/2", "1 hr 15".
+    `(\\d+)\\s*${HOURS}\\s*(?:et\\s*)?(\\d{1,2}|1\\/2)(?![\\d/°])(?:\\s*${MINUTES}\\b)?`,
     // "1 heure", "1/2 heure", "7-8 hours", "4 h", "1 heure et demie".
     `${NUM}(?:${JOIN}\\d+(?:[.,]\\d+)?)?\\s*(?:${HOURS}|h)\\b(\\s*(?:et|and)\\s*(?:demie?|a half))?`,
     // "5 à 7 minutes", "25 to 30 minutes", "1 1/2 minute".
@@ -33,7 +33,7 @@ export function stepTimes(text: string): number[] {
     if ((gap && RANGE_GAP.test(gap)) || EVERY.test(text.slice(0, m.index))) continue;
     let seconds: number;
     if (m[1]) seconds = Number(m[1]) * 3600 + (m[2] === "1/2" ? 1800 : Number(m[2]) * 60);
-    else if (m[3]) seconds = Number(m[3]) * 3600 + Number(m[4]) * 60;
+    else if (m[3]) seconds = Number(m[3]) * 3600 + (m[4] === "1/2" ? 1800 : Number(m[4]) * 60);
     else if (m[5]) seconds = Math.round(toNumber(m[5]) * 3600) + (m[6] ? 1800 : 0);
     else seconds = Math.round(toNumber(m[7]) * 60);
     if (seconds > 0 && !times.includes(seconds)) times.push(seconds);

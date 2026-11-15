@@ -89,6 +89,10 @@ describe("stepTimes", () => {
     expect(stepTimes("Cuire 1 1/2 minute.")).toEqual([90]);
     expect(stepTimes("Cuire 1 heure 350 °F.")).toEqual([3600]);
     expect(stepTimes("Cuire 1 h 350 °F.")).toEqual([3600]);
+    expect(stepTimes("Cuire 1 heure 30.")).toEqual([5400]);
+    expect(stepTimes("Cuire 1 heure 1/2.")).toEqual([5400]);
+    expect(stepTimes("Cuire 2 heures et 1/2.")).toEqual([9000]);
+    expect(stepTimes("Bake 1 hr 15 at 350.")).toEqual([4500]);
   });
 
   it("does not take how often for how long", () => {

@@ -158,9 +158,24 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
   const closing = useRef(false);
   // The done screen puts its buttons where Finish was; a double tap on Finish must not press them.
   const finishedAt = useRef(0);
+  const justFinished = () => Date.now() - finishedAt.current <= 600;
   const afterFinish = (action: () => void) => () => {
-    if (Date.now() - finishedAt.current > 600) action();
+    if (!justFinished()) action();
   };
+  // The second tap of a double tap must not take the focus from the heading either.
+  const keepFocus = (e: { preventDefault: () => void }) => {
+    if (justFinished()) e.preventDefault();
+  };
+  const stepRef = useRef(step);
+  stepRef.current = step;
+  // Back turns off at step 1, and "Start again" goes away; the focus must not fall to the page.
+  const focusNext = useRef(false);
+  useEffect(() => {
+    if (focusNext.current && nextButton.current) {
+      nextButton.current.focus();
+      focusNext.current = false;
+    }
+  }, [step]);
 
   const { markSeen } = timers;
   useEffect(() => markSeen(step), [step, timers.timers, markSeen]);
@@ -176,13 +191,15 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
   useEffect(() => {
     const onPop = () => {
       closing.current = false;
-      const state = window.history.state as { cook?: boolean; sheet?: boolean } | null;
+      const state = window.history.state as { cook?: boolean; sheet?: boolean; step?: number } | null;
       if (state?.cook) {
         setSheet(Boolean(state.sheet));
+        // Back or Forward onto an entry shows the step that the entry keeps.
+        if (typeof state.step === "number") setStep(state.step);
         return;
       }
       if (runningRef.current) {
-        window.history.pushState({ ...state, cook: true }, "");
+        window.history.pushState({ ...state, cook: true, step: stepRef.current }, "");
         setSheet(false);
         setAsking(true);
         return;
@@ -204,6 +221,12 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
     else leave();
   };
 
+  const closeSheet = () => {
+    if (closing.current) return;
+    closing.current = true;
+    window.history.back();
+  };
+
   const openSheet = () => {
     if (sheet) return;
     window.history.pushState({ ...window.history.state, sheet: true }, "");
@@ -222,8 +245,7 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
     if (n === steps.length) finishedAt.current = Date.now();
     window.history.replaceState({ ...window.history.state, step: n }, "");
     setStep(n);
-    // Back turns off at step 1; the focus must not fall to the page.
-    if (n === 0) nextButton.current?.focus();
+    if (n === 0) focusNext.current = true;
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -369,10 +391,10 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
         )}
         {done ? (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25, p: "0 20px 28px" }}>
-            <Button onClick={afterFinish(() => go(0))} sx={{ height: 48, fontSize: 16 }}>
+            <Button onClick={afterFinish(() => go(0))} onMouseDown={keepFocus} sx={{ height: 48, fontSize: 16 }}>
               Start again from step 1
             </Button>
-            <Button variant="contained" onClick={afterFinish(requestClose)} sx={{ height: 60, fontSize: 17 }}>
+            <Button variant="contained" onClick={afterFinish(requestClose)} onMouseDown={keepFocus} sx={{ height: 60, fontSize: 17 }}>
               Back to the recipe
             </Button>
           </Box>
@@ -395,7 +417,7 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
         ticks={ticks}
         desktop={desktop}
         onTick={(i) => setTicks((all) => ({ ...all, [i]: !all[i] }))}
-        onClose={() => window.history.back()}
+        onClose={closeSheet}
       />
 
       <Dialog open={asking} onClose={() => setAsking(false)} aria-labelledby="cook-timer-question">

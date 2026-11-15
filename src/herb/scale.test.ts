@@ -81,6 +81,10 @@ describe("scaleLine", () => {
     expect(at("1 et 1/2 c. à thé de sauce Worcestershire", 3)).toBe("4 1/2 c. à thé de sauce Worcestershire");
   });
 
+  it("scales a size that has the word in", () => {
+    expect(at("1 cup milk (about 250 ml, in a jug)", 3)).toBe("3 cups milk (about 750 ml, in a jug)");
+  });
+
   it("keeps a length, which is the size of each piece", () => {
     expect(at("8 tortillas à la farine (15 à 17,5 cm de diamètre)", 2)).toBe("16 tortillas à la farine (15 à 17,5 cm de diamètre)");
   });
