@@ -9,10 +9,10 @@ tags: soup, sweet potato, appetizer, hosting
 
 ingredients:
 - 2 patates douces
-- Bouillon de poulet 750 ml (3 tasses)
-- Cheddar fort râpé 125 ml (1/2 tasse)
-- Crème à cuisson 15% 80 ml (1/3 de tasse)
-- Bacon précuit 4 tranches
+- 750 ml (3 tasses) de bouillon de poulet
+- 125 ml (1/2 tasse) de cheddar fort râpé
+- 80 ml (1/3 tasse) de crème à cuisson 15%
+- 4 tranches de bacon précuit
 - 1 oignon haché
 - Huile d'olive
 

@@ -8,7 +8,7 @@ difficulty: Easy
 tags: chicken, main, weeknight, campbell, large portion, made by mom
 
 ingredients:
-- 1 boîte (10 oz) crème de poulet condensée
+- 1 boîte (10 oz total) crème de poulet condensée
 - 125 ml (½ tasse) crème sure
 - 30 ml (2 c. à soupe) margarine ou beurre
 - 1 oignon moyen haché
