@@ -85,8 +85,9 @@ function SectionTitle({ children, size = 22 }: { children: string; size?: number
 
 const FACTORS = [1, 2, 3, 4];
 
-// ×1 to ×4. Below the sm breakpoint only three fit next to the title at 375 px: ×3 hides, unless it
-// is the chosen factor (after a turn of the phone); then ×4 hides.
+// ×1 to ×4. Four buttons and the title need a card row of 321 px: a phone of 403 px or more. On a
+// narrower card ×3 hides, unless it is the chosen factor (after a turn of the phone); then ×4 hides.
+const FOUR_FIT = "@container (min-width: 321px)";
 function Scaler({ factor, onChange }: { factor: number; onChange: (factor: number) => void }) {
   const t = useTheme().herb;
   return (
@@ -118,7 +119,7 @@ function Scaler({ factor, onChange }: { factor: number; onChange: (factor: numbe
       }}
     >
       {FACTORS.map((f) => (
-        <ToggleButton key={f} value={f} sx={f === (factor === 3 ? 4 : 3) ? { display: { xs: "none", sm: "inline-flex" } } : undefined}>
+        <ToggleButton key={f} value={f} sx={f === (factor === 3 ? 4 : 3) ? { display: "none", [FOUR_FIT]: { display: "inline-flex" } } : undefined}>
           {f}×
         </ToggleButton>
       ))}
@@ -148,7 +149,7 @@ function Ingredients({ recipe, factor, onFactor }: { recipe: Recipe; factor: num
   const lines = toLines(recipe.ingredients);
   return (
     <Box component="section" sx={{ bgcolor: t.surface, border: `1px solid ${t.line}`, borderRadius: "24px", p: 2.5 }}>
-      <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 1, mb: 1.5, "& h2": { mb: 0 } }}>
+      <Box sx={{ containerType: "inline-size", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 1, mb: 1.5, "& h2": { mb: 0 } }}>
         <SectionTitle>Ingredients</SectionTitle>
         {hasAmounts(recipe.ingredients) && <Scaler factor={factor} onChange={onFactor} />}
       </Box>
