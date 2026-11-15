@@ -71,13 +71,22 @@ const SKIP = new Set(
     "tasse cup c cuillere cuilleree the soupe tsp tbsp teaspoon tablespoon ml l litre g kg lb pound oz once ounce " +
     "pincee pinch boite can paquet package pot sachet sac bag conserve bouteille carton tranche slice " +
     "feuille fleuron poitrine demi branche concentre genereuse gros grosse petit petite large small medium " +
+    "gousse clove tete head botte bunch bouquet brin sprig trait dash " +
     "sauce pate melange water mixture morceau piece facultatif optional gout taste environ about total " +
     "hache hachee haches coupe coupee coupes rape rapee rapes fondu fondue frais fraiche moulu moulue " +
     "egoutte egouttee cuit cuite seche fraichement extrait extract chopped diced minced shredded grated " +
     "fresh freshly cracked ground cooked dried dry yellow white red green black sweet boneless skinless " +
     "frozen canned lean extra virgin very ripe"
-  ).split(" "),
+  )
+    .split(" ")
+    .map(stem),
 );
+
+// "émincées", "émincés" and "émincé" give one word; "tomates" and "tomate" too.
+function stem(word: string): string {
+  const w = word.length > 3 ? word.replace(/[sx]$/, "") : word;
+  return w.length > 4 ? w.replace(/e$/, "") : w;
+}
 
 function words(text: string): string[] {
   return text
@@ -88,7 +97,7 @@ function words(text: string): string[] {
     .replace(/[̀-ͯ]/g, "")
     .split(/[^a-z]+/)
     .filter(Boolean)
-    .map((w) => (w.length > 3 ? w.replace(/[sx]$/, "") : w));
+    .map(stem);
 }
 
 // The words of an ingredient that link it to a step: its first word after the amount and the
