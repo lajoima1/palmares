@@ -19,8 +19,8 @@ ingredients:
 - Origan, basilic, thym, poudre d’ail, vinaigre balsamique, sel, poivre (au goût)
 
 instructions:
-1. Couper tous les légumes en petits dés.
-2. Faire revenir les légumes dans une grande marmite jusqu’à ce qu’ils soient tendres, puis les retirer et réserver.
+1. Couper les carottes, le céleri et l’oignon en petits dés.
+2. Faire revenir les carottes, le céleri et l’oignon dans une grande marmite jusqu’à ce qu’ils soient tendres, puis les retirer et réserver.
 3. Faire cuire le bœuf haché dans la marmite en l’émiettant bien pour éviter les grumeaux. Continuer la cuisson jusqu’à ce qu’il commence à dorer.
 4. Déglacer la viande avec le vin blanc.
 5. Ajouter les tomates en dés et les tomates broyées, puis remettre les légumes dans la marmite.

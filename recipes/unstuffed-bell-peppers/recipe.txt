@@ -27,7 +27,7 @@ ingredients:
 instructions:
 1. Mince the garlic; dice the onion and bell peppers.
 2. Add the olive oil and ground beef to a large deep skillet over medium heat and brown completely.
-3. Add the diced vegetables, garlic, basil, oregano, and pepper. Stir until the onion softens.
+3. Add the diced onion and bell peppers, garlic, basil, oregano, and pepper. Stir until the onion softens.
 4. Add the diced tomatoes with their juices, uncooked rice, and beef broth. Stir briefly.
 5. Cover the skillet and increase heat to medium-high until the broth boils. Reduce to low and simmer 15 minutes.
 6. Turn off the heat and let rest, covered, for 5 minutes.

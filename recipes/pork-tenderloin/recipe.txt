@@ -8,7 +8,7 @@ difficulty: Easy
 tags: pork, potato, weeknight, main, hosting, gd-friendly
 
 ingredients:
-- 2 pork tenderloins d’environ 1 lb chacun
+- 2 filets de porc (pork tenderloins) d’environ 1 lb chacun
 - 1 c. à thé de paprika fumé
 - 1 c. à thé de poudre d’ail
 - 1 c. à thé de poudre d’oignon

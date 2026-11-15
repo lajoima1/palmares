@@ -20,7 +20,7 @@ ingredients:
 
 instructions:
 1. Dans un grand bol, mélanger le thon, le cheddar, les œufs, le brocoli, la carotte et la farine.
-2. Saler et poivrer au goût, puis bien mélanger jusqu’à obtenir une préparation homogène.
+2. Ajouter le sel et le poivre au goût, puis bien mélanger jusqu’à obtenir une préparation homogène.
 3. Diviser la préparation en portions égales et façonner des pancakes.
 4. Dans une grande poêle, chauffer un peu d’huile d’olive à feu moyen.
 5. Cuire quelques pancakes à la fois pendant 2 à 3 minutes de chaque côté, jusqu’à ce qu’ils soient bien dorés.
