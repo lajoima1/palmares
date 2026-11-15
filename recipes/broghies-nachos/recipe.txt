@@ -13,9 +13,10 @@ ingredients:
 - Shredded cheese
 
 instructions:
-1. Add thin layer of salsa or tomato sauce to broghies.
-2. Spread some cheese on top.
-3. Cook in mini-oven at 400 until cheese is melted.
+1. Preheat the mini-oven to 400 °F.
+2. Add thin layer of salsa or tomato sauce to broghies.
+3. Spread some cheese on top.
+4. Cook in mini-oven at 400 until cheese is melted.
 
 notes:
 - Fantastic snack for gestational diabetes.

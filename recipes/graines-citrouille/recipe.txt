@@ -14,9 +14,10 @@ ingredients:
 
 instructions:
 1. Tu nettoies les graines sans les laver.
-2. Les laisses sècher toute une nuit.
-3. Ajouter le sel et le beurre fondu.
-4. Mettre au four 250 environ 30-40 minutes.
+2. Les laisser sécher toute une nuit.
+3. Préchauffer le four à 250 °F.
+4. Ajouter le sel et le beurre fondu.
+5. Cuire au four environ 30 à 40 minutes.
 
 notes: 
 - Miam!

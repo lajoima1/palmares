@@ -20,14 +20,16 @@ ingredients:
 - Beurre a l'ail
 
 instructions:  
-1. Faire revenir le poulet dans un peu d’huile. L’étendre dans un plat à lasagne.  
-2. Mélanger la crème de poulet, la crème de champignon et la mayonnaise. Poivrer.
-3. Étendre ce mélange sur le poulet.  
-4. Ajouter les brocolis, puis les zucchinis par dessus.
-5. Toaster le pain blanc, appliquer du beurre a l'ail, puis le mettre en morceaux sur le dessus.
-6. Terminer avec le fromage mozzarella.  
-7. Cuire au four à 350 °F pendant 45 minutes.  
-8. Servir sur un lit de linguinis.  
+1. Préchauffer le four à 350 °F.
+2. Faire revenir le poulet dans un peu d’huile. L’étendre dans un plat à lasagne.  
+3. Mélanger la crème de poulet, la crème de champignon et la mayonnaise. Poivrer.
+4. Étendre ce mélange sur le poulet.  
+5. Ajouter les brocolis, puis les zucchinis par dessus.
+6. Toaster le pain blanc, appliquer du beurre a l'ail, puis le mettre en morceaux sur le dessus.
+7. Terminer avec le fromage mozzarella.  
+8. Cuire au four à 350 °F pendant 45 minutes.  
+9. Pendant la cuisson, cuire les linguinis selon les indications de l’emballage.
+10. Servir sur un lit de linguinis.  
 
 notes: 
 - Ce plat est idéal pour un souper copieux et peut facilement être adapté selon les légumes disponibles.  

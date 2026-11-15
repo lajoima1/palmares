@@ -22,7 +22,7 @@ ingredients:
 instructions:
 1. Préchauffer le four à 350°F (180°C) et tapisser un moule carré 8×8 pouces de papier parchemin légèrement huilé. 
 2. Dans un grand bol, fouetter la farine de noix de coco, la poudre de cacao, le sel, la poudre à pâte et le substitut de sucre brun.  
-3. Dans un autre bol, battre les œufs, le beurre fondue, le lait et l’extrait de vanille jusqu’à homogénéité. 
+3. Dans un autre bol, battre les œufs, le beurre fondu, le lait et l’extrait de vanille jusqu’à homogénéité. 
 4. Ajouter les ingrédients liquides aux ingrédients secs et mélanger jusqu’à obtenir une pâte épaisse. 
 5. Incorporer les pépites de chocolat si désiré.  
 6. Verser la pâte dans le moule préparé et étaler uniformément.

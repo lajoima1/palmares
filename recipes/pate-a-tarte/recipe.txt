@@ -14,9 +14,10 @@ ingredients:
 - 1/2 t. eau chaude
 
 instructions:
-1. Mélanger tous les ingrédients ensemble jusqu'à obtenir une pâte homogène.
-2. Étaler la pâte et la placer dans un moule à tarte.
-3. Cuire 15 à 20 min. à 350°F en bas.
+1. Préchauffer le four à 350°F.
+2. Mélanger tous les ingrédients ensemble jusqu'à obtenir une pâte homogène.
+3. Étaler la pâte et la placer dans un moule à tarte.
+4. Cuire 15 à 20 min. à 350°F en bas.
 
 notes:
 - Pois par-dessus la croûte avec aluminium (empêche de lever)
