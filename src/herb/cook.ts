@@ -63,20 +63,30 @@ export function timeLabel(seconds: number): string {
   return m ? `${h} h ${String(m).padStart(2, "0")}` : `${h} h`;
 }
 
-// Words that never link an ingredient to a step: units, small words, and words that many lines
-// share, like "sauce" in "sauce tomate" and "Verser la sauce".
+// Words that never link an ingredient to a step: units, small words, containers and cuts.
 const SKIP = new Set(
   (
     "de du des la le les l d un une et ou en au aux a of the an and or with for to pour avec sans " +
     "tasse cup c cuillere cuilleree the soupe tsp tbsp teaspoon tablespoon ml l litre g kg lb pound oz once ounce " +
     "pincee pinch boite can paquet package pot sachet sac bag conserve bouteille carton tranche slice " +
     "feuille fleuron poitrine demi branche concentre genereuse gros grosse petit petite large small medium " +
-    "gousse clove tete head botte bunch bouquet brin sprig trait dash " +
-    "sauce pate melange water mixture morceau piece facultatif optional gout taste environ about total " +
-    "hache hachee haches coupe coupee coupes rape rapee rapes fondu fondue frais fraiche moulu moulue " +
-    "egoutte egouttee cuit cuite seche fraichement extrait extract chopped diced minced shredded grated " +
+    "gousse clove tete head botte bunch bouquet brin sprig trait dash morceau piece " +
+    "facultatif optional gout taste environ about total extrait extract very"
+  )
+    .split(" ")
+    .map(stem),
+);
+
+// Words that many lines share, like "sauce" in "sauce tomate" and "Verser la sauce", and the
+// preparation words. They never are the main word of a line, but they tell two lines apart:
+// "tomato sauce" and "diced tomatoes".
+const SECONDARY = new Set(
+  (
+    "sauce pate melange water mixture endes " +
+    "hache hachee coupe coupee rape rapee fondu fondue frais fraiche moulu moulue emince emincee " +
+    "egoutte egouttee cuit cuite seche fraichement chopped diced minced shredded grated " +
     "fresh freshly cracked ground cooked dried dry yellow white red green black sweet boneless skinless " +
-    "frozen canned lean extra virgin very ripe"
+    "frozen canned lean extra virgin ripe"
   )
     .split(" ")
     .map(stem),
@@ -95,30 +105,38 @@ function words(text: string): string[] {
     .replace(/æ/g, "ae")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
+    // "en dés" is a cut, not the article "des".
+    .replace(/\ben des\b/g, "endes")
     .split(/[^a-z]+/)
     .filter(Boolean)
     .map(stem);
 }
 
-// The words of an ingredient that link it to a step: its first word after the amount and the
-// unit, and each other word of 5 letters or more.
-function keyWords(line: string): string[] {
+// The words of an ingredient that link it to a step: its main word (the first word after the
+// amount, the unit and the preparation words), then its other words of 3 letters or more.
+function keyWords(line: string): { main: string | undefined; others: string[] } {
   const amount = readAmount(line);
   const text = (amount ? line.slice(amount.length) : line).replace(/\([^)]*\)/g, " ");
   const kept = words(text).filter((w) => !SKIP.has(w));
-  return kept.filter((w, i) => i === 0 || w.length >= 5);
+  const main = kept.find((w) => !SECONDARY.has(w));
+  const others = kept.filter((w) => w !== main && w.length >= 3);
+  return { main, others: [...new Set(others)] };
 }
 
-// The ingredient lines of a step: the first key word is in the step, or two key words are. One
-// other word alone is too weak: "poulet" in "crème de poulet" is not the chicken. Two equal lines
-// count once.
+// The ingredient lines of a step: the main word is in the step, or two words are. One other word
+// alone is too weak: "poulet" in "crème de poulet" is not the chicken. If two lines share a main
+// word, the step keeps the one with more words in the step. Two equal lines count once.
 export function stepIngredients(step: string, ingredients: string[]): string[] {
   const inStep = new Set(words(step));
-  const found: string[] = [];
+  const found: { line: string; main: string | undefined; score: number }[] = [];
   for (const line of ingredients) {
-    if (/^#{1,6}\s/.test(line.trim()) || found.includes(line)) continue;
-    const keys = keyWords(line);
-    if (inStep.has(keys[0]) || keys.filter((w) => inStep.has(w)).length >= 2) found.push(line);
+    if (/^#{1,6}\s/.test(line.trim()) || found.some((f) => f.line === line)) continue;
+    const { main, others } = keyWords(line);
+    const mainHit = main !== undefined && inStep.has(main);
+    const hits = others.filter((w) => inStep.has(w)).length + (mainHit ? 1 : 0);
+    if (mainHit || hits >= 2) found.push({ line, main, score: hits });
   }
-  return found;
+  const best = new Map<string | undefined, number>();
+  for (const f of found) best.set(f.main, Math.max(best.get(f.main) ?? 0, f.score));
+  return found.filter((f) => f.score === best.get(f.main)).map((f) => f.line);
 }

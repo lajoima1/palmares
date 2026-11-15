@@ -44,6 +44,24 @@ describe("stepIngredients", () => {
     ]);
   });
 
+  it("keeps the line with more words in the step if two lines share a main word", () => {
+    const lines = ["1 can (≈425 g / 15 oz total) diced tomatoes", "1 can (≈227 g / 8 oz total) tomato sauce"];
+    expect(stepIngredients("Combine the tomato sauce with the Worcestershire sauce.", lines)).toEqual([lines[1]]);
+    expect(stepIngredients("Add the diced tomatoes with their juices.", lines)).toEqual([lines[0]]);
+    const fr = ["1 boîte (≈793 g / 28 oz total) de tomates en dés (avec jus)", "1 boîte (≈425 g / 15 oz total) de sauce tomate"];
+    expect(stepIngredients("Ajouter les tomates en dés et la sauce tomate.", fr)).toEqual(fr);
+    expect(stepIngredients("Ajouter la sauce tomate.", fr)).toEqual([fr[1]]);
+    const spices = ["1 c. à thé de poudre d’ail", "1 c. à thé de poudre d’oignon"];
+    expect(stepIngredients("Mélanger la poudre d’ail et la poudre d’oignon.", spices)).toEqual(spices);
+  });
+
+  it("links garlic by its name, not by the clove", () => {
+    expect(stepIngredients("Ajouter l’oignon et l’ail émincés.", ["1 oignon jaune, haché", "4 gousses d’ail, émincées"])).toEqual([
+      "1 oignon jaune, haché",
+      "4 gousses d’ail, émincées",
+    ]);
+  });
+
   it("skips the container, the cut and the adjectives before the name", () => {
     expect(stepIngredients("Rouler le poulet.", ["4 demi-poitrines de poulet désossées"])).toEqual(["4 demi-poitrines de poulet désossées"]);
     expect(stepIngredients("Add the basil and oregano.", ["1 tsp dried basil", "1 tsp dried oregano"])).toEqual([
