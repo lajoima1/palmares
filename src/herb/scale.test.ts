@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseRecipeText } from "../utils/recipeText.ts";
-import { formatAmount, lineText, noteText, scaleLine, scaleServings, servingsLabel } from "./scale.ts";
+import { formatAmount, hasAmounts, lineText, noteText, scaleLine, scaleServings, servingsLabel } from "./scale.ts";
 
 const at = (line: string, factor: number) => lineText(scaleLine(line, factor));
 
@@ -35,7 +35,7 @@ describe("scaleLine", () => {
 
   it("scales both ends of a range", () => {
     expect(at("4 à 6 fleurons", 2)).toBe("8 à 12 fleurons");
-    expect(at("1-2 poivron", 3)).toBe("3-6 poivron");
+    expect(at("1-2 poivron", 3)).toBe("3-6 poivrons");
     expect(at("1/2 à 1 tasse de sauce soya, selon le goût", 2)).toBe("1 à 2 tasses de sauce soya, selon le goût");
   });
 
@@ -67,11 +67,38 @@ describe("scaleLine", () => {
     );
   });
 
+  it("scales a range in parentheses, a second choice, and an amount after ~", () => {
+    expect(at("1 rôti (2-3 lb)", 2)).toBe("2 rôti (4-6 lb)");
+    expect(at("2 tasses (500-600 ml)", 2)).toBe("4 tasses (1000-1200 ml)");
+    expect(at("2 poitrines de poulet désossées et sans peau (~450 g)", 2)).toBe("4 poitrines de poulet désossées et sans peau (~900 g)");
+    expect(at("2 gousses d’ail ou 1 c. à thé d’ail haché", 3)).toBe("6 gousses d’ail ou 3 c. à thé d’ail haché");
+    expect(
+      at("2 boîtes de 28 oz de tomates broyées (ou idéalement, 1 pot en verre de tomates Mutti nature + 1 pot en verre de tomates Mutti au basilic)", 2),
+    ).toBe("4 boîtes de 28 oz de tomates broyées (ou idéalement, 2 pots en verre de tomates Mutti nature + 2 pots en verre de tomates Mutti au basilic)");
+  });
+
+  it("reads 1 et 1/2", () => {
+    expect(at("1 et 1/2 c. à thé de sauce Worcestershire", 3)).toBe("4 1/2 c. à thé de sauce Worcestershire");
+  });
+
+  it("keeps a length, which is the size of each piece", () => {
+    expect(at("8 tortillas à la farine (15 à 17,5 cm de diamètre)", 2)).toBe("16 tortillas à la farine (15 à 17,5 cm de diamètre)");
+  });
+
   it("makes the words of the list agree", () => {
     expect(at("1 œuf", 3)).toBe("3 œufs");
     expect(at("1 garlic clove", 2)).toBe("2 garlic clove");
     expect(at("1 gousse d'ail", 2)).toBe("2 gousses d'ail");
     expect(at("4 tranches de bacon précuit", 2)).toBe("8 tranches de bacon précuit");
+    expect(at("1 oignon haché", 3)).toBe("3 oignons haché");
+    expect(at("1 sachet de soupe à l’oignon (28 g total)", 2)).toBe("2 sachets de soupe à l’oignon (56 g total)");
+  });
+});
+
+describe("hasAmounts", () => {
+  it("is false if no line has an amount at the start", () => {
+    expect(hasAmounts(["Sauce à pizza", "Fromage râpé (mozzarella)", "## Garnitures"])).toBe(false);
+    expect(hasAmounts(["Sel", "1 œuf"])).toBe(true);
   });
 });
 

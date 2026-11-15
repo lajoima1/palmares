@@ -1,4 +1,4 @@
-import { NUMBER, RANGE_JOIN, readAmount, toNumber } from "../utils/amounts";
+import { LENGTH, NUMBER, RANGE_JOIN, readAmount, toNumber } from "../utils/amounts";
 
 // A piece of a scaled line. The page draws a scaled piece in bold.
 export interface Part {
@@ -23,6 +23,7 @@ const PLURAL: Record<string, string> = {
   tasse: "tasses",
   cup: "cups",
   can: "cans",
+  canne: "cannes",
   clove: "cloves",
   gousse: "gousses",
   œuf: "œufs",
@@ -32,13 +33,34 @@ const PLURAL: Record<string, string> = {
   boite: "boites",
   paquet: "paquets",
   pot: "pots",
+  sachet: "sachets",
+  sac: "sacs",
+  bag: "bags",
+  bouteille: "bouteilles",
+  conserve: "conserves",
   tranche: "tranches",
   croûte: "croûtes",
+  oignon: "oignons",
+  onion: "onions",
+  carotte: "carottes",
+  poivron: "poivrons",
+  poitrine: "poitrines",
+  cuisse: "cuisses",
+  filet: "filets",
+  feuille: "feuilles",
+  branche: "branches",
+  tortilla: "tortillas",
+  tablespoon: "tablespoons",
+  teaspoon: "teaspoons",
+  pound: "pounds",
 };
-const NUMBER_ANYWHERE = new RegExp(`${NUMBER}(?![\\d/])`, "g");
-const AMOUNT_ANYWHERE = new RegExp(`${NUMBER}(?:${RANGE_JOIN}${NUMBER})?`, "g");
-// A parenthesis whose amounts scale: "(1 tasse)", "(≈225 g / 1/2 lb)", "(about 2 1/2 pounds)".
-const SCALED_PARENTHESIS = /\(\s*(?:≈|\d|[½¼¾⅓⅔⅛⅜]|environ\b|about\b)[^)]*\)/gi;
+const AMOUNT = `(${NUMBER})(?:(${RANGE_JOIN})(${NUMBER}))?`;
+const AMOUNT_ANYWHERE = new RegExp(`${AMOUNT}(?![\\d/])`, "g");
+// The second choice of a line: "2 gousses d'ail ou 1 c. à thé d'ail haché".
+const OR_AMOUNT = new RegExp(`\\b(?:ou|or) ${AMOUNT}(?![\\d/])`, "gi");
+// A parenthesis whose amounts scale: "(1 tasse)", "(≈225 g / 1/2 lb)", "(~450 g)",
+// "(about 2 1/2 pounds)", "(ou 1 pot …)". A length, like "(15 cm)", stays.
+const SCALED_PARENTHESIS = /\(\s*(?:≈|~|\d|[½¼¾⅓⅔⅛⅜]|environ\b|about\b|ou\b|or\b)[^)]*\)/gi;
 
 // Writes a scaled number in the style of the source: "1 1/2", "1 ½" or "1,5".
 export function formatAmount(value: number, source: string): string {
@@ -67,21 +89,29 @@ function agree(text: string, value: number): string {
   });
 }
 
-// Scales each number of a text, like the inside of "(≈225 g / 1/2 lb)".
-function scaleNumbers(text: string, factor: number): Part[] {
+// An amount or a range at `factor`, and the larger value for the word after it.
+function scaleAmount(from: string, join: string | undefined, to: string | undefined, factor: number) {
+  const a = toNumber(from) * factor;
+  const b = to ? toNumber(to) * factor : undefined;
+  return { text: formatAmount(a, from) + (to ? `${join}${formatAmount(b!, to)}` : ""), value: b ?? a };
+}
+
+// Scales the amounts that `pattern` finds in `text`. The amount is the last part of each match.
+function scaleMatches(text: string, factor: number, pattern: RegExp): Part[] {
   const parts: Part[] = [];
   let at = 0;
-  let pending = "";
-  for (const m of text.matchAll(NUMBER_ANYWHERE)) {
-    const value = toNumber(m[0]) * factor;
-    parts.push({ text: pending + text.slice(at, m.index), scaled: false });
-    parts.push({ text: formatAmount(value, m[0]), scaled: true });
+  for (const m of text.matchAll(pattern)) {
+    const amountText = m[1] + (m[3] ? m[2] + m[3] : "");
+    const start = m.index + m[0].length - amountText.length;
+    const scaled = scaleAmount(m[1], m[2], m[3], factor);
+    parts.push({ text: text.slice(at, start), scaled: false });
+    parts.push({ text: scaled.text, scaled: true });
     at = m.index + m[0].length;
-    const next = text.slice(at).match(/^\s*[^\s.,;:)/]*/)?.[0] ?? "";
-    pending = agree(next, value);
+    const next = text.slice(at).match(/^\s*[^\s.,;:)/\-–]*/)?.[0] ?? "";
+    parts.push({ text: agree(next, scaled.value), scaled: false });
     at += next.length;
   }
-  parts.push({ text: pending + text.slice(at), scaled: false });
+  parts.push({ text: text.slice(at), scaled: false });
   return parts;
 }
 
@@ -96,33 +126,35 @@ function merge(parts: Part[]): Part[] {
   return out;
 }
 
-// One ingredient line at `factor`. Only the amount at the start and the amounts in parentheses
-// change. A line with no amount at the start stays as it is.
+// One ingredient line at `factor`: the amount at the start, a second choice after "ou", and the
+// amounts in parentheses. A line with no amount at the start stays as it is.
 export function scaleLine(text: string, factor: number): Part[] {
   const amount = factor === 1 ? null : readAmount(text);
   if (!amount) return [{ text, scaled: false }];
-  const from = toNumber(amount.from) * factor;
-  const to = amount.to ? toNumber(amount.to) * factor : undefined;
+  const lead = scaleAmount(amount.from, amount.join, amount.to, factor);
   const parts: Part[] = [
     { text: amount.prefix, scaled: false },
-    {
-      text: formatAmount(from, amount.from) + (amount.to ? `${amount.join}${formatAmount(to!, amount.to)}` : ""),
-      scaled: true,
-    },
+    { text: lead.text, scaled: true },
   ];
-  const rest = agree(text.slice(amount.length), to ?? from);
+  const rest = agree(text.slice(amount.length), lead.value);
   let at = 0;
-  for (const m of rest.matchAll(SCALED_PARENTHESIS)) {
-    parts.push({ text: rest.slice(at, m.index), scaled: false });
-    parts.push(...scaleNumbers(m[0], factor));
+  for (const m of rest.matchAll(/\([^)]*\)/g)) {
+    parts.push(...scaleMatches(rest.slice(at, m.index), factor, OR_AMOUNT));
+    const scales = new RegExp(SCALED_PARENTHESIS.source, "i").test(m[0]) && !LENGTH.test(m[0]);
+    parts.push(...(scales ? scaleMatches(m[0], factor, AMOUNT_ANYWHERE) : [{ text: m[0], scaled: false }]));
     at = m.index + m[0].length;
   }
-  parts.push({ text: rest.slice(at), scaled: false });
+  parts.push(...scaleMatches(rest.slice(at), factor, OR_AMOUNT));
   return merge(parts);
 }
 
 export function lineText(parts: Part[]): string {
   return parts.map((p) => p.text).join("");
+}
+
+// True if at least one line has an amount that the scaler changes.
+export function hasAmounts(ingredients: string[]): boolean {
+  return ingredients.some((line) => !/^#{1,6}\s/.test(line.trim()) && readAmount(line) !== null);
 }
 
 // The servings at `factor`, if the text has one number or range outside parentheses. Else null.
@@ -132,12 +164,8 @@ export function scaleServings(text: string, factor: number): string | null {
   const amounts = [...outside.matchAll(AMOUNT_ANYWHERE)];
   if (amounts.length !== 1) return null;
   const m = amounts[0];
-  const range = m[0].match(new RegExp(`^(${NUMBER})(?:(${RANGE_JOIN})(${NUMBER}))?$`));
-  if (!range) return null;
-  const from = toNumber(range[1]) * factor;
-  const to = range[3] ? toNumber(range[3]) * factor : undefined;
-  const scaled = formatAmount(from, range[1]) + (range[3] ? `${range[2]}${formatAmount(to!, range[3])}` : "");
-  return text.slice(0, m.index) + scaled + agree(text.slice(m.index + m[0].length), to ?? from);
+  const scaled = scaleAmount(m[1], m[2], m[3], factor);
+  return text.slice(0, m.index) + scaled.text + agree(text.slice(m.index + m[0].length), scaled.value);
 }
 
 // The Serves tile: the scaled servings, else the text with "×2" after it.

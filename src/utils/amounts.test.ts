@@ -30,6 +30,12 @@ describe("amountProblems", () => {
     ]);
   });
 
+  it("finds a container size anywhere in the line", () => {
+    for (const line of ["1 boîte de sauce tomate (7½ oz ou 221 ml)", "1 (15 oz) can black beans", "1 bouteille de vin blanc (750 ml) ou un carton"]) {
+      expect(amountProblems([line])).toEqual([{ line, message: "Add “total” in the parentheses." }]);
+    }
+  });
+
   it("passes headings, lines with no number, and lines that the scaler reads", () => {
     expect(
       amountProblems([
@@ -39,6 +45,10 @@ describe("amountProblems", () => {
         "Environ 900 g de bœuf haché maigre (1 paquet format maxi)",
         "1 boîte (284 ml total) de tomates",
         "3 pounds beef chuck, cut into 1-inch pieces",
+        "1 tasse de salsa (≈16 oz/450 g) (1 boîte)",
+        "2 boîtes de 28 oz de tomates broyées (ou idéalement, 1 pot en verre)",
+        "8 tortillas à la farine (15 à 17,5 cm de diamètre)",
+        "1 et 1/2 c. à thé de sauce Worcestershire",
       ]),
     ).toEqual([]);
   });

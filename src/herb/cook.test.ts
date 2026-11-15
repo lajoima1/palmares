@@ -83,6 +83,19 @@ describe("stepTimes", () => {
     expect(stepTimes("Couvrir et cuire sur **low pendant 8 heures** ou **high pendant 4 heures**.")).toEqual([8 * 3600, 4 * 3600]);
   });
 
+  it("reads fractions of an hour, and never takes a temperature for minutes", () => {
+    expect(stepTimes("Cuire 1/2 heure.")).toEqual([1800]);
+    expect(stepTimes("Cuire 1 heure et demie.")).toEqual([5400]);
+    expect(stepTimes("Cuire 1 1/2 minute.")).toEqual([90]);
+    expect(stepTimes("Cuire 1 heure 350 °F.")).toEqual([3600]);
+    expect(stepTimes("Cuire 1 h 350 °F.")).toEqual([3600]);
+  });
+
+  it("does not take how often for how long", () => {
+    expect(stepTimes("Cuire pendant environ 2 heures en remuant toutes les 5 à 10 minutes.")).toEqual([2 * 3600]);
+    expect(stepTimes("Stir every 5 minutes for 1 hour.")).toEqual([3600]);
+  });
+
   it("gives no time for seconds or words", () => {
     expect(stepTimes("Cuire environ 30 secondes.")).toEqual([]);
     expect(stepTimes("Laisser mijoter quelques minutes.")).toEqual([]);

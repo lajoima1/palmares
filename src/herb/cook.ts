@@ -1,19 +1,26 @@
-import { readAmount } from "../utils/amounts";
+import { readAmount, toNumber } from "../utils/amounts";
 
-const HOURS = "(?:heures?|hours?|hrs?|h)";
+const HOURS = "(?:heures?|hours?|hrs?)";
 const MINUTES = "(?:minutes?|mins?)";
 const JOIN = "\\s*(?:-|–|à|to)\\s*";
-// "2 h 30", "8 heures 10 minutes", "1 h 1/2", "7-8 hours", "5 à 7 minutes", "25 to 30 minutes".
+const NUM = "(\\d+ \\d+\\/\\d+|\\d+\\/\\d+|\\d+(?:[.,]\\d+)?|½)";
 const TIME = new RegExp(
   [
-    `(\\d+)\\s*${HOURS}\\s*(?:et\\s*)?(1\\/2|\\d+)(?:\\s*${MINUTES})?(?![\\d/])`,
-    `(\\d+(?:[.,]\\d+)?)(?:${JOIN}\\d+(?:[.,]\\d+)?)?\\s*${HOURS}\\b`,
-    `(\\d+)(?:${JOIN}\\d+)?\\s*${MINUTES}\\b`,
+    // "2 h 30", "1 h 1/2". The minutes have one or two digits, so "1 h 350 °F" is only 1 h.
+    `(\\d+)\\s*h\\s*(\\d{1,2}|1\\/2)(?![\\d/°])`,
+    // "1 heure 15 minutes", "8 heures et 10 minutes".
+    `(\\d+)\\s*${HOURS}\\s*(?:et\\s*)?(\\d{1,2})\\s*${MINUTES}\\b`,
+    // "1 heure", "1/2 heure", "7-8 hours", "4 h", "1 heure et demie".
+    `${NUM}(?:${JOIN}\\d+(?:[.,]\\d+)?)?\\s*(?:${HOURS}|h)\\b(\\s*(?:et|and)\\s*(?:demie?|a half))?`,
+    // "5 à 7 minutes", "25 to 30 minutes", "1 1/2 minute".
+    `${NUM}(?:${JOIN}\\d+)?\\s*${MINUTES}\\b`,
   ].join("|"),
   "gi",
 );
 // A time right after another one, like the end of "2 heures à 2 heures 30", is the end of a range.
 const RANGE_GAP = /^\s*(?:-|–|à|to)\s*$/i;
+// "remuer toutes les 5 minutes" is how often, not how long.
+const EVERY = /(?:toutes les|tous les|every)\s*$/i;
 
 // The times of a step in seconds, at most two. A range gives its first number. Seconds and word
 // amounts ("quelques minutes") give no time.
@@ -23,11 +30,12 @@ export function stepTimes(text: string): number[] {
   for (const m of text.matchAll(TIME)) {
     const gap = lastEnd < 0 ? "" : text.slice(lastEnd, m.index);
     lastEnd = m.index + m[0].length;
-    if (gap && RANGE_GAP.test(gap)) continue;
+    if ((gap && RANGE_GAP.test(gap)) || EVERY.test(text.slice(0, m.index))) continue;
     let seconds: number;
     if (m[1]) seconds = Number(m[1]) * 3600 + (m[2] === "1/2" ? 1800 : Number(m[2]) * 60);
-    else if (m[3]) seconds = Math.round(Number(m[3].replace(",", ".")) * 3600);
-    else seconds = Number(m[4]) * 60;
+    else if (m[3]) seconds = Number(m[3]) * 3600 + Number(m[4]) * 60;
+    else if (m[5]) seconds = Math.round(toNumber(m[5]) * 3600) + (m[6] ? 1800 : 0);
+    else seconds = Math.round(toNumber(m[7]) * 60);
     if (seconds > 0 && !times.includes(seconds)) times.push(seconds);
     if (times.length === 2) break;
   }
