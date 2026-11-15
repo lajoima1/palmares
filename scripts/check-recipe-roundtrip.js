@@ -10,7 +10,9 @@ import { linesToItems, parseRecipeText, serializeRecipe } from "../src/utils/rec
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RECIPES_DIR = path.join(ROOT, "recipes");
-const WORK_DIR = path.join(ROOT, "node_modules", ".tmp", "roundtrip");
+// Not under node_modules: Node does not strip the types of a .ts file there, and the build script
+// imports src/utils/amounts.ts.
+const WORK_DIR = path.join(ROOT, ".roundtrip");
 const TABLES = {
   recipes: "SELECT slug, name, description, servings, prep_time, cook_time, total_time, difficulty, tags FROM recipes ORDER BY slug",
   ingredients: "SELECT r.slug, i.ingredient FROM ingredients i JOIN recipes r ON r.id = i.recipe_id ORDER BY r.slug, i.id",
@@ -31,6 +33,9 @@ function buildCopy(name, slugs, rewrite) {
   const dir = path.join(WORK_DIR, name);
   fs.mkdirSync(path.join(dir, "scripts"), { recursive: true });
   fs.copyFileSync(path.join(ROOT, "scripts", "build-recipes-db.js"), path.join(dir, "scripts", "build-recipes-db.js"));
+  // The build script imports the amount check from ../src/utils.
+  fs.mkdirSync(path.join(dir, "src", "utils"), { recursive: true });
+  fs.copyFileSync(path.join(ROOT, "src", "utils", "amounts.ts"), path.join(dir, "src", "utils", "amounts.ts"));
   fs.copyFileSync(path.join(RECIPES_DIR, "index.json"), path.join(dir, "recipes", "index.json"));
   for (const slug of slugs) {
     const text = fs.readFileSync(path.join(RECIPES_DIR, slug, "recipe.txt"), "utf-8");
