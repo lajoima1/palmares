@@ -55,6 +55,22 @@ describe("stepIngredients", () => {
     expect(stepIngredients("Mélanger la poudre d’ail et la poudre d’oignon.", spices)).toEqual(spices);
   });
 
+  it("ignores a name inside the name of another ingredient", () => {
+    const lines = ["2 poitrines de poulet désossées", "1 tasse de bouillon de poulet", "2 tasses de lait"];
+    expect(stepIngredients("Ajouter le lait et le bouillon de poulet.", lines)).toEqual([lines[1], lines[2]]);
+    expect(stepIngredients("Ajouter le poulet et le bouillon de poulet.", lines)).toEqual([lines[0], lines[1]]);
+    const en = ["2 bell peppers", "¼ tsp freshly cracked black pepper"];
+    expect(stepIngredients("Dice the onion and bell peppers.", en)).toEqual([en[0]]);
+    expect(stepIngredients("Season with salt and pepper.", en)).toEqual([en[1]]);
+  });
+
+  it("does not take fine, long grain or all-purpose for the name", () => {
+    expect(stepIngredients("Add the rice.", ["1 cup long grain white rice, uncooked"])).toEqual(["1 cup long grain white rice, uncooked"]);
+    expect(stepIngredients("Whisk in the flour.", ["¼ cup all-purpose flour"])).toEqual(["¼ cup all-purpose flour"]);
+    expect(stepIngredients("Ajouter le jambon.", ["4 tranches fines de jambon cuit"])).toEqual(["4 tranches fines de jambon cuit"]);
+    expect(stepIngredients("Nettoyer les graines.", ["Graines de citrouille"])).toEqual(["Graines de citrouille"]);
+  });
+
   it("links garlic by its name, not by the clove", () => {
     expect(stepIngredients("Ajouter l’oignon et l’ail émincés.", ["1 oignon jaune, haché", "4 gousses d’ail, émincées"])).toEqual([
       "1 oignon jaune, haché",
