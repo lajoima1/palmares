@@ -67,9 +67,9 @@ export function timeLabel(seconds: number): string {
 const SKIP = new Set(
   (
     "de du des la le les l d un une et ou en au aux a of the an and or with for to pour avec sans " +
-    "tasse cup c cuillere cuilleree the soupe tsp tbsp teaspoon tablespoon ml l litre g kg lb pound oz once ounce " +
+    "tasse cup c cuillere cuilleree the tsp tbsp teaspoon tablespoon ml l litre g kg lb pound oz once ounce " +
     "pincee pinch boite can paquet package pot sachet sac bag conserve bouteille carton tranche slice " +
-    "feuille fleuron poitrine demi branche concentre genereuse gros grosse petit petite large small medium " +
+    "feuille fleuron poitrine demi branche genereuse gros grosse petit petite large small medium " +
     "gousse clove tete head botte bunch bouquet brin sprig trait dash morceau piece " +
     "facultatif optional gout taste environ about total extrait extract very table lbs canne goutte peu all"
   )
@@ -108,6 +108,8 @@ function words(text: string): string[] {
     // "en dés" is a cut, not the article "des"; "long grain" describes rice, and "graines" is a food.
     .replace(/\ben des\b/g, "endes")
     .replace(/\blong grain\b/g, "longgrain")
+    // "c. à soupe" is a unit, but "soupe à l'oignon" is a food.
+    .replace(/\b(?:c|cuilleree?s?|cuilleres?)\.?\s*(?:a\s+)?soupe\b/g, "c")
     .split(/[^a-z]+/)
     .filter(Boolean)
     .map(stem);
@@ -144,32 +146,75 @@ function compoundPositions(tokens: string[], lineWords: Set<string>): number[] {
   return marked;
 }
 
-// The ingredient lines of a step: the main word is in the step, or two words are. One other word
-// alone is too weak: "poulet" in "crème de poulet" is not the chicken. If two lines share a main
-// word, the step keeps the one with more words in the step. A line whose main word is only inside
-// the name of another line ("poulet" in "le bouillon de poulet") does not count. Two equal lines
-// count once.
-export function stepIngredients(step: string, ingredients: string[]): string[] {
+const isHeading = (line: string) => /^#{1,6}\s/.test(line.trim());
+
+type Match = { line: string; index: number; main: string | undefined; key: string; score: number; missing: number; hit: Set<string> };
+
+// The lines of a step, by main word: the main word is in the step, or two words are. One other
+// word is too weak: "poulet" in "crème de poulet" is not the chicken. A main word only inside the
+// name of another line ("poulet" in "le bouillon de poulet") does not count.
+function stepMatches(step: string, ingredients: string[]): Match[][] {
   const tokens = words(step);
   const inStep = new Set(tokens);
-  const found: { line: string; main: string | undefined; score: number; hit: Set<string> }[] = [];
-  for (const line of ingredients) {
-    if (/^#{1,6}\s/.test(line.trim()) || found.some((f) => f.line === line)) continue;
+  const found: Match[] = [];
+  ingredients.forEach((line, index) => {
+    if (isHeading(line) || found.some((f) => f.line === line)) return;
     const { main, others } = keyWords(line);
     const mainHit = main !== undefined && inStep.has(main);
     const hit = new Set([...(mainHit ? [main] : []), ...others.filter((w) => inStep.has(w))]);
-    if (mainHit || hit.size >= 2) found.push({ line, main, score: hit.size, hit });
-  }
+    const missing = (main !== undefined && !mainHit ? 1 : 0) + others.filter((w) => !inStep.has(w)).length;
+    const key = [main, ...[...others].sort()].join(" ");
+    if (mainHit || hit.size >= 2) found.push({ line, index, main, key, score: hit.size, missing, hit });
+  });
   const covered = new Map<number, string>();
   for (const f of found) {
     if (f.score < 2) continue;
     for (const i of compoundPositions(tokens, f.hit)) covered.set(i, f.line);
   }
-  const insideOther = (f: (typeof found)[number]) =>
+  const insideOther = (f: Match) =>
     f.score === 1 &&
     tokens.every((t, i) => t !== f.main || (covered.has(i) && covered.get(i) !== f.line));
-  const kept = found.filter((f) => !insideOther(f));
-  const best = new Map<string | undefined, number>();
-  for (const f of kept) best.set(f.main, Math.max(best.get(f.main) ?? 0, f.score));
-  return kept.filter((f) => f.score === best.get(f.main)).map((f) => f.line);
+  const groups = new Map<string | undefined, Match[]>();
+  for (const f of found.filter((f) => !insideOther(f))) groups.set(f.main, [...(groups.get(f.main) ?? []), f]);
+  // Of two lines with the same main word, the step keeps the one with more words in the step. If
+  // both match the same words, it keeps the one with fewer other words: "1 oignon" before "1 oignon rouge".
+  const sameHit = (a: Match, b: Match) => a.hit.size === b.hit.size && [...a.hit].every((w) => b.hit.has(w));
+  return [...groups.values()].map((group) => {
+    const score = Math.max(...group.map((f) => f.score));
+    const top = group.filter((f) => f.score === score);
+    return top.filter((f) => !top.some((g) => g.missing < f.missing && sameHit(g, f)));
+  });
+}
+
+// "Mélanger tous les ingrédients" uses each line that no other step names.
+const ALL = /\b(?:tous les (?:autres )?ingr[ée]dients|le reste des ingr[ée]dients|all (?:the )?(?:other |remaining )?ingredients)\b/i;
+
+// The ingredient lines of each step, in the order of the list. Lines with the same words, like
+// "1/2 c. à thé de sauce soya" and "1/2 tasse de sauce soya (pour la sauce)", go to the steps in
+// the order of the list: the first step that names "sauce soya" gets the first line.
+export function cookIngredients(steps: string[], ingredients: string[]): string[][] {
+  const given = new Set<string>();
+  const result = steps.map((step) => {
+    const chosen = stepMatches(step, ingredients).flatMap((group) => {
+      if (group.length < 2 || group.some((f) => f.key !== group[0].key)) return group;
+      const next = group.find((f) => !given.has(f.line));
+      return next ? [next] : group;
+    });
+    for (const f of chosen) given.add(f.line);
+    return chosen;
+  });
+  const named = new Set(result.flatMap((chosen, i) => (ALL.test(steps[i]) ? [] : chosen.map((f) => f.line))));
+  return result.map((chosen, i) => {
+    const lines = chosen.map(({ line, index }) => ({ line, index }));
+    if (ALL.test(steps[i])) {
+      ingredients.forEach((line, index) => {
+        if (!isHeading(line) && !named.has(line)) lines.push({ line, index });
+      });
+    }
+    return [...new Set(lines.sort((a, b) => a.index - b.index).map((l) => l.line))];
+  });
+}
+
+export function stepIngredients(step: string, ingredients: string[]): string[] {
+  return cookIngredients([step], ingredients)[0];
 }

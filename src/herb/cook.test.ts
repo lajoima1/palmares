@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clock, stepIngredients, stepTimes, timeLabel, timeLeft } from "./cook.ts";
+import { clock, cookIngredients, stepIngredients, stepTimes, timeLabel, timeLeft } from "./cook.ts";
 
 const PUDDING = [
   "## Pour le gâteau:",
@@ -84,9 +84,44 @@ describe("stepIngredients", () => {
       "1 tsp dried basil",
       "1 tsp dried oregano",
     ]);
-    expect(stepIngredients("Ajouter le bouillon.", ["Concentré de bouillon de bœuf liquide"])).toEqual([
-      "Concentré de bouillon de bœuf liquide",
+  });
+
+  it("links a concentrate only by its own name", () => {
+    const lines = ["Concentré de bouillon de bœuf liquide"];
+    expect(stepIngredients("Ajouter le concentré de bouillon de bœuf.", lines)).toEqual(lines);
+    expect(stepIngredients("Arroser avec le bouillon réservé.", lines)).toEqual([]);
+  });
+
+  it("reads soupe as a food, but not in c. à soupe", () => {
+    const lines = ["30 ml (2 c. à soupe) de ketchup", "1 sachet de soupe à l’oignon (28 g total)", "1 petit oignon rouge coupé en dés"];
+    expect(stepIngredients("Ajouter le ketchup et le sachet de soupe à l’oignon.", lines)).toEqual([lines[0], lines[1]]);
+    expect(stepIngredients("Ajouter la soupe.", ["1 c. à soupe de beurre"])).toEqual([]);
+  });
+
+  it("keeps the shorter line if two lines match the same words", () => {
+    const lines = ["1 oignon rouge, haché", "1 oignon"];
+    expect(stepIngredients("Ajouter l’oignon.", lines)).toEqual([lines[1]]);
+    const cream = ["1 boîte (10 oz total) crème de poulet condensée", "125 ml (½ tasse) crème sure"];
+    expect(stepIngredients("Mélanger la crème condensée et la crème sure.", cream)).toEqual(cream);
+  });
+});
+
+describe("cookIngredients", () => {
+  it("gives equal lines to the steps in the order of the list", () => {
+    const lines = ["1/2 c. à thé de sauce soya (dans les boulettes)", "1 lb de porc haché", "1/2 tasse de sauce soya (pour la sauce)"];
+    expect(cookIngredients(["Mélanger le porc et la sauce soya.", "Combiner la sauce soya et l’eau.", "Ajouter la sauce soya."], lines)).toEqual([
+      [lines[0], lines[1]],
+      [lines[2]],
+      [lines[0], lines[2]],
     ]);
+  });
+
+  it("gives a step with all the ingredients each line that no other step names", () => {
+    const lines = ["1 tasse de lait", "2/3 tasse de chapelure", "## Boulettes", "1 lb de bœuf haché", "1 œuf", "1 pot de sauce chili"];
+    expect(
+      cookIngredients(["Faire tremper le lait dans la chapelure.", "Mélanger avec tous les autres ingrédients.", "Chauffer la sauce chili."], lines),
+    ).toEqual([[lines[0], lines[1]], [lines[3], lines[4]], [lines[5]]]);
+    expect(cookIngredients(["Mix all the ingredients.", "Bake 20 minutes."], ["1 cup flour", "1 egg"])).toEqual([["1 cup flour", "1 egg"], []]);
   });
 });
 

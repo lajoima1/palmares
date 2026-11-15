@@ -1,10 +1,10 @@
 import { Box, Button, ButtonBase, Checkbox, Dialog, Drawer, IconButton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import type { Recipe } from "../types/Recipe";
 import { headingFont } from "../theme/herb";
 import { parseSimpleMarkdown } from "../utils/simpleMarkdown";
-import { clock, stepIngredients, stepTimes, timeLabel, timeLeft } from "./cook";
+import { clock, cookIngredients, stepTimes, timeLabel, timeLeft } from "./cook";
 import { CheckIcon, CloseIcon, ListIcon, SunIcon, TimerIcon } from "./icons";
 import { toLines } from "./lines";
 import { ScaledText } from "./parts";
@@ -254,8 +254,11 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
     if (e.key === "ArrowLeft" && step > 0) go(step - 1);
   };
 
-  const ingredientLines = recipe.ingredients;
-  const chips = current ? stepIngredients(current.text, ingredientLines) : [];
+  const chipsByStep = useMemo(
+    () => cookIngredients(cookSteps(recipe.instructions).map((s) => s.text), recipe.ingredients),
+    [recipe.instructions, recipe.ingredients],
+  );
+  const chips = current ? chipsByStep[step] : [];
   const times = current ? stepTimes(current.text) : [];
   const elsewhere = Object.entries(timers.timers).filter(([, tm]) => tm.step !== step && (tm.endsAt !== null || (tm.rang && !tm.seen)));
 
@@ -412,7 +415,7 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
 
       <IngredientSheet
         open={sheet}
-        lines={ingredientLines}
+        lines={recipe.ingredients}
         factor={factor}
         ticks={ticks}
         desktop={desktop}
