@@ -74,10 +74,13 @@ function Shell({ appearance }: { appearance: Appearance }) {
     return () => window.removeEventListener("scroll", save);
   }, [route.page]);
 
+  // Only a new page or a new recipe scrolls. Cook mode adds history entries on the same recipe, and
+  // its Back must leave the recipe page where it was.
+  const slug = route.page === "recipe" ? route.slug : null;
   useLayoutEffect(() => {
     window.scrollTo(0, route.page === "list" ? listScroll.current : 0);
     if (route.page === "list") leaving.current = false;
-  }, [route]);
+  }, [route.page, slug]);
 
   const tags = useMemo(() => tagCounts(recipes), [recipes]);
   const shown = useMemo(() => filterRecipes(recipes, filters), [recipes, filters]);

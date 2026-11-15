@@ -1,11 +1,12 @@
 import { Box, Button, ButtonBase, IconButton, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { Recipe } from "../types/Recipe";
 import { headingFont } from "../theme/herb";
 import { parseSimpleMarkdown } from "../utils/simpleMarkdown";
 import { tagLabel } from "./filters";
-import { BackIcon, SunIcon } from "./icons";
+import { CookMode } from "./CookMode";
+import { BackIcon, PlayIcon, SunIcon } from "./icons";
 import { toLines } from "./lines";
 import { PhotoTile } from "./PhotoTile";
 import { DifficultyDot, ScaledText } from "./parts";
@@ -231,6 +232,19 @@ function Notes({ notes }: { notes: string[] }) {
   );
 }
 
+function StartCooking({ desktop, onStart }: { desktop: boolean; onStart: () => void }) {
+  return (
+    <Button
+      variant="contained"
+      onClick={onStart}
+      startIcon={<PlayIcon size={18} />}
+      sx={{ height: 52, fontSize: 16, alignSelf: desktop ? "flex-start" : "stretch", px: desktop ? 3 : undefined }}
+    >
+      Start cooking
+    </Button>
+  );
+}
+
 function ScreenOn() {
   const t = useTheme().herb;
   return (
@@ -249,6 +263,19 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
   const [scale, setScale] = useState({ id: recipe.id, factor: 1 });
   const factor = scale.id === recipe.id ? scale.factor : 1;
   const setFactor = (f: number) => setScale({ id: recipe.id, factor: f });
+  const [cooking, setCooking] = useState(false);
+  const canCook = toLines(recipe.instructions).some((l) => !l.heading);
+  const startCooking = () => {
+    window.history.pushState({ ...window.history.state, cook: true }, "");
+    setCooking(true);
+  };
+  const stopCooking = useCallback(() => setCooking(false), []);
+  // After a reload in cook mode, the entry still says cook; make it a plain recipe entry again.
+  useEffect(() => {
+    const state = window.history.state as { cook?: boolean; sheet?: boolean } | null;
+    if (state?.cook) window.history.replaceState({ ...state, cook: undefined, sheet: undefined }, "");
+  }, []);
+  const cookMode = cooking && <CookMode recipe={recipe} factor={factor} desktop={desktop} onClosed={stopCooking} />;
 
   if (desktop) {
     return (
@@ -271,6 +298,7 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
                 </Box>
               )}
               <Stats recipe={recipe} columns={4} factor={factor} />
+              {canCook && <StartCooking desktop onStart={startCooking} />}
             </Box>
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "flex-start" }}>
@@ -283,6 +311,7 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
             </Box>
           </Box>
         </Box>
+        {cookMode}
       </Box>
     );
   }
@@ -306,11 +335,13 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
           )}
         </Box>
         <Stats recipe={recipe} columns={2} factor={factor} />
+        {canCook && <StartCooking desktop={false} onStart={startCooking} />}
         {screenOn && <ScreenOn />}
         <Ingredients recipe={recipe} factor={factor} onFactor={setFactor} />
         <Steps items={recipe.instructions} desktop={false} />
         <Notes notes={notes} />
       </Box>
+      {cookMode}
     </Box>
   );
 }

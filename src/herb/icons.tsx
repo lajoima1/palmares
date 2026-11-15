@@ -108,6 +108,34 @@ export const BookIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const PlayIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M7 4.5v15l12.5-7.5z" fill="currentColor" />
+  </Svg>
+);
+
+export const ListIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M9 6h11M9 12h11M9 18h11" />
+    <circle cx="4.5" cy="6" r="1" />
+    <circle cx="4.5" cy="12" r="1" />
+    <circle cx="4.5" cy="18" r="1" />
+  </Svg>
+);
+
+export const TimerIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="13" r="8" />
+    <path d="M12 9v4l2.5 2.5M9 2h6" />
+  </Svg>
+);
+
+export const CheckIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M5 12.5l4.5 4.5L19 7.5" />
+  </Svg>
+);
+
 // The brand mark: a solid leaf on a herb square. The favicon (public/icon.svg) and the loader in
 // index.html draw the same leaf; change them together.
 export function Mark({ size = 40 }: { size?: number }) {
