@@ -10,7 +10,7 @@ import { BackIcon, PlayIcon, SunIcon } from "./icons";
 import { toLines } from "./lines";
 import { PhotoTile } from "./PhotoTile";
 import { DifficultyDot, ScaledText } from "./parts";
-import { noteText, scaleLine, servingsLabel } from "./scale";
+import { hasAmounts, noteText, scaleLine, servingsLabel } from "./scale";
 import { shortTime } from "./time";
 import { useWakeLock } from "./useWakeLock";
 import { tapArea } from "./tapArea";
@@ -85,7 +85,8 @@ function SectionTitle({ children, size = 22 }: { children: string; size?: number
 
 const FACTORS = [1, 2, 3, 4];
 
-// ×1 to ×4. Below the sm breakpoint ×3 does not fit next to the title at 375 px, so it is hidden.
+// ×1 to ×4. Below the sm breakpoint only three fit next to the title at 375 px: ×3 hides, unless it
+// is the chosen factor (after a turn of the phone); then ×4 hides.
 function Scaler({ factor, onChange }: { factor: number; onChange: (factor: number) => void }) {
   const t = useTheme().herb;
   return (
@@ -117,7 +118,7 @@ function Scaler({ factor, onChange }: { factor: number; onChange: (factor: numbe
       }}
     >
       {FACTORS.map((f) => (
-        <ToggleButton key={f} value={f} sx={f === 3 ? { display: { xs: "none", sm: "inline-flex" } } : undefined}>
+        <ToggleButton key={f} value={f} sx={f === (factor === 3 ? 4 : 3) ? { display: { xs: "none", sm: "inline-flex" } } : undefined}>
           {f}×
         </ToggleButton>
       ))}
@@ -147,9 +148,9 @@ function Ingredients({ recipe, factor, onFactor }: { recipe: Recipe; factor: num
   const lines = toLines(recipe.ingredients);
   return (
     <Box component="section" sx={{ bgcolor: t.surface, border: `1px solid ${t.line}`, borderRadius: "24px", p: 2.5 }}>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, mb: 1.5, "& h2": { mb: 0 } }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 1, mb: 1.5, "& h2": { mb: 0 } }}>
         <SectionTitle>Ingredients</SectionTitle>
-        {lines.some((l) => !l.heading) && <Scaler factor={factor} onChange={onFactor} />}
+        {hasAmounts(recipe.ingredients) && <Scaler factor={factor} onChange={onFactor} />}
       </Box>
       {factor !== 1 && <ScaleNote servings={recipe.servings} factor={factor} onReset={() => onFactor(1)} />}
       <Box component="ul" sx={{ m: 0, p: 0, listStyle: "none" }}>
@@ -263,17 +264,20 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
   const [scale, setScale] = useState({ id: recipe.id, factor: 1 });
   const factor = scale.id === recipe.id ? scale.factor : 1;
   const setFactor = (f: number) => setScale({ id: recipe.id, factor: f });
-  const [cooking, setCooking] = useState(false);
+  // A reload or Forward onto a cook mode entry opens cook mode again.
+  const [cooking, setCooking] = useState(() => Boolean(window.history.state?.cook));
   const canCook = toLines(recipe.instructions).some((l) => !l.heading);
   const startCooking = () => {
     window.history.pushState({ ...window.history.state, cook: true }, "");
     setCooking(true);
   };
   const stopCooking = useCallback(() => setCooking(false), []);
-  // After a reload in cook mode, the entry still says cook; make it a plain recipe entry again.
   useEffect(() => {
-    const state = window.history.state as { cook?: boolean; sheet?: boolean } | null;
-    if (state?.cook) window.history.replaceState({ ...state, cook: undefined, sheet: undefined }, "");
+    const onPop = () => {
+      if ((window.history.state as { cook?: boolean } | null)?.cook) setCooking(true);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
   const cookMode = cooking && <CookMode recipe={recipe} factor={factor} desktop={desktop} onClosed={stopCooking} />;
 

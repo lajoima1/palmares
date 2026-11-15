@@ -31,6 +31,8 @@ interface Timer {
   endsAt: number | null;
   left: number;
   rang: boolean;
+  // The person saw "Time is up" on its step, so the top bar no longer shows it.
+  seen: boolean;
 }
 
 const timerKey = (step: number, seconds: number) => `${step}:${seconds}`;
@@ -49,6 +51,8 @@ function cookSteps(instructions: string[]): Step[] {
 function ring(audio: AudioContext | null) {
   navigator.vibrate?.([300, 150, 300, 150, 300]);
   if (!audio) return;
+  // A phone suspends the audio while the page is hidden.
+  void audio.resume();
   for (let i = 0; i < 3; i++) {
     const osc = audio.createOscillator();
     const gain = audio.createGain();
@@ -86,7 +90,7 @@ function useTimers() {
     ring(audio.current);
     setTimers((all) => {
       const next = { ...all };
-      for (const [key, t] of ended) next[key] = { ...t, endsAt: null, left: 0, rang: true };
+      for (const [key, t] of ended) next[key] = { ...t, endsAt: null, left: 0, rang: true, seen: false };
       return next;
     });
   }, [now, timers]);
@@ -104,7 +108,7 @@ function useTimers() {
     setTimers((all) => {
       const t = all[key];
       const from = t && t.left > 0 ? t.left : seconds;
-      return { ...all, [key]: { step, seconds, endsAt: current + from * 1000, left: from, rang: false } };
+      return { ...all, [key]: { step, seconds, endsAt: current + from * 1000, left: from, rang: false, seen: false } };
     });
   };
 
@@ -114,22 +118,56 @@ function useTimers() {
       return t?.endsAt ? { ...all, [key]: { ...t, endsAt: null, left: timeLeft(t.endsAt, Date.now()) } } : all;
     });
 
+  const clear = (key: string) =>
+    setTimers((all) => {
+      const next = { ...all };
+      delete next[key];
+      return next;
+    });
+
+  const markSeen = useCallback(
+    (step: number) =>
+      setTimers((all) =>
+        Object.values(all).some((t) => t.step === step && t.rang && !t.seen)
+          ? Object.fromEntries(Object.entries(all).map(([k, t]) => [k, t.step === step && t.rang ? { ...t, seen: true } : t]))
+          : all,
+      ),
+    [],
+  );
+
   const stopAll = () => setTimers({});
 
-  return { timers, running, left, start, pause, stopAll };
+  return { timers, running, left, start, pause, clear, markSeen, stopAll };
 }
 
 export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
   const t = useTheme().herb;
   const steps = cookSteps(recipe.instructions);
-  const [step, setStep] = useState(0);
-  const [sheet, setSheet] = useState(false);
+  // The history entry keeps the step and the sheet, so a reload or Forward opens the same place.
+  const [step, setStep] = useState(() => Math.min(Number(window.history.state?.step) || 0, steps.length));
+  const [sheet, setSheet] = useState(() => Boolean(window.history.state?.sheet));
   const [ticks, setTicks] = useState<Record<number, boolean>>({});
   const [asking, setAsking] = useState(false);
   const timers = useTimers();
   const screenOn = useWakeLock(true);
   const done = step >= steps.length;
   const current = steps[step];
+  const nextButton = useRef<HTMLButtonElement>(null);
+  const doneHeading = useRef<HTMLHeadingElement>(null);
+  // A second tap on Close would go back twice and leave the recipe page.
+  const closing = useRef(false);
+  // The done screen puts its buttons where Finish was; a double tap on Finish must not press them.
+  const finishedAt = useRef(0);
+  const afterFinish = (action: () => void) => () => {
+    if (Date.now() - finishedAt.current > 600) action();
+  };
+
+  const { markSeen } = timers;
+  useEffect(() => markSeen(step), [step, timers.timers, markSeen]);
+  // After Finish, the focus leaves the button that "Start again" now replaces.
+  useEffect(() => {
+    if (done) doneHeading.current?.focus();
+  }, [done]);
 
   // The history entries of cook mode and of the sheet make the phone's Back close them. Only this
   // handler changes the state, so a button, Escape and Back all take the same path.
@@ -137,6 +175,7 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
   runningRef.current = timers.running;
   useEffect(() => {
     const onPop = () => {
+      closing.current = false;
       const state = window.history.state as { cook?: boolean; sheet?: boolean } | null;
       if (state?.cook) {
         setSheet(Boolean(state.sheet));
@@ -154,12 +193,19 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
     return () => window.removeEventListener("popstate", onPop);
   }, [onClosed]);
 
-  const requestClose = useCallback(() => {
+  const leave = () => {
+    if (closing.current) return;
+    closing.current = true;
+    window.history.back();
+  };
+
+  const requestClose = () => {
     if (runningRef.current) setAsking(true);
-    else window.history.back();
-  }, []);
+    else leave();
+  };
 
   const openSheet = () => {
+    if (sheet) return;
     window.history.pushState({ ...window.history.state, sheet: true }, "");
     setSheet(true);
   };
@@ -168,10 +214,17 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
     timers.stopAll();
     runningRef.current = false;
     setAsking(false);
-    window.history.back();
+    leave();
   };
 
-  const go = (next: number) => setStep(Math.max(0, Math.min(steps.length, next)));
+  const go = (next: number) => {
+    const n = Math.max(0, Math.min(steps.length, next));
+    if (n === steps.length) finishedAt.current = Date.now();
+    window.history.replaceState({ ...window.history.state, step: n }, "");
+    setStep(n);
+    // Back turns off at step 1; the focus must not fall to the page.
+    if (n === 0) nextButton.current?.focus();
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (sheet || asking) return;
@@ -182,7 +235,7 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
   const ingredientLines = recipe.ingredients;
   const chips = current ? stepIngredients(current.text, ingredientLines) : [];
   const times = current ? stepTimes(current.text) : [];
-  const elsewhere = Object.entries(timers.timers).filter(([, tm]) => tm.step !== step && (tm.endsAt !== null || tm.rang));
+  const elsewhere = Object.entries(timers.timers).filter(([, tm]) => tm.step !== step && (tm.endsAt !== null || (tm.rang && !tm.seen)));
 
   return (
     <Dialog
@@ -200,7 +253,7 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
           <Box sx={{ flexGrow: 1, minWidth: 0, lineHeight: 1.3 }}>
             <Box sx={{ fontSize: 13, color: t.ink2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {recipe.name}
-              {factor !== 1 && ` · ${factor}×`}
+              {factor !== 1 && ` · ×${factor}`}
             </Box>
             <Box sx={{ fontWeight: 700, fontSize: 15 }}>{done ? "All done" : `Step ${step + 1} of ${steps.length}`}</Box>
           </Box>
@@ -239,7 +292,7 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
             <Box sx={{ width: 96, height: 96, borderRadius: "50%", bgcolor: t.herbTint, color: t.herb, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <CheckIcon size={46} strokeWidth={2.4} />
             </Box>
-            <Box component="h2" sx={{ m: 0, fontFamily: headingFont, fontWeight: 800, fontSize: 36, letterSpacing: "-0.02em" }}>
+            <Box component="h2" ref={doneHeading} tabIndex={-1} sx={{ m: 0, fontFamily: headingFont, fontWeight: 800, fontSize: 36, letterSpacing: "-0.02em", outline: "none" }}>
               Bon appétit !
             </Box>
             <Box component="p" sx={{ m: 0, fontSize: 17, lineHeight: 1.5, color: t.ink2 }}>
@@ -277,19 +330,29 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
               const key = timerKey(step, seconds);
               const tm = timers.timers[key];
               const left = tm ? timers.left(tm) : seconds;
+              const label = timeLabel(seconds);
               return (
-                <Box key={key} sx={{ display: "flex", alignItems: "center", gap: 1.75, p: "14px 14px 14px 18px", borderRadius: "20px", bgcolor: t.surface, border: `1px solid ${tm?.rang ? t.saffron : t.line}` }}>
+                <Box key={key} role="group" aria-label={`${label} timer`} sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1.75, p: "14px 14px 14px 18px", borderRadius: "20px", bgcolor: t.surface, border: `1px solid ${tm?.rang ? t.saffron : t.line}` }}>
                   <TimerIcon size={26} color={t.herb} />
-                  <Box role="timer" aria-label={`Timer ${timeLabel(seconds)}`} sx={{ flexGrow: 1, fontFamily: headingFont, fontWeight: 800, fontSize: 30, fontVariantNumeric: "tabular-nums" }}>
-                    {tm?.rang ? "Time is up" : tm ? clock(left) : timeLabel(seconds)}
+                  <Box role="timer" sx={{ flex: "1 0 auto", whiteSpace: "nowrap", fontFamily: headingFont, fontWeight: 800, fontSize: 30, fontVariantNumeric: "tabular-nums" }}>
+                    {tm?.rang ? "Time is up" : tm ? clock(left) : label}
                   </Box>
                   {tm?.endsAt ? (
-                    <Button variant="outlined" color="inherit" onClick={() => timers.pause(key)} sx={{ borderColor: t.line }}>
+                    <Button variant="outlined" color="inherit" aria-label={`Pause the ${label} timer`} onClick={() => timers.pause(key)} sx={{ borderColor: t.line }}>
                       Pause
                     </Button>
+                  ) : tm?.rang ? (
+                    <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
+                      <Button variant="outlined" color="inherit" aria-label={`Start the ${label} timer again`} onClick={() => timers.start(step, seconds)} sx={{ borderColor: t.line }}>
+                        Again
+                      </Button>
+                      <Button variant="contained" aria-label={`Clear the ${label} timer`} onClick={() => timers.clear(key)}>
+                        OK
+                      </Button>
+                    </Box>
                   ) : (
-                    <Button variant="contained" onClick={() => timers.start(step, seconds)}>
-                      {tm && !tm.rang && left > 0 && left < seconds ? "Go on" : tm?.rang ? "Again" : "Start timer"}
+                    <Button variant="contained" aria-label={`${tm && left < seconds ? "Go on with" : "Start"} the ${label} timer`} onClick={() => timers.start(step, seconds)}>
+                      {tm && left < seconds ? "Go on" : "Start timer"}
                     </Button>
                   )}
                 </Box>
@@ -306,11 +369,11 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
         )}
         {done ? (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25, p: "0 20px 28px" }}>
-            <Button variant="contained" onClick={requestClose} sx={{ height: 56, fontSize: 17 }}>
-              Back to the recipe
-            </Button>
-            <Button onClick={() => go(0)} sx={{ height: 48, fontSize: 16 }}>
+            <Button onClick={afterFinish(() => go(0))} sx={{ height: 48, fontSize: 16 }}>
               Start again from step 1
+            </Button>
+            <Button variant="contained" onClick={afterFinish(requestClose)} sx={{ height: 60, fontSize: 17 }}>
+              Back to the recipe
             </Button>
           </Box>
         ) : (
@@ -318,7 +381,7 @@ export function CookMode({ recipe, factor, desktop, onClosed }: CookModeProps) {
             <Button variant="outlined" color="inherit" disabled={step === 0} onClick={() => go(step - 1)} sx={{ flex: 1, height: 60, fontSize: 17, borderColor: t.line, bgcolor: t.surface }}>
               Back
             </Button>
-            <Button variant="contained" onClick={() => go(step + 1)} sx={{ flex: 2, height: 60, fontSize: 17, fontWeight: 700 }}>
+            <Button ref={nextButton} variant="contained" onClick={() => go(step + 1)} sx={{ flex: 2, height: 60, fontSize: 17, fontWeight: 700 }}>
               {step === steps.length - 1 ? "Finish" : "Next step"}
             </Button>
           </Box>
@@ -385,7 +448,7 @@ function IngredientSheet({ open, lines, factor, ticks, desktop, onTick, onClose 
             Ingredients
           </Box>
           <Box sx={{ fontSize: 14, color: t.ink2 }}>
-            {factor !== 1 ? `Amounts ${factor}× · ` : ""}Tick what is ready.
+            {factor !== 1 ? `Amounts ×${factor} · ` : ""}Tick what is ready.
           </Box>
         </Box>
         <IconButton aria-label="Close the ingredients" onClick={onClose} sx={{ bgcolor: t.ground, "&:hover": { bgcolor: t.ground } }}>
