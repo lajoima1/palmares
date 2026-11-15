@@ -162,6 +162,7 @@ function rules(tags: string[]): string {
     "- Copy the ingredients and the steps as the source writes them. Never invent an ingredient or a step. Fix only clear reading errors.",
     "- One ingredient per item. One step per item. Do not number the steps. Do not start an item with a dash.",
     '- Each ingredient starts with its amount: "750 ml (3 tasses) de bouillon de poulet", never "Bouillon de poulet 750 ml (3 tasses)".',
+    '- Write a fraction with a slash and a space after the whole number: "1 1/2 tasse", "3/4 c. à thé". Never "1.5 tasse", "1½" or "½". Metric amounts keep their decimals: "7,5 ml".',
     '- After boîte, paquet, pot, sachet, can, jar or package, the size in parentheses ends with "total": "1 boîte (284 ml total) de tomates en dés", "1 paquet (300 g total) de légumes".',
     '- A group of ingredients starts with a heading item, like "## Pour la sauce:" in French or "## For the sauce:" in English.',
     '- Times are like "15 minutes" or "1 heure 15 minutes" in French, and "15 minutes" or "1 hour 15 minutes" in English. In a French recipe, write "heure", never "hour".',

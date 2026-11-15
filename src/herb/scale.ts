@@ -1,9 +1,11 @@
 import { LENGTH, NUMBER, RANGE_JOIN, readAmount, toNumber } from "../utils/amounts";
 
-// A piece of a scaled line. The page draws a scaled piece in bold.
+// A piece of an ingredient line. The page draws an amount with the fractions of the font, and a
+// scaled amount in bold too.
 export interface Part {
   text: string;
   scaled: boolean;
+  amount?: boolean;
 }
 
 // Fractions that a cook can measure with the usual cups and spoons.
@@ -89,10 +91,12 @@ function agree(text: string, value: number): string {
   });
 }
 
-// An amount or a range at `factor`, and the larger value for the word after it.
+// An amount or a range at `factor`, and the larger value for the word after it. At ×1 the text
+// stays as the recipe writes it.
 function scaleAmount(from: string, join: string | undefined, to: string | undefined, factor: number) {
   const a = toNumber(from) * factor;
   const b = to ? toNumber(to) * factor : undefined;
+  if (factor === 1) return { text: from + (to ? `${join}${to}` : ""), value: 0 };
   return { text: formatAmount(a, from) + (to ? `${join}${formatAmount(b!, to)}` : ""), value: b ?? a };
 }
 
@@ -105,7 +109,7 @@ function scaleMatches(text: string, factor: number, pattern: RegExp): Part[] {
     const start = m.index + m[0].length - amountText.length;
     const scaled = scaleAmount(m[1], m[2], m[3], factor);
     parts.push({ text: text.slice(at, start), scaled: false });
-    parts.push({ text: scaled.text, scaled: true });
+    parts.push({ text: scaled.text, scaled: factor !== 1, amount: true });
     at = m.index + m[0].length;
     const next = text.slice(at).match(/^\s*[^\s.,;:)/\-–]*/)?.[0] ?? "";
     parts.push({ text: agree(next, scaled.value), scaled: false });
@@ -120,21 +124,22 @@ function merge(parts: Part[]): Part[] {
   for (const p of parts) {
     if (!p.text) continue;
     const last = out[out.length - 1];
-    if (last && last.scaled === p.scaled) last.text += p.text;
+    if (last && last.scaled === p.scaled && last.amount === p.amount) last.text += p.text;
     else out.push({ ...p });
   }
   return out;
 }
 
 // One ingredient line at `factor`: the amount at the start, a second choice after "ou", and the
-// amounts in parentheses. A line with no amount at the start stays as it is.
+// amounts in parentheses. A line with no amount at the start stays as it is. At ×1 the amounts are
+// marked but not changed.
 export function scaleLine(text: string, factor: number): Part[] {
-  const amount = factor === 1 ? null : readAmount(text);
+  const amount = readAmount(text);
   if (!amount) return [{ text, scaled: false }];
   const lead = scaleAmount(amount.from, amount.join, amount.to, factor);
   const parts: Part[] = [
     { text: amount.prefix, scaled: false },
-    { text: lead.text, scaled: true },
+    { text: lead.text, scaled: factor !== 1, amount: true },
   ];
   const rest = agree(text.slice(amount.length), lead.value);
   let at = 0;

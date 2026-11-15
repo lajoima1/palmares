@@ -7,16 +7,29 @@ const at = (line: string, factor: number) => lineText(scaleLine(line, factor));
 
 describe("scaleLine", () => {
   it("keeps the line at ×1, and a line with no amount", () => {
-    expect(scaleLine("1 1/2 tasse de farine", 1)).toEqual([{ text: "1 1/2 tasse de farine", scaled: false }]);
+    expect(scaleLine("1 1/2 tasse de farine", 1)).toEqual([
+      { text: "1 1/2", scaled: false, amount: true },
+      { text: " tasse de farine", scaled: false },
+    ]);
     expect(at("Sel et poivre", 2)).toBe("Sel et poivre");
     expect(at("Linguinis cuits (quantité au choix ou Primo 700g)", 2)).toBe("Linguinis cuits (quantité au choix ou Primo 700g)");
   });
 
   it("marks the scaled amount", () => {
     expect(scaleLine("1 1/2 tasse de farine tamisée", 2)).toEqual([
-      { text: "3", scaled: true },
+      { text: "3", scaled: true, amount: true },
       { text: " tasses de farine tamisée", scaled: false },
     ]);
+  });
+
+  it("changes no line of the recipes at ×1, and marks the amounts in parentheses", () => {
+    const slugs: string[] = JSON.parse(fs.readFileSync("recipes/index.json", "utf8"));
+    for (const slug of slugs) {
+      for (const line of parseRecipeText(fs.readFileSync(`recipes/${slug}/recipe.txt`, "utf8")).ingredients) {
+        expect(lineText(scaleLine(line, 1)), slug).toBe(line);
+      }
+    }
+    expect(scaleLine("250 ml (1 tasse) sucre", 1).filter((p) => p.amount).map((p) => p.text)).toEqual(["250", "1"]);
   });
 
   it("scales fractions, mixed numbers and Unicode fractions in the style of the source", () => {

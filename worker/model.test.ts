@@ -65,6 +65,7 @@ describe("the rules", () => {
     const rules = (buildInput({ text: "x" }, [], MODELS[0]).messages as { content: string }[])[0].content;
     expect(rules).toContain("Each ingredient starts with its amount");
     expect(rules).toContain('ends with "total"');
+    expect(rules).toContain('Write a fraction with a slash');
   });
 });
 

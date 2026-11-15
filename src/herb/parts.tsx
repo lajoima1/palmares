@@ -31,14 +31,19 @@ export function RecipeLink({ slug, children, sx }: { slug: string; children: Rea
   );
 }
 
-// An ingredient line at a factor: the scaled amounts in bold and in the herb colour.
+// An ingredient line at a factor. Each amount uses the fractions of Inter ("1 1/2" shows as 1½);
+// the text stays "1 1/2" for a copy. A scaled amount is bold and in the herb colour too.
 export function ScaledText({ parts }: { parts: Part[] }) {
   const t = useTheme().herb;
   return (
     <>
       {parts.map((p, i) =>
-        p.scaled ? (
-          <Box key={i} component="b" sx={{ fontWeight: 700, color: t.herb }}>
+        p.amount ? (
+          <Box
+            key={i}
+            component={p.scaled ? "b" : "span"}
+            sx={{ fontFeatureSettings: "'frac' 1", ...(p.scaled && { fontWeight: 700, color: t.herb }) }}
+          >
             {p.text}
           </Box>
         ) : (
