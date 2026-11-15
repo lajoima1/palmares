@@ -71,7 +71,7 @@ const SKIP = new Set(
     "pincee pinch boite can paquet package pot sachet sac bag conserve bouteille carton tranche slice " +
     "feuille fleuron poitrine demi branche concentre genereuse gros grosse petit petite large small medium " +
     "gousse clove tete head botte bunch bouquet brin sprig trait dash morceau piece " +
-    "facultatif optional gout taste environ about total extrait extract very"
+    "facultatif optional gout taste environ about total extrait extract very table lbs canne goutte peu all"
   )
     .split(" ")
     .map(stem),
@@ -86,7 +86,7 @@ const SECONDARY = new Set(
     "hache hachee coupe coupee rape rapee fondu fondue frais fraiche moulu moulue emince emincee " +
     "egoutte egouttee cuit cuite seche fraichement chopped diced minced shredded grated " +
     "fresh freshly cracked ground cooked dried dry yellow white red green black sweet boneless skinless " +
-    "frozen canned lean extra virgin ripe"
+    "frozen canned lean extra virgin ripe fine longgrain purpose"
   )
     .split(" ")
     .map(stem),
@@ -105,8 +105,9 @@ function words(text: string): string[] {
     .replace(/æ/g, "ae")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
-    // "en dés" is a cut, not the article "des".
+    // "en dés" is a cut, not the article "des"; "long grain" describes rice, and "graines" is a food.
     .replace(/\ben des\b/g, "endes")
+    .replace(/\blong grain\b/g, "longgrain")
     .split(/[^a-z]+/)
     .filter(Boolean)
     .map(stem);
@@ -117,26 +118,58 @@ function words(text: string): string[] {
 function keyWords(line: string): { main: string | undefined; others: string[] } {
   const amount = readAmount(line);
   const text = (amount ? line.slice(amount.length) : line).replace(/\([^)]*\)/g, " ");
-  const kept = words(text).filter((w) => !SKIP.has(w));
+  const kept = words(text).filter((w) => w.length > 1 && !SKIP.has(w));
   const main = kept.find((w) => !SECONDARY.has(w));
   const others = kept.filter((w) => w !== main && w.length >= 3);
   return { main, others: [...new Set(others)] };
 }
 
+// The small words inside a compound name: "bouillon de poulet", "poudre d'oignon".
+const LINKERS = new Set(["de", "du", "des", "d", "a", "au", "aux", "en", "l", "la", "le", "of"]);
+
+// The positions of the step words that belong to the compound name of a line, like "bouillon" and
+// "poulet" in "le bouillon de poulet".
+function compoundPositions(tokens: string[], lineWords: Set<string>): number[] {
+  const marked: number[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    if (!lineWords.has(tokens[i])) continue;
+    for (let j = i + 1; j < tokens.length && j - i <= 3; j++) {
+      if (lineWords.has(tokens[j]) && tokens[j] !== tokens[i]) {
+        marked.push(i, j);
+        break;
+      }
+      if (!LINKERS.has(tokens[j])) break;
+    }
+  }
+  return marked;
+}
+
 // The ingredient lines of a step: the main word is in the step, or two words are. One other word
 // alone is too weak: "poulet" in "crème de poulet" is not the chicken. If two lines share a main
-// word, the step keeps the one with more words in the step. Two equal lines count once.
+// word, the step keeps the one with more words in the step. A line whose main word is only inside
+// the name of another line ("poulet" in "le bouillon de poulet") does not count. Two equal lines
+// count once.
 export function stepIngredients(step: string, ingredients: string[]): string[] {
-  const inStep = new Set(words(step));
-  const found: { line: string; main: string | undefined; score: number }[] = [];
+  const tokens = words(step);
+  const inStep = new Set(tokens);
+  const found: { line: string; main: string | undefined; score: number; hit: Set<string> }[] = [];
   for (const line of ingredients) {
     if (/^#{1,6}\s/.test(line.trim()) || found.some((f) => f.line === line)) continue;
     const { main, others } = keyWords(line);
     const mainHit = main !== undefined && inStep.has(main);
-    const hits = others.filter((w) => inStep.has(w)).length + (mainHit ? 1 : 0);
-    if (mainHit || hits >= 2) found.push({ line, main, score: hits });
+    const hit = new Set([...(mainHit ? [main] : []), ...others.filter((w) => inStep.has(w))]);
+    if (mainHit || hit.size >= 2) found.push({ line, main, score: hit.size, hit });
   }
+  const covered = new Map<number, string>();
+  for (const f of found) {
+    if (f.score < 2) continue;
+    for (const i of compoundPositions(tokens, f.hit)) covered.set(i, f.line);
+  }
+  const insideOther = (f: (typeof found)[number]) =>
+    f.score === 1 &&
+    tokens.every((t, i) => t !== f.main || (covered.has(i) && covered.get(i) !== f.line));
+  const kept = found.filter((f) => !insideOther(f));
   const best = new Map<string | undefined, number>();
-  for (const f of found) best.set(f.main, Math.max(best.get(f.main) ?? 0, f.score));
-  return found.filter((f) => f.score === best.get(f.main)).map((f) => f.line);
+  for (const f of kept) best.set(f.main, Math.max(best.get(f.main) ?? 0, f.score));
+  return kept.filter((f) => f.score === best.get(f.main)).map((f) => f.line);
 }
