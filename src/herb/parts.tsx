@@ -1,7 +1,9 @@
 import { Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import type { MouseEvent, ReactNode } from "react";
+import { Fragment, type MouseEvent, type ReactNode } from "react";
 import { difficultyColor } from "../theme/herb";
+import { parseSimpleMarkdown } from "../utils/simpleMarkdown";
+import type { Part } from "./scale";
 import { openRecipe, recipePath } from "./router";
 
 export function DifficultyDot({ difficulty, size = 7 }: { difficulty: string; size?: number }) {
@@ -26,5 +28,23 @@ export function RecipeLink({ slug, children, sx }: { slug: string; children: Rea
     <Box component="a" href={recipePath(slug)} onClick={onClick} sx={{ color: "inherit", textDecoration: "none", ...sx }}>
       {children}
     </Box>
+  );
+}
+
+// An ingredient line at a factor: the scaled amounts in bold and in the herb colour.
+export function ScaledText({ parts }: { parts: Part[] }) {
+  const t = useTheme().herb;
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.scaled ? (
+          <Box key={i} component="b" sx={{ fontWeight: 700, color: t.herb }}>
+            {p.text}
+          </Box>
+        ) : (
+          <Fragment key={i}>{parseSimpleMarkdown(p.text)}</Fragment>
+        ),
+      )}
+    </>
   );
 }

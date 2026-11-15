@@ -1,6 +1,6 @@
-import { Box, ButtonBase, IconButton } from "@mui/material";
+import { Box, Button, ButtonBase, IconButton, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { Recipe } from "../types/Recipe";
 import { headingFont } from "../theme/herb";
 import { parseSimpleMarkdown } from "../utils/simpleMarkdown";
@@ -8,7 +8,8 @@ import { tagLabel } from "./filters";
 import { BackIcon, SunIcon } from "./icons";
 import { toLines } from "./lines";
 import { PhotoTile } from "./PhotoTile";
-import { DifficultyDot } from "./parts";
+import { DifficultyDot, ScaledText } from "./parts";
+import { noteText, scaleLine, servingsLabel } from "./scale";
 import { shortTime } from "./time";
 import { useWakeLock } from "./useWakeLock";
 import { tapArea } from "./tapArea";
@@ -48,13 +49,13 @@ function Chips({ recipe, onTag }: { recipe: Recipe; onTag: (tag: string) => void
   );
 }
 
-function Stats({ recipe, columns }: { recipe: Recipe; columns: number }) {
+function Stats({ recipe, columns, factor }: { recipe: Recipe; columns: number; factor: number }) {
   const t = useTheme().herb;
   const stats = [
     { label: "Prep", value: shortTime(recipe.prep_time) },
     { label: "Cook", value: shortTime(recipe.cook_time) },
     { label: "Total", value: shortTime(recipe.total_time) },
-    { label: "Serves", value: recipe.servings.trim() },
+    { label: "Serves", value: servingsLabel(recipe.servings, factor), scaled: factor !== 1 },
   ].filter((s) => s.value);
   if (stats.length === 0) return null;
   return (
@@ -64,7 +65,7 @@ function Stats({ recipe, columns }: { recipe: Recipe; columns: number }) {
           <Box component="dt" sx={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: t.ink2 }}>
             {s.label}
           </Box>
-          <Box component="dd" sx={{ m: 0, fontWeight: 700, fontSize: 15, lineHeight: 1.3, overflowWrap: "anywhere" }}>
+          <Box component="dd" sx={{ m: 0, fontWeight: 700, fontSize: 15, lineHeight: 1.3, overflowWrap: "anywhere", color: s.scaled ? t.herb : undefined }}>
             {s.value}
           </Box>
         </Box>
@@ -81,12 +82,75 @@ function SectionTitle({ children, size = 22 }: { children: string; size?: number
   );
 }
 
-function Ingredients({ items }: { items: string[] }) {
+const FACTORS = [1, 2, 3, 4];
+
+// ×1 to ×4. Below the sm breakpoint ×3 does not fit next to the title at 375 px, so it is hidden.
+function Scaler({ factor, onChange }: { factor: number; onChange: (factor: number) => void }) {
   const t = useTheme().herb;
-  const lines = toLines(items);
+  return (
+    <ToggleButtonGroup
+      exclusive
+      value={factor}
+      onChange={(_, value: number | null) => value !== null && onChange(value)}
+      aria-label="Amounts"
+      sx={{
+        flexShrink: 0,
+        p: "3px",
+        gap: "2px",
+        borderRadius: 999,
+        bgcolor: t.ground,
+        border: `1px solid ${t.line}`,
+        "& .MuiToggleButtonGroup-grouped": {
+          ...tapArea(38),
+          minWidth: 44,
+          height: 38,
+          px: 1,
+          m: 0,
+          border: 0,
+          borderRadius: "999px !important",
+          fontSize: 14,
+          fontWeight: 700,
+          color: t.ink,
+          "&.Mui-selected, &.Mui-selected:hover": { bgcolor: t.herb, color: t.onHerb },
+        },
+      }}
+    >
+      {FACTORS.map((f) => (
+        <ToggleButton key={f} value={f} sx={f === 3 ? { display: { xs: "none", sm: "inline-flex" } } : undefined}>
+          {f}×
+        </ToggleButton>
+      ))}
+    </ToggleButtonGroup>
+  );
+}
+
+function ScaleNote({ servings, factor, onReset }: { servings: string; factor: number; onReset: () => void }) {
+  const t = useTheme().herb;
+  return (
+    <Box
+      role="status"
+      sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1, py: 0.5, pl: 1.75, pr: 0.5, borderRadius: "14px", bgcolor: t.saffronTint, color: t.saffronInk, fontSize: 14, lineHeight: 1.4 }}
+    >
+      <Box component="span" sx={{ flexGrow: 1 }}>
+        {noteText(servings, factor)}
+      </Box>
+      <Button onClick={onReset} sx={{ flexShrink: 0, color: t.saffronInk, fontWeight: 700, textDecoration: "underline", "&:hover": { textDecoration: "underline" } }}>
+        Reset
+      </Button>
+    </Box>
+  );
+}
+
+function Ingredients({ recipe, factor, onFactor }: { recipe: Recipe; factor: number; onFactor: (factor: number) => void }) {
+  const t = useTheme().herb;
+  const lines = toLines(recipe.ingredients);
   return (
     <Box component="section" sx={{ bgcolor: t.surface, border: `1px solid ${t.line}`, borderRadius: "24px", p: 2.5 }}>
-      <SectionTitle>Ingredients</SectionTitle>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, mb: 1.5, "& h2": { mb: 0 } }}>
+        <SectionTitle>Ingredients</SectionTitle>
+        {lines.some((l) => !l.heading) && <Scaler factor={factor} onChange={onFactor} />}
+      </Box>
+      {factor !== 1 && <ScaleNote servings={recipe.servings} factor={factor} onReset={() => onFactor(1)} />}
       <Box component="ul" sx={{ m: 0, p: 0, listStyle: "none" }}>
         {lines.map((line, i) =>
           line.heading ? (
@@ -108,7 +172,9 @@ function Ingredients({ items }: { items: string[] }) {
               }}
             >
               <Box component="span" aria-hidden="true" sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: t.saffron, mt: "8px", flexShrink: 0 }} />
-              <span>{parseSimpleMarkdown(line.text)}</span>
+              <span>
+                <ScaledText parts={scaleLine(line.text, factor)} />
+              </span>
             </Box>
           ),
         )}
@@ -179,6 +245,10 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
   const t = useTheme().herb;
   const screenOn = useWakeLock(!desktop);
   const notes = (recipe.notes ?? []).filter((n) => n.trim());
+  // Kept with its recipe, so another recipe opens at ×1.
+  const [scale, setScale] = useState({ id: recipe.id, factor: 1 });
+  const factor = scale.id === recipe.id ? scale.factor : 1;
+  const setFactor = (f: number) => setScale({ id: recipe.id, factor: f });
 
   if (desktop) {
     return (
@@ -200,12 +270,12 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
                   {recipe.description}
                 </Box>
               )}
-              <Stats recipe={recipe} columns={4} />
+              <Stats recipe={recipe} columns={4} factor={factor} />
             </Box>
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "flex-start" }}>
             <Box sx={{ flex: "1 1 340px", minWidth: 0, maxWidth: 420 }}>
-              <Ingredients items={recipe.ingredients} />
+              <Ingredients recipe={recipe} factor={factor} onFactor={setFactor} />
             </Box>
             <Box sx={{ flex: "2 1 480px", minWidth: 0, display: "flex", flexDirection: "column", gap: 3.5 }}>
               <Steps items={recipe.instructions} desktop />
@@ -235,9 +305,9 @@ export function RecipePage({ recipe, desktop, onBack, onTag, header }: RecipePag
             </Box>
           )}
         </Box>
-        <Stats recipe={recipe} columns={2} />
+        <Stats recipe={recipe} columns={2} factor={factor} />
         {screenOn && <ScreenOn />}
-        <Ingredients items={recipe.ingredients} />
+        <Ingredients recipe={recipe} factor={factor} onFactor={setFactor} />
         <Steps items={recipe.instructions} desktop={false} />
         <Notes notes={notes} />
       </Box>
