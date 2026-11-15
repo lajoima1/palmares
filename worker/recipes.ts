@@ -1,3 +1,4 @@
+import { amountProblems } from "../src/utils/amounts.ts";
 import { hasLineBreak, nameToSlug, parseRecipeText, serializeRecipe, type RecipeFields } from "../src/utils/recipeText.ts";
 import { commitChanges, listRecipes, readHead, readImage, type Change, type Head } from "./github.ts";
 import { HttpError, json, readJson } from "./http.ts";
@@ -138,9 +139,17 @@ export async function imageHandler({ env, params }: Context): Promise<Response> 
   return readImage(env, checkSlug(params[0]));
 }
 
+// The recipe page scales each amount, and the build refuses a line that it cannot read. Not in
+// readFields: an auto-fill answer with such a line still fills the form.
+function checkAmounts(fields: RecipeFields): void {
+  const problem = amountProblems(fields.ingredients)[0];
+  if (problem) throw new HttpError(400, `Ingredient "${problem.line}": ${problem.message}`);
+}
+
 export async function createHandler({ request, env }: Context): Promise<Response> {
   const body = await readJson<SaveBody>(request, MAX_BODY);
   const fields = readFields(body.fields);
+  checkAmounts(fields);
   const text = recipeText(fields);
   const image = body.image === undefined || body.image === null ? null : readImage64(body.image);
   const slug = nameToSlug(fields.name);
@@ -164,6 +173,7 @@ export async function updateHandler({ request, env, params }: Context): Promise<
   const slug = checkSlug(params[0]);
   const body = await readJson<SaveBody>(request, MAX_BODY);
   const fields = readFields(body.fields);
+  checkAmounts(fields);
   const text = recipeText(fields);
   const image = body.image === undefined || body.image === null ? body.image : readImage64(body.image);
   const textOid = await gitBlobOid(text);

@@ -60,6 +60,14 @@ describe("modelsFor", () => {
   });
 });
 
+describe("the rules", () => {
+  it("ask for the amount first, and for total in a container size", () => {
+    const rules = (buildInput({ text: "x" }, [], MODELS[0]).messages as { content: string }[])[0].content;
+    expect(rules).toContain("Each ingredient starts with its amount");
+    expect(rules).toContain('ends with "total"');
+  });
+});
+
 describe("geminiBody", () => {
   it("sends the same rules and schema as Workers AI, and the photo inline", () => {
     const body = geminiBody({ image: PHOTO }, TAGS, gemini) as {

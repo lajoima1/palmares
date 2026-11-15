@@ -42,6 +42,18 @@ instructions:
 notes: Optional additional notes
 ```
 
+#### Ingredient amounts
+
+The recipe page scales the amounts (×2, ×3, ×4), so each ingredient line must follow two rules.
+`npm run build` stops on a line that breaks one, and the admin page refuses to save it.
+
+- Start the line with the amount: `750 ml (3 tasses) de bouillon de poulet`, not
+  `Bouillon de poulet 750 ml (3 tasses)`. "Environ" or "About" before the amount is allowed.
+- End the size of a can, a box or a package with "total": `1 boîte (284 ml total) de tomates`.
+  At ×2, it becomes `2 boîtes (568 ml total)`.
+
+A line with no number, like `Sel et poivre`, is correct.
+
 ## Getting Started
 
 ### Development

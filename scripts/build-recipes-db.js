@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import initSqlJs from "sql.js";
+import { amountProblems } from "../src/utils/amounts.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -133,6 +134,9 @@ function parseRecipe(content) {
 // Read recipe slugs from index.json
 const recipeSlugs = JSON.parse(fs.readFileSync(INDEX_PATH, "utf-8"));
 
+// Ingredient lines that the scaler of the recipe page cannot read. The build stops on them.
+const problems = [];
+
 // Process all recipes
 for (const slug of recipeSlugs) {
   const recipeDir = path.join(RECIPES_DIR, slug);
@@ -147,6 +151,7 @@ for (const slug of recipeSlugs) {
   // Parse recipe
   const content = fs.readFileSync(recipePath, "utf-8");
   const recipe = parseRecipe(content);
+  for (const p of amountProblems(recipe.ingredients)) problems.push(`${slug}: "${p.line}": ${p.message}`);
 
   // Copy and rename image to public/recipes/ folder
   const newImageName = `${slug}.webp`;
@@ -204,6 +209,12 @@ for (const slug of recipeSlugs) {
   }
 
   console.log(`✓ Processed recipe: ${recipe.name || slug}`);
+}
+
+if (problems.length) {
+  console.error("\n❌ Some ingredient lines cannot scale. Fix them in recipes/<slug>/recipe.txt:");
+  for (const p of problems) console.error(`  ${p}`);
+  process.exit(1);
 }
 
 // Export database to file

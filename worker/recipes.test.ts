@@ -146,6 +146,18 @@ describe("adding", () => {
     expect(gh.calledPaths().filter((p) => p !== "POST /graphql")).toEqual([]);
   });
 
+  it("refuses an ingredient line that cannot scale, and names it", async () => {
+    for (const [line, message] of [
+      ["Bouillon de poulet 750 ml (3 tasses)", "Put the amount first."],
+      ["1 boîte (284 ml) de tomates", "Add “total” in the parentheses."],
+    ]) {
+      const res = await call("POST", "/api/recipes", { fields: fields({ name: "Potage", ingredients: [line] }) });
+      expect(res.status).toBe(400);
+      expect((await res.json<{ error: string }>()).error).toBe(`Ingredient "${line}": ${message}`);
+    }
+    expect(gh.calledPaths().filter((p) => p !== "POST /graphql")).toEqual([]);
+  });
+
   it("refuses a photo that is not webp", async () => {
     expect((await call("POST", "/api/recipes", { fields: { name: "A" }, image: JPEG })).status).toBe(400);
     expect((await call("POST", "/api/recipes", { fields: { name: "A" }, image: "not base64!" })).status).toBe(400);
@@ -182,6 +194,15 @@ describe("changing", () => {
     const res = await call("PUT", "/api/recipes/lasagne", { fields: fields({ name: "X" }), baseOid: "old-oid" });
     expect(res.status).toBe(409);
     expect(gh.calledPaths()).toEqual(["POST /graphql"]);
+  });
+
+  it("refuses an ingredient line that cannot scale", async () => {
+    const res = await call("PUT", "/api/recipes/lasagne", {
+      fields: fields({ name: "Lasagne", ingredients: ["Bacon précuit 4 tranches"] }),
+      baseOid: baseOid(),
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json<{ error: string }>()).error).toBe('Ingredient "Bacon précuit 4 tranches": Put the amount first.');
   });
 
   it("gives 400 without a version", async () => {
