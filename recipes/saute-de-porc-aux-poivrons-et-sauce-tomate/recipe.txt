@@ -1,0 +1,29 @@
+name: Sauté de porc aux poivrons et sauce tomate
+description: Un plat de porc sauté aux poivrons et à la sauce tomate, servi avec du riz pilaf à l'ail.
+servings: 4 portions
+prep_time: 15 minutes
+cook_time: 20 minutes
+total_time: 35 minutes
+difficulty: Easy
+tags: pork, main, weeknight
+
+ingredients:
+- 1 filet de porc de 450 g (1 lb)
+- 1 petit oignon, haché
+- 2 poivrons de couleurs variées, coupés en cubes
+- 80 ml (1/3 tasse) de vin rouge
+- 500 ml (2 tasses) de sauce tomate
+- Huile de canola
+- Sel
+- Poivre
+
+instructions:
+1. Parer le filet de porc en retirant la membrane blanche. Couper le filet en cubes.
+2. Dans une grande poêle, chauffer un peu d’huile de canola à feu moyen-élevé. Faire dorer les cubes de porc de 3 à 4 minutes en remuant fréquemment. Saler et poivrer. Réserver dans une assiette.
+3. Dans la même poêle, cuire l’oignon et les poivrons de 4 à 5 minutes.
+4. Verser le vin rouge et chauffer jusqu’à évaporation presque complète du liquide.
+5. Ajouter la sauce tomate. Saler et poivrer. Porter à ébullition.
+6. Remettre le porc dans la poêle. Laisser mijoter de 4 à 5 minutes à feu doux-moyen, jusqu’à ce que la sauce ait légèrement épaissi.
+
+notes:
+- Pour accompagner: Riz pilaf à l’ail. Préchauffer le four à 180°C (350°F). Dans une casserole, faire fondre 30 ml (2 c. à soupe) de beurre à feu moyen. Cuire 15 ml (1 c. à soupe) d’ail haché et ½ petit oignon haché de 2 à 3 minutes en remuant, sans les laisser se colorer. Ajouter 250 ml (1 tasse) de riz blanc à grains longs rincé et égoutté. Cuire 1 minute en remuant. Verser 500 ml (2 tasses) de bouillon de poulet. Saler et poivrer. Porter à ébullition, puis couvrir et cuire au four de 18 à 22 minutes, jusqu’à absorption complète du liquide. Retirer du four et laisser reposer 5 minutes avant de remuer à l’aide d’une fourchette. Ajouter 30 ml (2 c. à soupe) de persil frais haché et remuer.
