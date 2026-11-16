@@ -5,7 +5,7 @@ prep_time: 15 minutes
 cook_time: 20 minutes
 total_time: 35 minutes
 difficulty: Easy
-tags: pork, main, weeknight
+tags: pork, main, weeknight, rice
 
 ingredients:
 - 1 filet de porc de 450 g (1 lb)
